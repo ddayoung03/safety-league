@@ -73,3 +73,16 @@ data class Point2D(
     val x: Double,
     val y: Double
 )
+
+/**
+ * 완료된 트립 전체 결과 데이터
+ */
+data class CompletedTrip(
+    val trip: Trip,
+    val events: List<ReplayEvent>,
+    val route: List<Point2D>,
+    val startTime: String,
+    val endTime: String,
+    val isEligible: Boolean
+)
+

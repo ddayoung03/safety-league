@@ -31,6 +31,8 @@
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:name=".SafetyLeagueApp"
@@ -43,6 +45,11 @@
         <meta-data
             android:name="android.car.application"
             android:resource="@xml/automotive_app_desc" />
+
+        <service
+            android:name=".service.TripTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <activity
             android:name=".ui.MainActivity"
