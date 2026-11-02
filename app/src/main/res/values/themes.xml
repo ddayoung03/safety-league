@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SafetyLeague" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/yellow</item>
+        <item name="colorPrimaryVariant">@color/yellow</item>
+        <item name="colorOnPrimary">@color/asphalt</item>
+        <item name="android:windowBackground">@color/asphalt</item>
+        <item name="android:statusBarColor">@color/asphalt_deep</item>
+        <item name="android:navigationBarColor">@color/asphalt_deep</item>
+    </style>
+</resources>

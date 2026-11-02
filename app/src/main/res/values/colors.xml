@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Safety League Design Tokens -->
+    <color name="asphalt">#24272C</color>
+    <color name="asphalt_deep">#1E2125</color>
+    <color name="cell">#2E3238</color>
+    <color name="white">#F2F1EC</color>
+    <color name="grey">#9BA1A8</color>
+    <color name="yellow">#FFC52E</color>
+    <color name="red">#C8102E</color>
+    <color name="gold">#D4A23C</color>
+
+    <!-- Standard Aliases -->
+    <color name="colorPrimary">#FFC52E</color>
+    <color name="colorOnPrimary">#24272C</color>
+    <color name="colorBackground">#24272C</color>
+    <color name="colorSurface">#2E3238</color>
+    <color name="colorOnSurface">#F2F1EC</color>
+</resources>
