@@ -18,4 +18,11 @@ test('result-win', () => {
   assert.ok(!/플래티넘 승급|골드 졸업/.test(dump));
 });
 
+test('result-low', () => {
+  const dump = checkPage('result-low.html',
+    ['64', '다음 주행 작전', '차선 바꿀 때 깜빡이부터 켜기', '깜빡이 없이 차선 변경 4회', '매너 +9점',
+     '13일 → 0일', '다음 주행 70점이면 1일부터 다시', 'P126', '▼1', '목표', '다른 날의 예시']);
+  assert.ok(!dump.includes('#E8323C') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
+});
+
 module.exports = { checkPage };
