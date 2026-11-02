@@ -56,6 +56,6 @@ body {
 /* 결과 카드 → 리플레이 버튼 */
 .replay-btn {
   position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 76px; padding: 0 30px;
-  border: 2px solid var(--white); color: var(--white); text-decoration: none; font-size: 24px; transform: skewX(-14deg);
+  background: var(--white); color: var(--asphalt); text-decoration: none; font-size: 24px; transform: skewX(-14deg);
 }
 .replay-btn > * { transform: skewX(14deg); }
