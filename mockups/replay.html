@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>레이스 리플레이</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .head { position: absolute; left: 64px; top: 40px; display: flex; align-items: center; gap: 18px; }
+  .back { width: 48px; height: 48px; border: 2px solid #3A3E45; display: flex; align-items: center; justify-content: center; }
+  .head h1 { margin: 0; font-weight: 400; font-size: 34px; }
+  .head .sub { color: var(--grey); font-size: 24px; }
+  .note { position: absolute; right: 64px; top: 52px; font-size: 18px; color: var(--grey); }
+  #map { position: absolute; left: 30px; top: 108px; width: 760px; height: 456px; }
+  .list { position: absolute; right: 64px; top: 120px; width: 380px; margin: 0; padding: 0; list-style: none; }
+  .list li { display: grid; grid-template-columns: 70px 44px 1fr; align-items: center; height: 52px; border-bottom: 1px solid #3A3E45; font-size: 22px; }
+  .list li .time { font-size: 26px; color: var(--grey); }
+  .list li.lane .what { color: var(--yellow); }
+  .pit { position: absolute; left: 64px; right: 64px; bottom: 40px; display: flex; align-items: center; gap: 24px; background: var(--yellow); color: var(--asphalt); padding: 18px 28px; }
+  .pit .h { font-size: 22px; opacity: .75; white-space: nowrap; }
+  .pit .m { font-size: 30px; white-space: nowrap; }
+  .pit .r { margin-left: auto; font-size: 20px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<div class="kerb t muted" aria-hidden="true"></div>
+
+<div class="head">
+  <a class="back" href="result-low.html" aria-label="결과로 돌아가기"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#F2F1EC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <h1>레이스 리플레이</h1>
+  <span class="sub" data-bind="meta"></span>
+</div>
+<div class="note">다른 날의 예시</div>
+
+<svg id="map" role="img" aria-label="오늘 주행 경로와 사건 지점"></svg>
+<ol class="list" id="list"></ol>
+
+<div class="pit skew">
+  <span class="unskew h">다음 주행 작전</span>
+  <span class="unskew m">차선 바꿀 때 깜빡이부터 켜기</span>
+</div>
+
+<script src="demo-data.js"></script>
+<script src="page.js"></script>
+<script>
+  const day = DEMO.lowDay;
+  document.querySelector('[data-bind="meta"]').textContent = `${day.start} ~ ${day.end} · ${day.km}km`;
+  drawRoute(document.getElementById('map'), { events: day.events, road: .12, line: .45, marks: .8, width: 40 });
+  document.getElementById('list').innerHTML = day.events.map(e =>
+    `<li class="${e.kind}"><span class="time num">${e.at}</span><svg width="36" height="36" viewBox="-24 -24 48 48" aria-hidden="true">${EVENT_ICON[e.kind]}</svg><span class="what">${EVENT_NAME[e.kind]}</span></li>`).join('');
+  finishPage();
+</script>
+</body>
+</html>

@@ -36,3 +36,26 @@ body {
 .row.me .p { color: var(--asphalt); }
 .row.dim { opacity: .55; }
 .tag { font-size: 18px; padding: 3px 9px; }
+
+/* 배경: 아스팔트 입자 + 점수 쪽 조명 */
+.bg {
+  position: absolute; inset: 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    radial-gradient(ellipse 70% 90% at 25% 45%, #30343B 0%, var(--asphalt) 60%, #1B1E22 100%);
+}
+
+/* 서킷 연석 띠 (위는 얇게). 아쉬운 날은 빨강 없이 muted */
+.kerb {
+  position: absolute; left: -40px; right: -40px; bottom: 0; height: 18px; transform: skewX(-30deg);
+  background: repeating-linear-gradient(90deg, var(--red) 0 56px, var(--white) 56px 112px); opacity: .9;
+}
+.kerb.t { top: 0; bottom: auto; height: 8px; opacity: .5; }
+.kerb.muted { background: repeating-linear-gradient(90deg, #4A4F57 0 56px, #8A9097 56px 112px); }
+
+/* 결과 카드 → 리플레이 버튼 */
+.replay-btn {
+  position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 56px; padding: 0 26px;
+  border: 2px solid var(--white); color: var(--white); text-decoration: none; font-size: 24px; transform: skewX(-14deg);
+}
+.replay-btn > * { transform: skewX(14deg); }

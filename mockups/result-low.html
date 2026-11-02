@@ -30,6 +30,9 @@
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"></div>
+<svg id="route" aria-hidden="true" style="position:absolute;left:-30px;top:110px;width:720px;height:432px"></svg>
+<div class="kerb muted" aria-hidden="true"></div><div class="kerb t muted" aria-hidden="true"></div>
 <div class="top">아이오닉 5 리그 · 오늘의 레이스 종료</div>
 <div class="note">다른 날의 예시</div>
 <div class="score num">64<small>점</small></div>
@@ -45,6 +48,7 @@
   <div>주행 거리<b class="num">22.1km</b></div>
 </div>
 
+<a class="replay-btn" href="replay.html" style="right:64px;top:440px"><span>리플레이 보기</span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></a>
 <div class="tower">
   <h4><span>11월 시즌 순위</span><span>시즌 평균</span></h4>
   <div class="row dim"><span class="p num">P124</span><span class="n">깜빡이장인</span><span></span><span class="s num">89.1</span></div>
@@ -54,7 +58,8 @@
   <div class="row dim"><span class="p num">P127</span><span class="n">조용한퇴근</span><span></span><span class="s num">88.2</span></div>
 </div>
 
+<script src="demo-data.js"></script>
 <script src="page.js"></script>
-<script>finishPage();</script>
+<script>drawRoute(document.getElementById('route')); finishPage();</script>
 </body>
 </html>

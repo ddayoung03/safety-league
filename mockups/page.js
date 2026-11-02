@@ -24,3 +24,29 @@ function finishPage() {
     if (bad) document.body.dataset.offender = bad.tagName + '.' + bad.className + ' ' + bad.textContent.slice(0, 20) + ' ' + JSON.stringify(bad.getBoundingClientRect());
   });
 }
+
+// DEMO.route(100×60 좌표)를 svg에 그린다: 넓은 회색 노면 + 노란 점선 중앙선 + 출발점 + 도착 체커기.
+// opts.events가 있으면 사건 지점에 종류별 표시를 찍는다.
+function drawRoute(svg, opts = {}) {
+  const pts = DEMO.route.map(([x, y]) => [x * 10, y * 10]);
+  const d = 'M' + pts.map(p => p.join(' ')).join(' L');
+  const [sx, sy] = pts[0], [fx, fy] = pts[pts.length - 1];
+  let s = `<path d="${d}" stroke="#F2F1EC" stroke-opacity="${opts.road || .07}" stroke-width="${opts.width || 34}" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
+    + `<path d="${d}" stroke="#FFC52E" stroke-opacity="${opts.line || .25}" stroke-width="3" stroke-dasharray="2 14" fill="none"/>`
+    + `<circle cx="${sx}" cy="${sy}" r="12" fill="#F2F1EC" fill-opacity="${opts.marks || .35}"/>`
+    + `<g opacity="${opts.marks || .35}"><rect x="${fx - 16}" y="${fy - 16}" width="32" height="32" fill="#F2F1EC"/><path d="M${fx - 16} ${fy - 16}h16v16h-16zM${fx} ${fy}h16v16h-16z" fill="#24272C"/></g>`;
+  for (const e of opts.events || []) {
+    const [x, y] = DEMO.pointAt(pts, e.t);
+    s += `<g transform="translate(${x} ${y})">${EVENT_ICON[e.kind]}</g>`;
+  }
+  svg.setAttribute('viewBox', '0 0 1000 600');
+  svg.innerHTML = s;
+}
+
+// 사건 종류: 이름과 아이콘(원 + 선 기호). 깜빡이 누락만 노랑(고칠 것), 나머지는 흰색.
+const EVENT_NAME = { lane: '깜빡이 없이 차선 변경', brake: '급제동', accel: '급가속' };
+const EVENT_ICON = {
+  lane: '<circle r="22" fill="#FFC52E"/><path d="M-7 11V1l12-10M-1-9h6v6" fill="none" stroke="#24272C" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>',
+  brake: '<circle r="22" fill="#F2F1EC"/><path d="M0-11v12M0 8v2" stroke="#24272C" stroke-width="4.5" stroke-linecap="round"/>',
+  accel: '<circle r="22" fill="#F2F1EC"/><path d="M-9-7l8 7-8 7M1-7l8 7-8 7" fill="none" stroke="#24272C" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>',
+};

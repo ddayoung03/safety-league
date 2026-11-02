@@ -52,3 +52,23 @@ test('overflow is measured with the real fonts, not the fallback', () => {
 test('text clipped with the real fonts is still flagged', () => {
   assert.match(dumpDom('test/fixtures/clipped.html'), /data-overflow="yes"/);
 });
+
+test('backgrounds: kerb + route on result cards, kerb on league/report, texture only while driving', () => {
+  for (const f of ['result-win.html', 'result-low.html']) {
+    const d = dumpDom(f);
+    assert.match(d, /class="kerb/, f); assert.match(d, /id="route"/, f); assert.match(d, /리플레이 보기/, f);
+  }
+  for (const f of ['league.html', 'report.html']) assert.match(dumpDom(f), /class="kerb/, f);
+  const drive = dumpDom('driving.html');
+  assert.match(drive, /class="bg"/); assert.doesNotMatch(drive, /class="kerb|id="route"/);
+});
+
+test('replay', () => {
+  const dump = checkPage('replay.html',
+    ['레이스 리플레이', '22.1km', '6:08', '6:42', '6:17', '깜빡이 없이 차선 변경', '급제동', '급가속',
+     '다음 주행 작전', '차선 바꿀 때 깜빡이부터 켜기', '다른 날의 예시']);
+  const text = dump.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '');
+  assert.equal(text.split('깜빡이 없이 차선 변경').length - 1, 4, '깜빡이 누락 4회');
+  assert.doesNotMatch(text, /[−-]\d+점/, '사건별 감점 숫자 금지');
+  assert.ok(!dump.includes('#E8323C') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
+});

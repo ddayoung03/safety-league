@@ -44,6 +44,38 @@ const DEMO = {
     ],
   },
 
+  // 가상의 출퇴근 경로 (실제 장소 아님). 100×60 상자 안 좌표, 출발 → 도착 순서.
+  route: [[6, 52], [14, 50], [22, 44], [26, 34], [34, 28], [46, 30], [54, 24], [58, 14],
+    [68, 10], [80, 12], [88, 20], [92, 30], [86, 38], [90, 48]],
+
+  // 아쉬운 날(별도 시나리오) 리플레이. t = 경로 위 위치(0~1). 깜빡이 누락 4회는 피트 보드와 같다.
+  lowDay: {
+    start: '6:08', end: '6:42', km: 22.1,
+    events: [
+      { at: '6:12', kind: 'accel', t: 0.10 },
+      { at: '6:17', kind: 'lane', t: 0.21 },
+      { at: '6:21', kind: 'brake', t: 0.34 },
+      { at: '6:26', kind: 'lane', t: 0.47 },
+      { at: '6:31', kind: 'lane', t: 0.61 },
+      { at: '6:34', kind: 'brake', t: 0.70 },
+      { at: '6:38', kind: 'lane', t: 0.86 },
+    ],
+  },
+
+  // 경로를 따라 전체 길이의 t 비율만큼 간 지점
+  pointAt(pts, t) {
+    const seg = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
+    let left = t * seg.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < seg.length; i++) {
+      if (left <= seg[i] || i === seg.length - 1) {
+        const k = seg[i] ? Math.min(left / seg[i], 1) : 0;
+        return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k];
+      }
+      left -= seg[i];
+    }
+    return pts[0];
+  },
+
   round1(x) { return Math.round(x * 10) / 10; },
 
   average(from, to) {

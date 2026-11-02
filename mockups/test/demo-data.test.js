@@ -41,3 +41,19 @@ test('neighbors are sorted and include me', () => {
     }
   }
 });
+
+test('pointAt walks the route by distance', () => {
+  const line = [[0, 0], [10, 0], [10, 10]];
+  assert.deepEqual(D.pointAt(line, 0), [0, 0]);
+  assert.deepEqual(D.pointAt(line, 0.5), [10, 0]);
+  assert.deepEqual(D.pointAt(line, 0.75), [10, 5]);
+  assert.deepEqual(D.pointAt(line, 1), [10, 10]);
+});
+
+test('low-day replay events match the pit board', () => {
+  const ev = D.lowDay.events;
+  assert.equal(ev.filter(e => e.kind === 'lane').length, 4);
+  for (let i = 1; i < ev.length; i++) assert.ok(ev[i - 1].at < ev[i].at, 'events in time order');
+  for (const e of ev) assert.ok(e.t > 0 && e.t < 1 && e.at > D.lowDay.start && e.at < D.lowDay.end);
+  assert.ok(D.route.length >= 8);
+});
