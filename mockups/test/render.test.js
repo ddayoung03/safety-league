@@ -44,3 +44,11 @@ test('report', () => checkPage('report.html',
    '84', '88', '휴식', '90', '92', '86', '93', 'P131 → P125 ▲6', '승급 라인', '다음 주 작전']));
 
 module.exports = { checkPage };
+
+test('overflow is measured with the real fonts, not the fallback', () => {
+  assert.match(dumpDom('test/fixtures/fits-after-fonts.html'), /data-overflow="none"/);
+});
+
+test('text clipped with the real fonts is still flagged', () => {
+  assert.match(dumpDom('test/fixtures/clipped.html'), /data-overflow="yes"/);
+});
