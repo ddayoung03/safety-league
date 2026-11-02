@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주행 결과 — 이긴 날</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .flag { position: absolute; right: -90px; top: 0; bottom: 0; width: 150px; transform: skewX(-14deg); opacity: .85;
+    background: repeating-conic-gradient(var(--white) 0 25%, var(--asphalt) 0 50%) 0 0/40px 40px; }
+  .top { position: absolute; left: 64px; top: 52px; font-size: 30px; color: var(--yellow); }
+  .score { position: absolute; left: 56px; top: 96px; font-size: 340px; line-height: .85; letter-spacing: -12px; font-weight: 900; }
+  .score small { font-family: 'Black Han Sans'; font-style: normal; font-size: 84px; letter-spacing: 0; color: var(--grey); margin-left: 28px; }
+  .band { position: absolute; left: 60px; top: 430px; display: flex; gap: 12px; font-size: 38px; }
+  .band > span { background: var(--red); padding: 6px 20px; }
+  .band > span + span { background: var(--cell); color: var(--white); }
+  .stats { position: absolute; left: 64px; bottom: 56px; display: flex; gap: 44px; font-size: 24px; color: var(--grey); }
+  .stats b { display: block; font-size: 56px; line-height: 1; color: var(--white); }
+  .tower { position: absolute; right: 100px; top: 52px; width: 520px; }
+  .tower h4 { margin: 0 0 14px; font-weight: 400; font-size: 26px; color: var(--grey); display: flex; justify-content: space-between; }
+  .tower .row { grid-template-columns: 112px minmax(0, 1fr) auto 84px; height: 64px; }
+  .tower .row .n { font-size: 26px; }
+  .tower .row .s { font-size: 34px; }
+  .tower .row.me { height: 78px; margin: 10px 0 16px -28px; background: var(--yellow); }
+  .tower .row.me .p { font-size: 46px; }
+  .tower .tag { background: var(--red); color: var(--white); }
+  .gap { font-size: 22px; color: var(--yellow); margin: 2px 0 10px 8px; }
+</style>
+</head>
+<body>
+<div class="flag" aria-hidden="true"></div>
+<div class="top"><span data-bind="model"></span> 리그 · 오늘의 레이스 종료</div>
+<div class="score num"><span data-bind="score"></span><small>점</small></div>
+<div class="band skew"><span><span class="unskew" data-bind="change"></span></span><span><span class="unskew" data-bind="toLine"></span></span></div>
+<div class="stats">
+  <div>연속 안전 주행<b class="num" data-bind="streak"></b></div>
+  <div>주행 거리<b class="num" data-bind="km"></b></div>
+</div>
+<div class="tower">
+  <h4><span>11월 시즌 순위</span><span>시즌 평균</span></h4>
+  <div id="rows"></div>
+</div>
+
+<script src="demo-data.js"></script>
+<script src="page.js"></script>
+<script>
+  const DAY = '2026-11-07', PREV = '2026-11-06';
+  const trip = DEMO.trips.find(t => t.date === DAY);
+  const me = DEMO.ranks[DAY], prev = DEMO.ranks[PREV];
+  const rows = DEMO.neighbors(DAY);
+  const above = rows.find(r => r.rank === me - 1);
+  const vals = {
+    model: DEMO.league.model,
+    score: trip.score,
+    change: '▲' + (prev - me),
+    toLine: '승급 라인까지 ' + (me - DEMO.promotionRank(DEMO.league.total)) + '계단',
+    streak: DEMO.streakAt(DAY) + '일',
+    km: trip.km + 'km',
+  };
+  for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
+
+  const box = document.getElementById('rows');
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  let html = '';
+  for (const r of rows) {
+    const isMe = r.name === '나';
+    const passed = r.rank > me && r.rank <= prev;
+    const cls = 'row' + (isMe ? ' me' : '') + (Math.abs(r.rank - me) >= 2 && !passed ? ' dim' : '');
+    const name = isMe ? '나 ' + vals.change : esc(r.name);
+    const tag = passed ? '<span class="tag">추월</span>' : '';
+    html += `<div class="${cls}"><span class="p num">P${r.rank}</span><span class="n">${name}</span><span>${tag}</span><span class="s num">${r.avg.toFixed(1)}</span></div>`;
+    if (r === above) html += `<div class="gap">${DEMO.round1(above.avg - DEMO.seasonAverage(DAY))}점 차, 다음 주행에서 따라잡을 수 있어요</div>`;
+  }
+  box.innerHTML = html;
+
+  finishPage();
+</script>
+</body>
+</html>

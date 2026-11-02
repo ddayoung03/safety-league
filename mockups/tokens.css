@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Saira+Condensed:wght@800;900&display=block');
+
+:root {
+  --asphalt: #24272C;
+  --asphalt-deep: #1E2125;
+  --cell: #2E3238;
+  --white: #F2F1EC;
+  --grey: #9BA1A8;
+  --yellow: #FFC52E;
+  --red: #E8323C;
+  --gold: #D4A23C;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; width: 1280px; height: 720px; overflow: hidden; position: relative;
+  background: var(--asphalt); color: var(--white);
+  font-family: 'Black Han Sans', sans-serif; font-weight: 400;
+}
+
+.num { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 800; }
+.skew { transform: skewX(-14deg); }
+.unskew { display: inline-block; transform: skewX(14deg); }
+
+/* 순위 타워 줄 */
+.row {
+  display: grid; align-items: center; column-gap: 16px; background: var(--cell);
+  transform: skewX(-14deg); padding: 0 20px; margin-bottom: 6px;
+}
+.row > * { transform: skewX(14deg); white-space: nowrap; }
+.row .n { overflow: hidden; text-overflow: ellipsis; }
+.row .p { font-size: 36px; color: var(--grey); }
+.row .s { text-align: right; padding-right: 6px; }
+.row.me { background: var(--white); color: var(--asphalt); }
+.row.me .p { color: var(--asphalt); }
+.row.dim { opacity: .55; }
+.tag { font-size: 18px; padding: 3px 9px; }
