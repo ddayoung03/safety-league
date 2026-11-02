@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>리그 순위</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .head { position: absolute; left: 64px; right: 64px; top: 40px; display: flex; justify-content: space-between; align-items: center; }
+  .head .t { font-size: 34px; }
+  .head .t .sub { color: var(--grey); font-size: 24px; margin-left: 16px; }
+  .tabs { display: flex; gap: 8px; }
+  .tabs b { font-weight: 400; font-size: 22px; padding: 12px 22px; background: var(--cell); color: var(--grey); }
+  .tabs b.on { background: var(--white); color: var(--asphalt); }
+  .mine { position: absolute; left: 64px; top: 128px; width: 500px; }
+  .mine .k { font-size: 24px; color: var(--grey); }
+  .mine .big { font-size: 200px; line-height: .85; letter-spacing: -6px; margin-top: 6px; }
+  .mine .line { display: inline-block; margin-top: 14px; background: var(--yellow); color: var(--asphalt); font-size: 28px; padding: 8px 20px; }
+  .tiers { display: flex; gap: 6px; margin-top: 28px; }
+  .tiers i { font-style: normal; flex: 1; text-align: center; font-size: 19px; padding: 8px 0; background: var(--cell); color: var(--grey); }
+  .tiers i.on { background: var(--gold); color: var(--asphalt); }
+  .gain { position: absolute; left: 64px; bottom: 44px; width: 500px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gain div { background: var(--cell); padding: 16px 18px 18px; font-size: 17px; color: var(--grey); line-height: 1.3; }
+  .gain b { display: block; font-weight: 400; font-size: 46px; color: var(--white); line-height: 1.05; margin-bottom: 4px; }
+  .gain .team b { color: var(--yellow); }
+  .tower { position: absolute; right: 64px; top: 128px; width: 560px; }
+  .tower h4 { margin: 0 0 10px; font-weight: 400; font-size: 22px; color: var(--grey); display: flex; justify-content: space-between; padding: 0 20px; }
+  .tower .row { grid-template-columns: 100px minmax(0, 1fr) 90px; height: 50px; margin-bottom: 5px; }
+  .tower .row .p { font-size: 32px; }
+  .tower .row .n { font-size: 22px; }
+  .tower .row .s { font-size: 28px; }
+  .tower .row.top1 .p { color: var(--gold); }
+  .tower .row.me { height: 62px; margin: 6px 0 6px -24px; }
+  .dots { text-align: center; color: #6B7178; font-size: 22px; line-height: 26px; }
+  .zone { position: relative; height: 30px; margin: 2px 0 6px; }
+  .zone::before { content: ''; position: absolute; left: 0; right: 0; top: 14px; border-top: 3px dashed var(--yellow); }
+  .zone span { position: absolute; left: 50%; top: 0; transform: translateX(-50%); background: var(--asphalt); color: var(--yellow); font-size: 20px; padding: 0 14px; line-height: 30px; white-space: nowrap; }
+  .zone.down::before { border-top-color: var(--red); }
+  .zone.down span { color: #F07A80; }
+</style>
+</head>
+<body>
+<div class="head">
+  <div class="t">11월 시즌 · <span data-bind="tier"></span> 리그<span class="sub" data-bind="left"></span></div>
+  <div class="tabs"><b class="on skew"><span class="unskew" data-bind="model"></span></b><b class="skew"><span class="unskew" data-bind="region"></span></b><b class="skew"><span class="unskew">친구</span></b></div>
+</div>
+
+<div class="mine">
+  <div class="k">내 순위 · <span data-bind="tier"></span> 리그 <span data-bind="total"></span>명 중</div>
+  <div class="big num" data-bind="rank"></div>
+  <div class="line skew"><span class="unskew" data-bind="toLine"></span></div>
+  <div class="tiers"><i class="skew">브론즈</i><i class="skew">실버</i><i class="skew on">골드</i><i class="skew">플래티넘</i><i class="skew">다이아</i></div>
+</div>
+
+<div class="gain">
+  <div>안전운전으로 내가 아낀 돈<b class="num">₩8,400</b>이번 달, 부드럽게 달린 만큼</div>
+  <div class="team">우리 리그가 함께 줄인 급제동<b class="num">3,120회</b>이번 주, 지난주보다 12% 적게</div>
+</div>
+
+<div class="tower">
+  <h4><span>순위</span><span>시즌 평균</span></h4>
+  <div id="rows"></div>
+</div>
+
+<script src="demo-data.js"></script>
+<script src="page.js"></script>
+<script>
+  const DAY = '2026-11-09';
+  const L = DEMO.league, me = DEMO.ranks[DAY];
+  const line = DEMO.promotionRank(L.total);
+  const lineAvg = DEMO.neighbors(DAY).find(r => r.rank === line).avg;
+  const vals = {
+    tier: L.tier, model: L.model, region: L.region, total: L.total,
+    left: DEMO.daysLeft(DAY) + '일 남음',
+    rank: 'P' + me,
+    toLine: '승급 라인까지 ' + (me - line) + '계단 · ' + DEMO.round1(lineAvg - DEMO.seasonAverage(DAY)) + '점',
+  };
+  for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
+
+  let html = '', last = 0;
+  for (const r of DEMO.neighbors(DAY)) {
+    if (last && r.rank > last + 1) html += '<div class="dots">⋯</div>';
+    const cls = 'row' + (r.name === '나' ? ' me' : '') + (r.rank <= 3 ? ' top1' : '');
+    html += `<div class="${cls}"><span class="p num">P${r.rank}</span><span class="n">${r.name}</span><span class="s num">${r.avg.toFixed(1)}</span></div>`;
+    if (r.rank === line) html += '<div class="zone"><span>승급 라인 · 상위 30%</span></div>';
+    last = r.rank;
+  }
+  html += '<div class="dots">⋯</div><div class="zone down"><span>강등 라인 · 하위 30%</span></div>';
+  document.getElementById('rows').innerHTML = html;
+  finishPage();
+</script>
+</body>
+</html>
