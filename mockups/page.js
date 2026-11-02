@@ -15,5 +15,10 @@ function finishPage() {
     return outside || clipped;
   });
   document.body.dataset.overflow = bad ? 'yes' : 'none';
+  // data-fonts: 제목 글꼴과 숫자 글꼴이 실제로 불러와졌으면 'loaded'
+  document.fonts.ready.then(() => {
+    const ok = f => document.fonts.check(`800 40px "${f}"`) && [...document.fonts].some(x => x.family.replace(/"/g, '') === f && x.status === 'loaded');
+    document.body.dataset.fonts = ok('Black Han Sans') && ok('Saira Condensed') ? 'loaded' : 'missing';
+  });
   if (bad) document.body.dataset.offender = bad.tagName + '.' + bad.className + ' ' + bad.textContent.slice(0, 20) + ' ' + JSON.stringify(bad.getBoundingClientRect());
 }
