@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/asphalt">
+
+    <!-- 상단 얇은 연석 띠 -->
+    <ai.pleos.safetyleague.ui.view.KerbView
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_gravity="top"
+        android:alpha="0.5" />
+
+    <!-- 하단 서킷 연석 띠 -->
+    <ai.pleos.safetyleague.ui.view.KerbView
+        android:layout_width="match_parent"
+        android:layout_height="18dp"
+        android:layout_gravity="bottom"
+        android:alpha="0.9" />
+
+    <!-- 주행 경로 배경 흐림 -->
+    <ai.pleos.safetyleague.ui.view.CircuitRouteView
+        android:id="@+id/route_bg"
+        android:layout_width="720dp"
+        android:layout_height="432dp"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="-30dp"
+        android:layout_marginTop="110dp" />
+
+    <!-- 왼쪽 주행 정보 및 점수 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="64dp"
+        android:paddingTop="52dp"
+        android:paddingBottom="56dp">
+
+        <TextView
+            android:id="@+id/tv_top_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아이오닉 5 리그 · 오늘의 레이스 종료"
+            android:textColor="@color/yellow"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <!-- 큰 점수 및 불타는 모션 컨테이너 -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <!-- 고득점 시 불타는 모션 뷰 -->
+            <ai.pleos.safetyleague.ui.view.FlameScoreView
+                android:id="@+id/flame_score_view"
+                android:layout_width="480dp"
+                android:layout_height="280dp"
+                android:layout_gravity="center" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_score"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="92"
+                    android:textColor="@color/white"
+                    android:textSize="220sp"
+                    android:textStyle="bold|italic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="36dp"
+                    android:layout_marginStart="16dp"
+                    android:text="점"
+                    android:textColor="@color/grey"
+                    android:textSize="56sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 순위 상승 및 승급 라인 띠 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_rank_change"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/red"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="6dp"
+                android:text="▲3"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_to_promotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@color/cell"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="6dp"
+                android:text="승급 라인까지 6계단"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 하단 통계 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="연속 안전 주행"
+                    android:textColor="@color/grey"
+                    android:textSize="22sp" />
+
+                <TextView
+                    android:id="@+id/tv_streak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="13일"
+                    android:textColor="@color/white"
+                    android:textSize="44sp"
+                    android:textStyle="bold|italic" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="44dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="주행 거리"
+                    android:textColor="@color/grey"
+                    android:textSize="22sp" />
+
+                <TextView
+                    android:id="@+id/tv_km"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="18.4km"
+                    android:textColor="@color/white"
+                    android:textSize="44sp"
+                    android:textStyle="bold|italic" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 오른쪽 순위 타워 -->
+    <LinearLayout
+        android:layout_width="480dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:layout_marginEnd="80dp"
+        android:orientation="vertical"
+        android:paddingTop="52dp"
+        android:paddingBottom="56dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="11월 시즌 순위"
+                android:textColor="@color/grey"
+                android:textSize="22sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="시즌 평균"
+                android:textColor="@color/grey"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <!-- 순위 줄 컨테이너 -->
+        <LinearLayout
+            android:id="@+id/layout_tower_rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 리플레이 보기 버튼 -->
+        <FrameLayout
+            android:id="@+id/btn_replay"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_gravity="end"
+            android:background="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="28dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="리플레이 보기"
+                    android:textColor="@color/asphalt"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@android:drawable/ic_media_play" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+</FrameLayout>

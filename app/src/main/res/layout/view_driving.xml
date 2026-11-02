@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/asphalt_deep">
+
+    <!-- 현재 날씨 앰비언트 모션 레이어 (맑음, 비, 눈) -->
+    <ai.pleos.safetyleague.ui.view.WeatherAmbientView
+        android:id="@+id/weather_ambient_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 우상단 시연용 날씨 전환 버튼 바 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_marginEnd="64dp"
+        android:layout_marginTop="36dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text="날씨 모션:"
+            android:textColor="@color/grey"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btn_weather_sunny"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="맑음 ☀️"
+            android:textColor="@color/yellow"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btn_weather_rainy"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="비 🌧️"
+            android:textColor="@color/grey"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btn_weather_snowy"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="눈 ❄️"
+            android:textColor="@color/grey"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 좌상단 주행 기록 중 인디케이터 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:background="@drawable/shape_circle_yellow" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="주행 기록 중"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+    </LinearLayout>
+
+    <!-- 중앙 타이틀 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="160dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오늘의 레이스 진행 중"
+            android:textColor="@color/white"
+            android:textSize="64sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="결과는 주차하면 공개돼요"
+            android:textColor="@color/grey"
+            android:textSize="28sp" />
+    </LinearLayout>
+
+    <!-- 하단 1km 트랙 프로그레스 및 자동차 아이콘 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="64dp"
+        android:layout_marginHorizontal="80dp"
+        android:orientation="vertical">
+
+        <!-- 3km 자격 라벨 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="3km부터 기록 인정"
+            android:textColor="@color/grey"
+            android:textSize="20sp" />
+
+        <!-- 1km 프로그레스 칸 바 -->
+        <LinearLayout
+            android:id="@+id/layout_track_bar"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
+        <!-- 하단 메타 정보 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="11.2 / 18.4km · 해운대까지"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold|italic" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="70점 넘기면 연속 13일째"
+                android:textColor="@color/yellow"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

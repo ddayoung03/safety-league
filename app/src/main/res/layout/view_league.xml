@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/asphalt">
+
+    <!-- 상단 연석 띠 -->
+    <ai.pleos.safetyleague.ui.view.KerbView
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_gravity="top"
+        android:alpha="0.5" />
+
+    <!-- 하단 연석 띠 -->
+    <ai.pleos.safetyleague.ui.view.KerbView
+        android:layout_width="match_parent"
+        android:layout_height="18dp"
+        android:layout_gravity="bottom"
+        android:alpha="0.9" />
+
+    <!-- 상단 헤더 및 탭 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="64dp"
+        android:paddingTop="36dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="11월 시즌 · 골드 리그"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="21일 남음"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 탭 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:text="아이오닉 5"
+                android:textColor="@color/asphalt"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@color/cell"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:text="부산"
+                android:textColor="@color/grey"
+                android:textSize="22sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@color/cell"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:text="친구"
+                android:textColor="@color/grey"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 왼쪽 내 순위 및 안전운전 효용 -->
+    <LinearLayout
+        android:layout_width="520dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="64dp"
+        android:paddingTop="108dp"
+        android:paddingBottom="44dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="내 순위 · 골드 리그 397명 중"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P125"
+            android:textColor="@color/white"
+            android:textSize="140sp"
+            android:textStyle="bold|italic" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/yellow"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="승급 라인까지 6계단 · 0.9점"
+            android:textColor="@color/asphalt"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- 티어 5칸 바 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:text="브론즈"
+                android:textColor="@color/grey"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:text="실버"
+                android:textColor="@color/grey"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@color/gold"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:text="골드"
+                android:textColor="@color/asphalt"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:text="플래티넘"
+                android:textColor="@color/grey"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:text="다이아"
+                android:textColor="@color/grey"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 안전운전 효용 2칸 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="내가 아낀 돈"
+                    android:textColor="@color/grey"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₩8,400"
+                    android:textColor="@color/white"
+                    android:textSize="36sp"
+                    android:textStyle="bold|italic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="이번 달"
+                    android:textColor="@color/grey"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:background="@color/cell"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="리그가 줄인 급제동"
+                    android:textColor="@color/grey"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3,120회"
+                    android:textColor="@color/yellow"
+                    android:textSize="36sp"
+                    android:textStyle="bold|italic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="이번 주, 12% 감소"
+                    android:textColor="@color/grey"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 오른쪽 전체 순위 타워 -->
+    <LinearLayout
+        android:layout_width="540dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:layout_marginEnd="64dp"
+        android:orientation="vertical"
+        android:paddingTop="96dp"
+        android:paddingBottom="44dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="순위"
+                android:textColor="@color/grey"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="시즌 평균"
+                android:textColor="@color/grey"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/layout_league_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+    </LinearLayout>
+
+</FrameLayout>

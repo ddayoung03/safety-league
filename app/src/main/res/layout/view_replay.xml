@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/asphalt">
+
+    <!-- 상단 회색 연석 띠 -->
+    <ai.pleos.safetyleague.ui.view.KerbView
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_gravity="top"
+        android:alpha="0.4" />
+
+    <!-- 상단 헤더 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="64dp"
+        android:paddingTop="36dp">
+
+        <FrameLayout
+            android:id="@+id/btn_back"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@color/cell"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_revert" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="레이스 리플레이"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_replay_meta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="6:08 ~ 6:42 · 22.1km"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="다른 날의 예시"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+    </LinearLayout>
+
+    <!-- 왼쪽 대형 서킷 뷰 -->
+    <ai.pleos.safetyleague.ui.view.CircuitRouteView
+        android:id="@+id/route_replay_view"
+        android:layout_width="720dp"
+        android:layout_height="480dp"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="96dp" />
+
+    <!-- 오른쪽 사건 목록 -->
+    <LinearLayout
+        android:layout_width="440dp"
+        android:layout_height="480dp"
+        android:layout_gravity="end|top"
+        android:layout_marginEnd="64dp"
+        android:layout_marginTop="104dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="주행 사건 기록 (시간순)"
+            android:textColor="@color/grey"
+            android:textSize="22sp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/layout_event_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- 하단 피트 보드 띠 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="64dp"
+        android:background="@color/yellow"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="28dp"
+        android:paddingVertical="14dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="다음 주행 작전"
+            android:textColor="@color/asphalt"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="차선 바꿀 때 깜빡이부터 켜기"
+            android:textColor="@color/asphalt"
+            android:textSize="26sp" />
+    </LinearLayout>
+
+</FrameLayout>
