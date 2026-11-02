@@ -7,7 +7,7 @@
   --white: #F2F1EC;
   --grey: #9BA1A8;
   --yellow: #FFC52E;
-  --red: #E8323C;
+  --red: #C8102E;
   --gold: #D4A23C;
 }
 
@@ -34,8 +34,8 @@ body {
 .row .s { text-align: right; padding-right: 6px; }
 .row.me { background: var(--white); color: var(--asphalt); }
 .row.me .p { color: var(--asphalt); }
-.row.dim { opacity: .55; }
-.tag { font-size: 18px; padding: 3px 9px; }
+.row.dim > * { color: var(--grey); }
+.tag { font-size: 24px; padding: 3px 9px; }
 
 /* 배경: 아스팔트 입자 + 점수 쪽 조명 */
 .bg {
@@ -51,11 +51,11 @@ body {
   background: repeating-linear-gradient(90deg, var(--red) 0 56px, var(--white) 56px 112px); opacity: .9;
 }
 .kerb.t { top: 0; bottom: auto; height: 8px; opacity: .5; }
-.kerb.muted { background: repeating-linear-gradient(90deg, #4A4F57 0 56px, #8A9097 56px 112px); }
+.kerb.muted { background: repeating-linear-gradient(90deg, #4A4F57 0 56px, #9BA1A8 56px 112px); }
 
 /* 결과 카드 → 리플레이 버튼 */
 .replay-btn {
-  position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 56px; padding: 0 26px;
+  position: absolute; display: inline-flex; align-items: center; gap: 12px; height: 76px; padding: 0 30px;
   border: 2px solid var(--white); color: var(--white); text-decoration: none; font-size: 24px; transform: skewX(-14deg);
 }
 .replay-btn > * { transform: skewX(14deg); }

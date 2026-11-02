@@ -23,7 +23,7 @@ test('result-low', () => {
   const dump = checkPage('result-low.html',
     ['64', '다음 주행 작전', '차선 바꿀 때 깜빡이부터 켜기', '깜빡이 없이 차선 변경 4회', '매너 +9점',
      '13일 → 0일', '다음 주행 70점이면 1일부터 다시', 'P126', '▼1', '목표', '다른 날의 예시']);
-  assert.ok(!dump.includes('#E8323C') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
+  assert.ok(!dump.includes('#C8102E') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
 });
 
 test('league', () => checkPage('league.html',
@@ -70,5 +70,16 @@ test('replay', () => {
   const text = dump.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '');
   assert.equal(text.split('깜빡이 없이 차선 변경').length - 1, 4, '깜빡이 누락 4회');
   assert.doesNotMatch(text, /[−-]\d+점/, '사건별 감점 숫자 금지');
-  assert.ok(!dump.includes('#E8323C') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
+  assert.ok(!dump.includes('#C8102E') && !dump.includes('var(--red)'), '아쉬운 날에 빨강 사용');
+});
+
+// Android Automotive 가이드: 글씨 24dp 이상, 대비 4.5:1 이상, 누르는 영역 76×76dp 이상 (1px = 1dp로 봄)
+test('car readability: text >= 24px, contrast >= 4.5, tap targets >= 76px', () => {
+  const problems = [];
+  for (const f of ['result-win.html', 'result-low.html', 'replay.html', 'league.html', 'driving.html', 'report.html']) {
+    const m = dumpDom(f).match(/data-audit="([^"]*)"/);
+    assert.ok(m, `${f}: audit 없음`);
+    if (m[1]) problems.push(`${f}: ${m[1].replace(/&quot;/g, '"')}`);
+  }
+  assert.equal(problems.length, 0, '\n' + problems.join('\n'));
 });

@@ -9,31 +9,31 @@
   .head .t { font-size: 34px; }
   .head .t .sub { color: var(--grey); font-size: 24px; margin-left: 16px; }
   .tabs { display: flex; gap: 8px; }
-  .tabs b { font-weight: 400; font-size: 22px; padding: 12px 22px; background: var(--cell); color: var(--grey); }
+  .tabs b { font-weight: 400; font-size: 24px; padding: 12px 22px; background: var(--cell); color: var(--grey); }
   .tabs b.on { background: var(--white); color: var(--asphalt); }
   .mine { position: absolute; left: 64px; top: 128px; width: 500px; }
   .mine .k { font-size: 24px; color: var(--grey); }
   .mine .big { font-size: 200px; line-height: .85; letter-spacing: -6px; margin-top: 6px; }
   .mine .line { display: inline-block; margin-top: 14px; background: var(--yellow); color: var(--asphalt); font-size: 28px; padding: 8px 20px; }
   .tiers { display: flex; gap: 6px; margin-top: 28px; }
-  .tiers i { font-style: normal; flex: 1; text-align: center; font-size: 19px; padding: 8px 0; background: var(--cell); color: var(--grey); }
+  .tiers i { font-style: normal; flex: 1; text-align: center; font-size: 24px; padding: 8px 0; background: var(--cell); color: var(--grey); }
   .tiers i.on { background: var(--gold); color: var(--asphalt); }
   .gain { position: absolute; left: 64px; bottom: 44px; width: 500px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .gain div { background: var(--cell); padding: 16px 18px 18px; font-size: 17px; color: var(--grey); line-height: 1.3; }
+  .gain div { background: var(--cell); padding: 16px 18px 18px; font-size: 24px; color: var(--grey); line-height: 1.3; }
   .gain b { display: block; font-weight: 400; font-size: 46px; color: var(--white); line-height: 1.05; margin-bottom: 4px; }
   .gain .team b { color: var(--yellow); }
   .tower { position: absolute; right: 64px; top: 112px; width: 560px; }
-  .tower h4 { margin: 0 0 10px; font-weight: 400; font-size: 22px; color: var(--grey); display: flex; justify-content: space-between; padding: 0 20px; }
+  .tower h4 { margin: 0 0 10px; font-weight: 400; font-size: 24px; color: var(--grey); display: flex; justify-content: space-between; padding: 0 20px; }
   .tower .row { grid-template-columns: 100px minmax(0, 1fr) 90px; height: 50px; margin-bottom: 5px; }
   .tower .row .p { font-size: 32px; }
-  .tower .row .n { font-size: 22px; }
+  .tower .row .n { font-size: 24px; }
   .tower .row .s { font-size: 28px; }
   .tower .row.top1 .p { color: var(--gold); }
   .tower .row.me { height: 62px; margin: 6px 0 6px -24px; }
-  .dots { text-align: center; color: #6B7178; font-size: 22px; line-height: 26px; }
+  .dots { text-align: center; color: #9BA1A8; font-size: 24px; line-height: 26px; }
   .zone { display: flex; align-items: center; gap: 14px; height: 30px; margin: 2px 0 6px; --c: var(--yellow); }
   .zone::before, .zone::after { content: ''; flex: 1; border-top: 3px dashed var(--c); }
-  .zone span { color: var(--yellow); font-size: 20px; white-space: nowrap; }
+  .zone span { color: var(--yellow); font-size: 24px; white-space: nowrap; }
   .zone.down { --c: var(--red); }
   .zone.down span { color: #F07A80; }
 </style>
@@ -54,8 +54,8 @@
 </div>
 
 <div class="gain">
-  <div>안전운전으로 내가 아낀 돈<b class="num">₩8,400</b>이번 달, 부드럽게 달린 만큼</div>
-  <div class="team">우리 리그가 함께 줄인 급제동<b class="num">3,120회</b>이번 주, 지난주보다 12% 적게</div>
+  <div>내가 아낀 돈<b class="num">₩8,400</b>이번 달</div>
+  <div class="team">리그가 줄인 급제동<b class="num">3,120회</b>이번 주, 12% 감소</div>
 </div>
 
 <div class="tower">

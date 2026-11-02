@@ -21,6 +21,7 @@ function finishPage() {
       return outside || clipped;
     });
     document.body.dataset.overflow = bad ? 'yes' : 'none';
+    document.body.dataset.audit = carAudit().join(' | ');
     if (bad) document.body.dataset.offender = bad.tagName + '.' + bad.className + ' ' + bad.textContent.slice(0, 20) + ' ' + JSON.stringify(bad.getBoundingClientRect());
   });
 }
@@ -50,3 +51,38 @@ const EVENT_ICON = {
   brake: '<circle r="22" fill="#F2F1EC"/><path d="M0-11v12M0 8v2" stroke="#24272C" stroke-width="4.5" stroke-linecap="round"/>',
   accel: '<circle r="22" fill="#F2F1EC"/><path d="M-9-7l8 7-8 7M1-7l8 7-8 7" fill="none" stroke="#24272C" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>',
 };
+
+// Android Automotive 가독성 기준 검사. 어긋난 곳을 "글자: 이유" 목록으로 돌려준다.
+// 글씨 24px 이상, 글씨와 배경 대비 4.5:1 이상, 링크·버튼은 76×76px 이상.
+const PAGE_BG = [48, 52, 59]; // 조명이 가장 밝은 곳(#30343B). 밝은 글씨에는 가장 불리한 바탕.
+function carAudit() {
+  const rgba = s => (s.match(/[\d.]+/g) || [0, 0, 0, 0]).map(Number).concat(1).slice(0, 4);
+  const lum = c => { const v = c.slice(0, 3).map(x => { x /= 255; return x <= .03928 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4; }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+  const mix = (fg, bg, a) => fg.slice(0, 3).map((x, i) => x * a + bg[i] * (1 - a));
+  const out = [];
+  for (const el of document.body.querySelectorAll('*')) {
+    if (el.closest('[aria-hidden="true"]') || el.tagName === 'SCRIPT') continue;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0) continue;
+    const label = (el.textContent || el.getAttribute('aria-label') || el.tagName).trim().slice(0, 14);
+    if ((el.tagName === 'A' || el.tagName === 'BUTTON') && Math.min(r.width, r.height) < 75.5) out.push(`${label}: 누르는 영역 ${Math.round(r.width)}×${Math.round(r.height)}`);
+    const own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+    if (!own) continue;
+    const cs = getComputedStyle(el);
+    const size = parseFloat(cs.fontSize);
+    if (size < 23.5) out.push(`${label}: 글씨 ${size}px`);
+    // 바탕: 색이 칠해진 가장 가까운 조상, 없으면 페이지 바탕. 투명도는 글씨에 곱한다.
+    let bg = PAGE_BG, alpha = rgba(cs.color)[3];
+    for (let p = el; p && p !== document.body; p = p.parentElement) {
+      const ps = getComputedStyle(p);
+      alpha *= parseFloat(ps.opacity);
+      const b = rgba(ps.backgroundColor);
+      if (b[3] > .5 && bg === PAGE_BG) bg = b.slice(0, 3);
+    }
+    const fg = mix(rgba(cs.color), bg, alpha);
+    const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a);
+    const ratio = (hi + .05) / (lo + .05);
+    if (ratio < 4.5) out.push(`${label}: 대비 ${ratio.toFixed(1)}`);
+  }
+  return out;
+}
