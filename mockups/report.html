@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주간 리포트</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .head { position: absolute; left: 64px; top: 40px; font-size: 34px; }
+  .head span { color: var(--grey); font-size: 24px; margin-left: 16px; }
+  .sc { position: absolute; left: 64px; top: 118px; }
+  .sc .k { font-size: 24px; color: var(--grey); }
+  .sc .big { font-size: 150px; line-height: .9; letter-spacing: -4px; }
+  .sc .chg { display: inline-block; margin-left: 18px; vertical-align: 28px; background: var(--yellow); color: var(--asphalt); font-size: 30px; padding: 6px 18px; }
+  .sc .last { font-size: 22px; color: var(--grey); margin-top: 6px; }
+  .bars { position: absolute; left: 64px; top: 380px; width: 520px; height: 190px; display: flex; align-items: flex-end; gap: 14px; border-bottom: 2px solid #3A3E45; }
+  .bars div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .bars b { font-weight: 400; font-size: 24px; }
+  .bars i { display: block; width: 100%; background: #4A4F57; transform: skewX(-8deg); }
+  .bars i.hi { background: var(--yellow); }
+  .bars i.rest { background: none; border: 2px dashed #3A3E45; border-bottom: none; height: 24px; }
+  .days { position: absolute; left: 64px; top: 582px; width: 520px; display: flex; gap: 14px; }
+  .days span { flex: 1; text-align: center; font-size: 22px; color: var(--grey); }
+  .pos { position: absolute; right: 64px; top: 118px; width: 560px; }
+  .pos .k { font-size: 24px; color: var(--grey); display: flex; justify-content: space-between; }
+  .pos .k b { font-weight: 400; color: var(--yellow); }
+  .pos svg { display: block; margin-top: 12px; }
+  .pit { position: absolute; left: 64px; right: 64px; bottom: 36px; display: flex; align-items: center; gap: 20px; background: var(--cell); padding: 16px 24px; }
+  .pit .h { color: var(--yellow); font-size: 22px; white-space: nowrap; }
+  .pit .m { font-size: 26px; }
+</style>
+</head>
+<body>
+<div class="head">11월 2주차 리포트<span data-bind="range"></span></div>
+<div class="sc">
+  <div class="k">이번 주 평균 점수</div>
+  <div><span class="big num" data-bind="avg"></span><span class="chg skew"><span class="unskew" data-bind="chg"></span></span></div>
+  <div class="last" data-bind="last"></div>
+</div>
+<div class="bars" id="bars" aria-hidden="true"></div>
+<div class="days" id="days"></div>
+<div class="pos">
+  <div class="k"><span>순위 변동 · 골드 리그</span><b data-bind="move"></b></div>
+  <svg id="chart" width="560" height="400" viewBox="0 0 560 400" role="img" aria-label="요일별 순위 변화"></svg>
+</div>
+<div class="pit skew"><span class="unskew h">다음 주 작전</span><span class="unskew m" data-bind="next"></span></div>
+
+<script src="demo-data.js"></script>
+<script src="page.js"></script>
+<script>
+  const FROM = '2026-11-03', TO = '2026-11-09', LAST = ['2026-10-27', '2026-11-02'];
+  const NAMES = ['월', '화', '수', '목', '금', '토', '일'];
+  const days = NAMES.map((n, i) => {
+    const date = '2026-11-' + String(3 + i).padStart(2, '0');
+    const trip = DEMO.trips.find(t => t.date === date);
+    return { n, date, score: trip && trip.score, rank: DEMO.ranks[date] };
+  });
+  const avg = DEMO.average(FROM, TO), last = DEMO.average(...LAST);
+  const line = DEMO.promotionRank(DEMO.league.total);
+  const lineAvg = DEMO.neighbors(TO).find(r => r.rank === line).avg;
+  const first = days[0].rank, end = days[6].rank;
+  const vals = {
+    range: '11.03 ~ 11.09 · 주행 ' + days.filter(d => d.score).length + '일',
+    avg: avg.toFixed(1),
+    chg: '지난주보다 +' + DEMO.round1(avg - last),
+    last: '지난주 ' + last,
+    move: `P${first} → P${end} ▲${first - end}`,
+    next: `깜빡이 누락만 줄이면 승급 라인까지 ${end - line}계단, 평균 +${DEMO.round1(lineAvg - DEMO.seasonAverage(TO))}점이면 돼요`,
+  };
+  for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
+
+  // 요일별 점수 막대: 가장 높은 날만 노랑
+  const best = Math.max(...days.filter(d => d.score).map(d => d.score));
+  document.getElementById('bars').innerHTML = days.map(d => d.score
+    ? `<div><b class="num">${d.score}</b><i class="${d.score === best ? 'hi' : ''}" style="height:${Math.round((d.score - 60) / 40 * 170)}px"></i></div>`
+    : '<div><i class="rest"></i></div>').join('');
+  document.getElementById('days').innerHTML = days.map(d => `<span>${d.n}${d.score ? '' : ' 휴식'}</span>`).join('');
+
+  // 포지션 차트: 위가 승급 라인, 가장 많이 오른 날 강조
+  const lo = line, hi = Math.max(...days.map(d => d.rank));
+  const x = i => 70 + i * 78, y = r => 40 + (r - lo) / (hi - lo) * 320;
+  const jumps = days.map((d, i) => i ? days[i - 1].rank - d.rank : 0);
+  const bestJump = jumps.indexOf(Math.max(...jumps));
+  let svg = '';
+  for (let r = lo; r <= hi; r += 3) svg += `<path d="M60 ${y(r)} H540" stroke="#3A3E45"/><text x="0" y="${y(r) + 7}" fill="#9BA1A8" font-size="22" class="num">P${r}</text>`;
+  svg += `<path d="M60 ${y(lo)} H540" stroke="#FFC52E" stroke-width="3" stroke-dasharray="10 8"/><text x="540" y="${y(lo) - 10}" fill="#FFC52E" font-size="20" text-anchor="end">승급 라인</text>`;
+  svg += `<polyline points="${days.map((d, i) => x(i) + ',' + y(d.rank)).join(' ')}" fill="none" stroke="#F2F1EC" stroke-width="5" stroke-linejoin="round"/>`;
+  days.forEach((d, i) => {
+    svg += i === bestJump ? `<circle cx="${x(i)}" cy="${y(d.rank)}" r="10" fill="#FFC52E"/><text x="${x(i)}" y="${y(d.rank) - 20}" fill="#FFC52E" font-size="24" text-anchor="middle" class="num">+${jumps[i]}</text>`
+      : `<circle cx="${x(i)}" cy="${y(d.rank)}" r="7" fill="#24272C" stroke="#F2F1EC" stroke-width="4"/>`;
+    svg += `<text x="${x(i)}" y="396" fill="#9BA1A8" font-size="22" text-anchor="middle">${d.n}</text>`;
+  });
+  document.getElementById('chart').innerHTML = svg;
+  finishPage();
+</script>
+</body>
+</html>

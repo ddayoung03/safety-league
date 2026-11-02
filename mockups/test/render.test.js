@@ -39,4 +39,8 @@ test('driving', () => {
   assert.ok(!/@keyframes|animation:/.test(dump), '주행 중 화면에 애니메이션');
 });
 
+test('report', () => checkPage('report.html',
+  ['11월 2주차 리포트', '11.03 ~ 11.09', '주행 6일', '88.8', '지난주보다 +3.1', '지난주 85.7',
+   '84', '88', '휴식', '90', '92', '86', '93', 'P131 → P125 ▲6', '승급 라인', '다음 주 작전']));
+
 module.exports = { checkPage };
