@@ -30,4 +30,13 @@ test('league', () => checkPage('league.html',
   ['11월 시즌', '골드 리그', '21일 남음', 'P125', '397명', '승급 라인까지 6계단', '0.9점',
    '승급 라인', '상위 30%', '강등 라인', '하위 30%', '₩8,400', '3,120회', '아이오닉 5', '부산', '친구']));
 
+test('driving', () => {
+  const dump = checkPage('driving.html',
+    ['주행 기록 중', '오늘의 레이스 진행 중', '결과는 주차하면 공개돼요', '3km부터 기록 인정',
+     '11.2', '18.4km', '해운대', '70점 넘기면 연속 13일째']);
+  const text = dump.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '').replace('70점 넘기면', '');
+  assert.ok(!/P\d{2,3}|점수|감점|순위|\d+점/.test(text), '주행 중 화면에 점수·순위 표시');
+  assert.ok(!/@keyframes|animation:/.test(dump), '주행 중 화면에 애니메이션');
+});
+
 module.exports = { checkPage };

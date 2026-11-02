@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주행 중</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: var(--asphalt-deep); color: #C9CDD2; }
+  .rec { position: absolute; left: 80px; top: 64px; display: flex; align-items: center; gap: 14px; font-size: 26px; color: var(--grey); }
+  .rec i { width: 16px; height: 16px; border-radius: 50%; background: var(--yellow); }
+  h1 { position: absolute; left: 80px; top: 180px; margin: 0; font-weight: 400; font-size: 84px; color: var(--white); line-height: 1.1; }
+  .sub { position: absolute; left: 84px; top: 290px; font-size: 30px; color: #8A9097; }
+  .sil { position: absolute; right: 70px; top: 318px; width: 480px; height: 176px; opacity: .18; }
+  .wrap { position: absolute; left: 80px; right: 80px; bottom: 150px; height: 44px; }
+  .track { position: absolute; inset: 0; display: flex; gap: 6px; }
+  .track span { flex: 1; background: #2B2F35; }
+  .track span.on { background: var(--yellow); opacity: .8; }
+  .track span.flag { flex: 0 0 60px; background: repeating-conic-gradient(#8A9097 0 25%, #2B2F35 0 50%) 0 0/22px 22px; }
+  .qlabel { position: absolute; top: -44px; left: 0; border-bottom: 3px solid #5C5A4E; font-size: 20px; color: #8A9097; padding-bottom: 6px; white-space: nowrap; }
+  .car { position: absolute; top: -34px; }
+  .meta { position: absolute; left: 80px; right: 80px; bottom: 72px; display: flex; justify-content: space-between; font-size: 26px; color: #8A9097; }
+  .meta b { font-size: 40px; color: var(--white); margin-right: 8px; }
+  .meta .streak { color: var(--yellow); }
+</style>
+</head>
+<body>
+<svg class="sil" viewBox="0 0 4800 1760" fill="none" stroke="#F2F1EC" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+<path vector-effect="non-scaling-stroke" d="M130 1500 L505 1500 A450 450 0 1 1 1345 1500 L3505 1500 A450 450 0 1 1 4345 1500 L4680 1500 L4712 1180 L4700 760 L3420 640 L2660 112 L860 96 L205 128 L92 560 L86 1150 Z"/>
+<path vector-effect="non-scaling-stroke" d="M3230 680 L2630 218 L700 205 L335 640 Z"/>
+<path vector-effect="non-scaling-stroke" d="M2085 212 V700 M1150 207 L1030 680"/>
+<path vector-effect="non-scaling-stroke" d="M3290 690 V1440 M2085 700 V1440 M1180 690 C1240 900 1300 1200 1330 1430"/>
+<path vector-effect="non-scaling-stroke" d="M3260 1290 L1460 1000"/>
+<path vector-effect="non-scaling-stroke" d="M4560 860 H4705 M4560 900 H4705 M96 340 H230 M96 372 H230"/>
+<path vector-effect="non-scaling-stroke" d="M3230 630 l-150 -20 l-20 70 l160 10 z"/>
+<circle vector-effect="non-scaling-stroke" cx="925" cy="1340" r="360"/><circle vector-effect="non-scaling-stroke" cx="925" cy="1340" r="250"/><circle vector-effect="non-scaling-stroke" cx="925" cy="1340" r="60"/>
+<circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="360"/><circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="250"/><circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="60"/>
+<path vector-effect="non-scaling-stroke" d="M0 1740 H4800" stroke-dasharray="14 10"/>
+</svg>
+<div class="rec"><i></i>주행 기록 중</div>
+<h1>오늘의 레이스 진행 중</h1>
+<div class="sub">결과는 주차하면 공개돼요</div>
+<div class="wrap">
+  <div class="qlabel">3km부터 기록 인정</div>
+  <div class="track skew" id="track" aria-hidden="true"></div>
+  <svg class="car" width="64" height="30" viewBox="0 0 64 30" aria-hidden="true">
+    <rect x="4" y="8" width="54" height="14" rx="7" fill="#F2F1EC"/>
+    <path d="M18 8l6-6h14l7 6z" fill="#F2F1EC"/>
+    <rect x="24" y="4" width="12" height="5" fill="#1E2125"/>
+    <circle cx="16" cy="23" r="5" fill="#1E2125" stroke="#F2F1EC" stroke-width="2.5"/>
+    <circle cx="46" cy="23" r="5" fill="#1E2125" stroke="#F2F1EC" stroke-width="2.5"/>
+    <rect x="54" y="11" width="6" height="4" rx="2" fill="#FFC52E"/>
+  </svg>
+</div>
+<div class="meta">
+  <span><b class="num" data-bind="done"></b>/ <span data-bind="dest"></span></span>
+  <span class="streak" data-bind="goal"></span>
+</div>
+
+<script src="demo-data.js"></script>
+<script src="page.js"></script>
+<script>
+  const DONE = 11.2, DEST = DEMO.trips.find(t => t.date === '2026-11-07').km, QUALIFY = 3;
+  const cells = Math.ceil(DEST), on = Math.floor(DONE);
+  const track = document.getElementById('track');
+  track.innerHTML = Array.from({ length: cells }, (_, i) => `<span class="${i < on ? 'on' : ''}"></span>`).join('') + '<span class="flag"></span>';
+
+  // 자동차는 마지막으로 채운 칸 끝, "3km" 표시는 앞 3칸 위
+  const spans = track.querySelectorAll('span');
+  const wrap = track.parentElement.getBoundingClientRect();
+  const car = document.querySelector('.car');
+  car.style.left = (spans[on - 1].getBoundingClientRect().right - wrap.left - 40) + 'px';
+  document.querySelector('.qlabel').style.width = (spans[QUALIFY - 1].getBoundingClientRect().right - wrap.left) + 'px';
+
+  const vals = { done: DONE, dest: DEST + 'km · 해운대까지', goal: '70점 넘기면 연속 ' + (DEMO.streakAt('2026-11-06') + 1) + '일째' };
+  for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
+  finishPage();
+</script>
+</body>
+</html>
