@@ -25,6 +25,14 @@ Pleos Connect(Android Automotive OS) 앱 "세이프티 리그". 실제 차량 �
 3. 작업은 `app` 브랜치에서 하고, 작은 단위로 커밋한다. `main`에 합치거나 push하지 않는다.
 4. 하루 작업이 끝나면 `docs/app-dev-log.md`에 날짜별로 적는다: 한 일, 막힌 점, 직접 정한 것(이유 포함), 확인 못 한 것.
 
+## Pleos Connect SDK (공식 문서에서 확인한 것, 2026-11-03)
+- 문서: https://document.pleos.ai/en/api-reference/connect-sdk-pleos/ , 환경 설정: https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/setup-application-development-environment
+- SDK 구성: Vehicle SDK(차량 정보 조회·제어), NaviHelper SDK(경로·목적지·TBT), Fused Location SDK(위치), ADAS, TTS/STT, LLM, Sync.
+- 기획서의 "Vehicle State"는 문서상 **Vehicle SDK**다. 도메인별 지원 여부는 각 인터페이스의 `checkXXXCapabilities`로 확인한다.
+- 레이스 리플레이 경로는 **Fused Location SDK**가 1순위 후보 (기획서에는 "NaviHelper 위치 정보 또는 AAOS 표준 위치 API"로 적혀 있음 → 확인 후 로그에 기록).
+- 환경: Android Studio + Pleos Connect Emulator(AVD), 최소 API 28, Gradle 8.0 이상. **AVD 부트 옵션은 cold boot** (quick boot면 VHAL 사용 불가).
+- 아직 모르는 것: SDK 사용에 개발자 등록·키가 필요한지, Virtual Console 사용법, Vehicle SDK에 브레이크·조향각·방향지시등·안전벨트·경고등·도어가 모두 있는지. 1번 작업에서 확인한다.
+
 ## 먼저 할 일 (순서대로)
 1. Pleos Connect SDK·에뮬레이터 환경 확인: Vehicle State SDK(속도·브레이크·조향각·방향지시등·안전벨트·경고등·도어·주행거리·EV/연료), NaviHelper, 위치 정보를 실제로 받을 수 있는지. 결과를 로그에 적는다. 기획서와 다르면 표시한다.
 2. AAOS 앱 프로젝트 뼈대 (Kotlin, 최소 SDK는 Pleos 문서 기준).
