@@ -263,3 +263,7 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 공용 `SkewDrawable`: -14° 평행사변형 배경, 글자·터치 영역은 수평 유지. 순위 행, 리플레이 버튼, 리그 탭·티어·승급 알약, 리포트·리플레이 작전 띠 적용.
 - 목표 행의 노란 점선을 같은 경로에 유지. 기존 색 토큰 사용, core 변경 없음.
 - 검증: `testDebugUnitTest assembleDebug` 성공. 화면 비교는 5개 항목 적용 후 함께 진행.
+
+## 2026-11-03 Codex polish — 2. 체커기 띠
+- 이긴 날 오른쪽에 폭 150dp, 오른쪽 90dp 넘침, 중심 기준 -14° 기울임, 40dp 체커, alpha 0.85 적용. 화면 가장자리에서 잘리며 다른 화면에는 표시하지 않음.
+- 검증: `testDebugUnitTest assembleDebug` 성공. Pleos_Connect cold boot 부팅 확인.
