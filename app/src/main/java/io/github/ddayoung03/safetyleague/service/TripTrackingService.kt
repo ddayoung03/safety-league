@@ -1,5 +1,6 @@
 package io.github.ddayoung03.safetyleague.service
 
+import io.github.ddayoung03.safetyleague.core.data.DemoData
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -44,7 +45,7 @@ class TripTrackingService : Service() {
 
         collector = TripCollector(
             streakDays = repository.getStreak("2026-11-07"),
-            efficiencyRatio = 1.0,
+            leagueAvgEfficiency = DemoData.leagueAvgEfficiency,
             onTripCompleted = { completedTrip ->
                 onTripFinished(completedTrip)
             }

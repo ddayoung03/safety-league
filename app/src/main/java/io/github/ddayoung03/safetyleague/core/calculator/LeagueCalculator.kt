@@ -67,14 +67,14 @@ object LeagueCalculator {
      * 승급 라인 순위 (상위 30%)
      */
     fun promotionRank(totalDrivers: Int): Int {
-        return Math.round(totalDrivers * 0.3f)
+        return Math.round(totalDrivers * 0.3).toInt()
     }
 
     /**
      * 강등 라인 순위 (하위 30%)
      */
     fun demotionRank(totalDrivers: Int): Int {
-        return totalDrivers - Math.round(totalDrivers * 0.3f) + 1
+        return totalDrivers - Math.round(totalDrivers * 0.3).toInt() + 1
     }
 
     /**

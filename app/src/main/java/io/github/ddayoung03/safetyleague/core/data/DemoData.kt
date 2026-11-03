@@ -11,6 +11,9 @@ import io.github.ddayoung03.safetyleague.core.model.Trip
  * 시연용 가상 운전자 "나"의 데이터 (mockups/demo-data.js와 100% 동일)
  */
 object DemoData {
+    /** 시연용 아이오닉 5 리그 평균 전비(km/kWh). 가상값. */
+    const val leagueAvgEfficiency = 5.8
+
 
     val league = League(
         total = 397,

@@ -36,6 +36,8 @@ interface VehicleSignalListener {
     fun onDoorChanged(doorOpen: Boolean, timestampMs: Long)
     fun onOdometerChanged(distanceKm: Double, timestampMs: Long)
     fun onLocationChanged(point: Point2D, timestampMs: Long)
+    /** 순간 전비(km/kWh, EV) 또는 연비(km/L, 내연). 신호가 없는 차는 호출되지 않는다. */
+    fun onEfficiencyChanged(value: Double, timestampMs: Long) {}
 }
 
 /**

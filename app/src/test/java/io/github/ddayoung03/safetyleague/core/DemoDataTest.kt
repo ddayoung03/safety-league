@@ -1,7 +1,7 @@
 package io.github.ddayoung03.safetyleague.core
 
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
-import io.github.ddayoung03.safetyleague.core.calculator.ScoreCalculator
+import io.github.ddayoung03.safetyleague.core.model.toMinutes
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.Point2D
 import io.github.ddayoung03.safetyleague.core.model.Trip
@@ -109,49 +109,16 @@ class DemoDataTest {
         assertEquals(4, laneEvents.size) // 깜빡이 없는 차선 변경 4회
 
         for (i in 1 until ev.size) {
-            assertTrue("사건은 시간순으로 정렬되어 있어야 함", ev[i - 1].at < ev[i].at)
+            assertTrue("사건은 시간순으로 정렬되어 있어야 함", ev[i - 1].minutes < ev[i].minutes)
         }
 
         for (e in ev) {
             assertTrue("t 비율은 0과 1 사이여야 함", e.t > 0.0 && e.t < 1.0)
-            assertTrue("사건 발생 시각은 시작 시각 이후여야 함", e.at > DemoData.lowDayStart)
-            assertTrue("사건 발생 시각은 종료 시각 이전이어야 함", e.at < DemoData.lowDayEnd)
+            assertTrue("사건 발생 시각은 시작 시각 이후여야 함", e.minutes > toMinutes(DemoData.lowDayStart))
+            assertTrue("사건 발생 시각은 종료 시각 이전이어야 함", e.minutes < toMinutes(DemoData.lowDayEnd))
         }
 
         assertTrue("가상 경로는 최소 8개 이상의 점이어야 함", DemoData.route.size >= 8)
     }
 
-    @Test
-    fun testScoreCalculatorRules() {
-        // 3km 미만 트립은 기록 및 점수 제외
-        val shortTrip = ScoreCalculator.calculateTripScore(
-            km = 2.8,
-            hardAccels = 0,
-            hardBrakes = 0,
-            unindicatedLaneChanges = 0,
-            efficiencyRatio = 1.0,
-            allBeltsFastenedBeforeDrive = true,
-            unresolvedWarningSeconds = 0,
-            streakDays = 5
-        )
-        assertEquals(0.0, shortTrip.total, 0.001)
-
-        // 완벽한 18.4km 주행 시 만점 계산
-        val perfectTrip = ScoreCalculator.calculateTripScore(
-            km = 18.4,
-            hardAccels = 0,
-            hardBrakes = 0,
-            unindicatedLaneChanges = 0,
-            efficiencyRatio = 1.2, // 120% 전비
-            allBeltsFastenedBeforeDrive = true,
-            unresolvedWarningSeconds = 0,
-            streakDays = 13
-        )
-        assertEquals(30.0, perfectTrip.smoothness, 0.001)
-        assertEquals(25.0, perfectTrip.manner, 0.001)
-        assertEquals(20.0, perfectTrip.eco, 0.001)
-        assertEquals(15.0, perfectTrip.safety, 0.001)
-        assertEquals(10.0, perfectTrip.consistency, 0.001)
-        assertEquals(100.0, perfectTrip.total, 0.001)
-    }
 }

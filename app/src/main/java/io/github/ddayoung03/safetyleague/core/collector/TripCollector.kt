@@ -6,261 +6,205 @@ import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.Point2D
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
 import io.github.ddayoung03.safetyleague.core.model.Trip
+import io.github.ddayoung03.safetyleague.core.model.TripStats
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.max
 
 /**
- * 실시간 차량 신호를 수집하여 트립 기록 및 점수를 산출하는 코어 수집기
+ * 차량 신호를 받아 트립을 기록하고, P단에서 점수를 매겨 onTripCompleted로 넘긴다.
+ * 트립은 P가 아닌 기어에서 실제로 움직였을 때 시작한다 (P→R→P 주차는 트립 아님).
  */
 class TripCollector(
     val date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
     var streakDays: Int = 0,
-    var efficiencyRatio: Double = 1.0,
+    var leagueAvgEfficiency: Double = 0.0,
     val onTripCompleted: (CompletedTrip) -> Unit = {}
 ) : VehicleSignalListener {
 
-    var isTracking: Boolean = false
-        private set
-
-    var startTimeMs: Long = 0L
-        private set
-    var endTimeMs: Long = 0L
-        private set
-
-    private var startOdometerKm: Double = -1.0
-    private var currentOdometerKm: Double = 0.0
-
-    var hardAccels: Int = 0
-        private set
-    var hardBrakes: Int = 0
-        private set
-    var unindicatedLaneChanges: Int = 0
-        private set
-
-    var allBeltsFastenedBeforeDrive: Boolean = true
-        private set
-    var unresolvedWarningSeconds: Long = 0L
-        private set
-
-    private var warningStartMs: Long = 0L
-    private var isBrakePressed: Boolean = false
-    private var currentTurnSignal: TurnSignalState = TurnSignalState()
-    private var currentSeatBeltMap: Map<Int, Boolean> = emptyMap()
-
-    private var lastSpeedMps: Float = 0f
-    private var lastSpeedTimeMs: Long = 0L
-
-    // 조향각 기반 차선 변경 감지 상태 머신
-    private var isSteeringManeuver: Boolean = false
-    private var steeringTurnSignalUsed: Boolean = false
-    private var steeringStartTimeMs: Long = 0L
-
-    // 이벤트 및 주행 경로
-    private val rawEvents = mutableListOf<RawEvent>()
-    val route = mutableListOf<Point2D>()
-
-    private data class RawEvent(
-        val timestampMs: Long,
-        val kind: String,
-        val point: Point2D? = null
-    )
-
-    override fun onGearChanged(gear: GearState, timestampMs: Long) {
-        if (gear != GearState.PARK && !isTracking) {
-            // 트립 시작!
-            isTracking = true
-            startTimeMs = timestampMs
-            hardAccels = 0
-            hardBrakes = 0
-            unindicatedLaneChanges = 0
-            unresolvedWarningSeconds = 0L
-            rawEvents.clear()
-            route.clear()
-
-            // 출발 시점 전 좌석 안전벨트 착용 확인
-            allBeltsFastenedBeforeDrive = if (currentSeatBeltMap.isNotEmpty()) {
-                currentSeatBeltMap.values.all { it }
-            } else {
-                true
-            }
-        } else if (gear == GearState.PARK && isTracking) {
-            // 트립 종료!
-            endTimeMs = timestampMs
-            isTracking = false
-
-            val tripDistanceKm = if (startOdometerKm >= 0.0) {
-                max(0.0, currentOdometerKm - startOdometerKm)
-            } else {
-                0.0
-            }
-
-            // 5대 배점 종합 계산
-            val detailScore = ScoreCalculator.calculateTripScore(
-                km = tripDistanceKm,
-                hardAccels = hardAccels,
-                hardBrakes = hardBrakes,
-                unindicatedLaneChanges = unindicatedLaneChanges,
-                efficiencyRatio = efficiencyRatio,
-                allBeltsFastenedBeforeDrive = allBeltsFastenedBeforeDrive,
-                unresolvedWarningSeconds = unresolvedWarningSeconds,
-                streakDays = streakDays
-            )
-
-            val isEligible = LeagueCalculator.isEligibleTrip(tripDistanceKm)
-            val finalScore = if (isEligible) detailScore.total else 0.0
-
-            val trip = Trip(
-                date = date,
-                score = finalScore,
-                km = LeagueCalculator.round1(tripDistanceKm),
-                detailScore = detailScore
-            )
-
-            // 사건들의 상대 위치 t(0.0..1.0) 계산
-            val durationMs = max(1L, endTimeMs - startTimeMs)
-            val replayEvents = rawEvents.map { raw ->
-                val ratio = (raw.timestampMs - startTimeMs).toDouble() / durationMs.toDouble()
-                val clampedRatio = max(0.01, minOf(0.99, LeagueCalculator.round1(ratio * 100.0) / 100.0))
-                ReplayEvent(
-                    at = formatTime(raw.timestampMs),
-                    kind = raw.kind,
-                    t = clampedRatio
-                )
-            }.sortedBy { it.t }
-
-            val completed = CompletedTrip(
-                trip = trip,
-                events = replayEvents,
-                route = route.toList(),
-                startTime = formatTime(startTimeMs),
-                endTime = formatTime(endTimeMs),
-                isEligible = isEligible
-            )
-
-            onTripCompleted(completed)
-        }
+    companion object {
+        const val HARD_ACCEL_MPS2 = 3.0     // 일반 출발(약 1.5~2.5 m/s²)보다 확실히 센 가속
+        const val HARD_BRAKE_MPS2 = -3.5    // 일반 정지(약 -2 m/s²)보다 확실히 센 감속
+        const val MOVING_MPS = 0.5f
+        const val LANE_MIN_MPS = 8.3f       // 30 km/h 미만은 차선 변경을 보지 않는다
+        const val FAST_MPS = 16.7f          // 60 km/h 이상은 조향을 더 작게 해도 차선이 바뀐다
+        const val LANE_ANGLE_SLOW_DEG = 10f // 조향 휠 각도 기준
+        const val LANE_ANGLE_FAST_DEG = 4f
+        const val LANE_ANGLE_MAX_DEG = 45f  // 이보다 크게 꺾으면 회전
+        const val LANE_MIN_MS = 1_000L
+        const val LANE_MAX_MS = 6_000L      // 이보다 길게 꺾고 있으면 회전·램프·곡선
+        const val SIGNAL_GRACE_MS = 5_000L  // 깜빡이가 자동으로 꺼진 직후의 조향도 정상
     }
 
-    override fun onOdometerChanged(distanceKm: Double, timestampMs: Long) {
-        if (startOdometerKm < 0.0) {
-            startOdometerKm = distanceKm
-        }
-        currentOdometerKm = distanceKm
+    private var gear = GearState.PARK
+    var isTracking = false
+        private set
+
+    private var startTimeMs = 0L
+    private var startOdometerKm = -1.0
+    private var currentOdometerKm = -1.0
+
+    var hardAccels = 0; private set
+    var hardBrakes = 0; private set
+    var laneChanges = 0; private set
+    var unindicatedLaneChanges = 0; private set
+    private var doorOpenWhileMoving = 0
+    private var unresolvedWarningSeconds = 0L
+    private var allBeltsFastened = true
+
+    private var warningStartMs = 0L
+    private var brakePressed = false
+    private var turnSignal = TurnSignalState()
+    private var lastSignalOnMs = Long.MIN_VALUE / 2
+    private var seatBelts: Map<Int, Boolean> = emptyMap()
+    private var efficiency: Double? = null
+
+    private var lastSpeed = 0f
+    private var lastSpeedMs = 0L
+    private var inHardAccel = false
+    private var inHardBrake = false
+
+    private var inManeuver = false
+    private var maneuverStartMs = 0L
+    private var maneuverSignalled = false
+    private var maneuverPeakDeg = 0f
+
+    private val rawEvents = mutableListOf<Pair<Long, String>>()
+    val route = mutableListOf<Point2D>()
+
+    private fun startTrip(t: Long) {
+        isTracking = true
+        startTimeMs = t
+        startOdometerKm = currentOdometerKm
+        hardAccels = 0; hardBrakes = 0; laneChanges = 0; unindicatedLaneChanges = 0
+        doorOpenWhileMoving = 0; unresolvedWarningSeconds = 0L; warningStartMs = 0L
+        inHardAccel = false; inHardBrake = false; inManeuver = false
+        efficiency = null
+        rawEvents.clear(); route.clear()
+        allBeltsFastened = seatBelts.isEmpty() || seatBelts.values.all { it }
+    }
+
+    override fun onGearChanged(gear: GearState, timestampMs: Long) {
+        this.gear = gear
+        if (gear == GearState.PARK && isTracking) finishTrip(timestampMs)
     }
 
     override fun onSpeedChanged(speedMps: Float, timestampMs: Long) {
-        if (!isTracking) {
-            lastSpeedMps = speedMps
-            lastSpeedTimeMs = timestampMs
-            return
-        }
-
-        if (lastSpeedTimeMs > 0L) {
-            val dt = (timestampMs - lastSpeedTimeMs) / 1000.0
+        if (!isTracking && gear != GearState.PARK && speedMps > MOVING_MPS) startTrip(timestampMs)
+        if (isTracking && lastSpeedMs > 0L) {
+            val dt = (timestampMs - lastSpeedMs) / 1000.0
             if (dt in 0.1..3.0) {
-                val accel = (speedMps - lastSpeedMps) / dt
-                if (accel > 3.0) { // 급가속 (> 3.0 m/s²)
-                    hardAccels++
-                    rawEvents.add(RawEvent(timestampMs, "accel", route.lastOrNull()))
-                } else if (accel < -3.5 && isBrakePressed) { // 급감속/급제동 (< -3.5 m/s² + 브레이크)
-                    hardBrakes++
-                    rawEvents.add(RawEvent(timestampMs, "brake", route.lastOrNull()))
-                }
+                val accel = (speedMps - lastSpeed) / dt
+                // 임계값을 넘은 구간 하나가 사건 하나
+                if (accel > HARD_ACCEL_MPS2) {
+                    if (!inHardAccel) { hardAccels++; rawEvents += timestampMs to "accel" }
+                    inHardAccel = true
+                } else inHardAccel = false
+                if (accel < HARD_BRAKE_MPS2 && brakePressed) {
+                    if (!inHardBrake) { hardBrakes++; rawEvents += timestampMs to "brake" }
+                    inHardBrake = true
+                } else inHardBrake = false
+            } else {
+                inHardAccel = false; inHardBrake = false
             }
         }
-
-        lastSpeedMps = speedMps
-        lastSpeedTimeMs = timestampMs
+        lastSpeed = speedMps
+        lastSpeedMs = timestampMs
     }
 
     override fun onBrakePedalChanged(isPressed: Boolean, timestampMs: Long) {
-        isBrakePressed = isPressed
+        brakePressed = isPressed
     }
 
     override fun onTurnSignalChanged(turnSignal: TurnSignalState, timestampMs: Long) {
-        currentTurnSignal = turnSignal
-        if (turnSignal.isAnyOn && isSteeringManeuver) {
-            steeringTurnSignalUsed = true
-        }
+        // 꺼지는 순간까지 켜져 있던 것으로 본다
+        if (turnSignal.isAnyOn || this.turnSignal.isAnyOn) lastSignalOnMs = timestampMs
+        this.turnSignal = turnSignal
+        if (turnSignal.isAnyOn && inManeuver) maneuverSignalled = true
     }
 
     override fun onSteeringWheelAngleChanged(angleDeg: Float, timestampMs: Long) {
         if (!isTracking) return
-
-        // 30km/h(8.3m/s) 이상 주행 중에만 차선 변경 감지
-        if (lastSpeedMps >= 8.3f) {
-            val absAngle = abs(angleDeg)
-            if (!isSteeringManeuver && absAngle >= 15f) {
-                // 조향 각도 변화 시작
-                isSteeringManeuver = true
-                steeringStartTimeMs = timestampMs
-                steeringTurnSignalUsed = currentTurnSignal.isAnyOn
-            } else if (isSteeringManeuver && absAngle < 5f) {
-                // 조향 복귀 (차선 변경 완료)
-                val maneuverDuration = timestampMs - steeringStartTimeMs
-                if (maneuverDuration in 300..4000) {
-                    if (!steeringTurnSignalUsed && !currentTurnSignal.isAnyOn) {
-                        unindicatedLaneChanges++
-                        rawEvents.add(RawEvent(timestampMs, "lane", route.lastOrNull()))
-                    }
+        if (lastSpeed < LANE_MIN_MPS) { inManeuver = false; return }
+        val threshold = if (lastSpeed >= FAST_MPS) LANE_ANGLE_FAST_DEG else LANE_ANGLE_SLOW_DEG
+        val a = abs(angleDeg)
+        if (!inManeuver && a >= threshold) {
+            inManeuver = true
+            maneuverStartMs = timestampMs
+            maneuverPeakDeg = a
+            maneuverSignalled = turnSignal.isAnyOn || timestampMs - lastSignalOnMs <= SIGNAL_GRACE_MS
+        } else if (inManeuver) {
+            maneuverPeakDeg = maxOf(maneuverPeakDeg, a)
+            if (a < threshold / 2) {
+                inManeuver = false
+                val duration = timestampMs - maneuverStartMs
+                if (duration in LANE_MIN_MS..LANE_MAX_MS && maneuverPeakDeg <= LANE_ANGLE_MAX_DEG) {
+                    laneChanges++
+                    if (!maneuverSignalled) { unindicatedLaneChanges++; rawEvents += timestampMs to "lane" }
                 }
-                isSteeringManeuver = false
-                steeringTurnSignalUsed = false
             }
-        } else {
-            isSteeringManeuver = false
         }
     }
 
     override fun onSeatBeltChanged(seatBuckledMap: Map<Int, Boolean>, timestampMs: Long) {
-        currentSeatBeltMap = seatBuckledMap
+        seatBelts = seatBuckledMap
     }
 
     override fun onTelltaleChanged(warningActive: Boolean, timestampMs: Long) {
         if (!isTracking) return
+        if (warningActive && warningStartMs == 0L) warningStartMs = timestampMs
+        if (!warningActive && warningStartMs > 0L) closeWarning(timestampMs)
+    }
 
-        if (warningActive) {
-            if (warningStartMs == 0L) {
-                warningStartMs = timestampMs
-            }
-        } else {
-            if (warningStartMs > 0L) {
-                val durationSec = (timestampMs - warningStartMs) / 1000L
-                unresolvedWarningSeconds += durationSec
-                warningStartMs = 0L
-            }
-        }
+    private fun closeWarning(t: Long) {
+        unresolvedWarningSeconds += (t - warningStartMs) / 1000L
+        warningStartMs = 0L
     }
 
     override fun onDoorChanged(doorOpen: Boolean, timestampMs: Long) {
-        // 주행 중 도어 열림 발생 시 안전 기본기 감점 요소
+        if (isTracking && doorOpen && lastSpeed > MOVING_MPS) doorOpenWhileMoving++
+    }
+
+    override fun onOdometerChanged(distanceKm: Double, timestampMs: Long) {
+        currentOdometerKm = distanceKm
+        if (isTracking && startOdometerKm < 0.0) startOdometerKm = distanceKm
     }
 
     override fun onLocationChanged(point: Point2D, timestampMs: Long) {
-        if (isTracking) {
-            route.add(point)
-        }
+        if (isTracking) route += point
     }
 
-    /**
-     * 시뮬레이터 및 테스트용 직접 이벤트 주입 메서드
-     */
-    fun triggerEvent(kind: String, timestampMs: Long, point: Point2D? = null) {
-        when (kind) {
-            "accel" -> hardAccels++
-            "brake" -> hardBrakes++
-            "lane" -> unindicatedLaneChanges++
-        }
-        rawEvents.add(RawEvent(timestampMs, kind, point))
-        if (point != null) {
-            route.add(point)
-        }
+    override fun onEfficiencyChanged(value: Double, timestampMs: Long) {
+        if (isTracking) efficiency = value
     }
 
-    private fun formatTime(timeMs: Long): String {
-        return SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(timeMs))
+    private fun finishTrip(endMs: Long) {
+        isTracking = false
+        if (warningStartMs > 0L) closeWarning(endMs)
+        val km = if (startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+        val detail = ScoreCalculator.calculate(
+            TripStats(
+                km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, efficiency,
+                leagueAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
+            )
+        )
+        val eligible = LeagueCalculator.isEligibleTrip(km)
+        val duration = maxOf(1L, endMs - startTimeMs).toDouble()
+        val events = rawEvents.map { (t, kind) ->
+            ReplayEvent(formatTime(t), kind, ((t - startTimeMs) / duration).coerceIn(0.01, 0.99))
+        }
+        onTripCompleted(
+            CompletedTrip(
+                trip = Trip(date, if (eligible) detail.total else 0.0, LeagueCalculator.round1(km), detail),
+                events = events,
+                route = route.toList(),
+                startTime = formatTime(startTimeMs),
+                endTime = formatTime(endMs),
+                isEligible = eligible
+            )
+        )
     }
+
+    private fun formatTime(timeMs: Long): String = SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(timeMs))
 }

@@ -64,7 +64,12 @@ data class ReplayEvent(
     val at: String,
     val kind: String,
     val t: Double
-)
+) {
+    /** 자정부터 분. "10:05"처럼 자릿수가 다른 시각도 바르게 비교하려고 쓴다. */
+    val minutes: Int get() = toMinutes(at)
+}
+
+fun toMinutes(hhmm: String): Int = hhmm.split(":").let { it[0].toInt() * 60 + it[1].toInt() }
 
 /**
  * 2차원 좌표 (경로 polyline 점)
@@ -86,3 +91,26 @@ data class CompletedTrip(
     val isEligible: Boolean
 )
 
+
+/**
+ * 점수 계산에 들어가는 한 트립의 집계값
+ * @param efficiency 이 트립 전비(km/kWh) 또는 연비(km/L). 신호가 없으면 null
+ * @param leagueAvgEfficiency 같은 차종(같은 동력 방식) 리그 평균
+ * @param streakDays 이 트립 전까지의 연속 안전 주행 일수
+ */
+data class TripStats(
+    val km: Double,
+    val hardAccels: Int,
+    val hardBrakes: Int,
+    val laneChanges: Int,
+    val unindicatedLaneChanges: Int,
+    val efficiency: Double?,
+    val leagueAvgEfficiency: Double,
+    val allBeltsFastened: Boolean,
+    val unresolvedWarningSeconds: Long,
+    val doorOpenWhileMoving: Int,
+    val streakDays: Int
+)
+
+/** 동력 방식. 전비/연비 기준이 달라 리그를 나눈다. */
+enum class Powertrain { EV, ICE }

@@ -1,77 +1,62 @@
 package io.github.ddayoung03.safetyleague.core.calculator
 
 import io.github.ddayoung03.safetyleague.core.model.DetailScore
-import kotlin.math.max
-import kotlin.math.min
+import io.github.ddayoung03.safetyleague.core.model.TripStats
 
 /**
- * 5대 영역 안전 운전 점수(100점 만점) 계산기
- * - 부드러움 30점: 10km당 급가속·급감속
- * - 매너 25점: 10km당 깜빡이 없는 차선 변경
- * - 에코 20점: 동급 차종 대비 전비/연비 달성도
- * - 안전 기본기 15점: 출발 전 전좌석 벨트, 경고 해결 시간, 도어 닫힘
- * - 꾸준함 10점: 연속 안전 주행 일수 및 거리 기여도
+ * 트립 안전 운전 점수(100점) = 부드러움 30 · 매너 25 · 에코 20 · 안전 기본기 15 · 꾸준함 10
+ * 3km 미만 트립은 0점(집계 제외). 감점 계수와 근거는 docs/app-dev-log.md에 기록.
  */
 object ScoreCalculator {
 
-    /**
-     * 트립 데이터로부터 5대 배점 및 종합 점수 산출
-     */
-    fun calculateTripScore(
-        km: Double,
-        hardAccels: Int,
-        hardBrakes: Int,
-        unindicatedLaneChanges: Int,
-        efficiencyRatio: Double, // 기준 대비 달성 비율 (1.0 = 100%)
-        allBeltsFastenedBeforeDrive: Boolean,
-        unresolvedWarningSeconds: Long,
-        streakDays: Int
-    ): DetailScore {
-        // 3km 미만 트립은 점수 산정 대상 제외 (0점 처리 또는 미반영)
-        if (!LeagueCalculator.isEligibleTrip(km)) {
-            return DetailScore(0.0, 0.0, 0.0, 0.0, 0.0)
-        }
+    // 부드러움: 10km당 급가속 1회 -3, 급제동 1회 -4 (급제동이 사고 위험이 더 커서 더 무겁게)
+    private const val ACCEL_PENALTY_PER_10KM = 3.0
+    private const val BRAKE_PENALTY_PER_10KM = 4.0
 
-        val distanceFactor = max(km / 10.0, 0.3) // 10km 기준 환산 배수
+    // 에코: 리그 평균 대비 80% 이하 0점, 120% 이상 만점, 평균이면 절반
+    private const val ECO_FLOOR_RATIO = 0.8
+    private const val ECO_FULL_RATIO = 1.2
 
-        // 1. 부드러움 (최대 30점)
-        // 10km당 급가속 1회당 -3점, 급제동 1회당 -4점
-        val accelRate = hardAccels / distanceFactor
-        val brakeRate = hardBrakes / distanceFactor
-        val smoothnessDeduction = (accelRate * 3.0) + (brakeRate * 4.0)
-        val smoothness = max(0.0, LeagueCalculator.round1(30.0 - smoothnessDeduction))
+    // 안전 기본기: 출발 전 미착용 -8, 경고를 30초 방치할 때마다 -2, 주행 중 도어 열림 1회 -3
+    private const val BELT_PENALTY = 8.0
+    private const val WARNING_PENALTY_PER_30S = 2.0
+    private const val DOOR_PENALTY = 3.0
 
-        // 2. 매너 (최대 25점)
-        // 10km당 깜빡이 누락 1회당 -5점
-        val laneRate = unindicatedLaneChanges / distanceFactor
-        val mannerDeduction = laneRate * 5.0
-        val manner = max(0.0, LeagueCalculator.round1(25.0 - mannerDeduction))
+    // 꾸준함: 연속 기록 7점(10일이면 만점) + 주행거리 3점(10km면 만점). 기본점 없음.
+    private const val STREAK_POINTS = 7.0
+    private const val STREAK_FULL_DAYS = 10.0
+    private const val DISTANCE_POINTS = 3.0
+    private const val DISTANCE_FULL_KM = 10.0
 
-        // 3. 에코 (최대 20점)
-        // 기준 전비/연비 대비 100% 이상 시 20점, 그 이하는 비율 반영
-        val eco = min(20.0, max(0.0, LeagueCalculator.round1(20.0 * efficiencyRatio)))
+    fun calculate(s: TripStats): DetailScore {
+        if (!LeagueCalculator.isEligibleTrip(s.km)) return DetailScore(0.0, 0.0, 0.0, 0.0, 0.0)
+        val per10km = s.km / 10.0
 
-        // 4. 안전 기본기 (최대 15점)
-        // 출발 전 벨트 미착용 출발: -8점, 경고등 방치 30초 초과당 -2점
-        var safetyScore = 15.0
-        if (!allBeltsFastenedBeforeDrive) {
-            safetyScore -= 8.0
-        }
-        val warningDeduction = (unresolvedWarningSeconds / 30) * 2.0
-        safetyScore -= warningDeduction
-        val safety = max(0.0, LeagueCalculator.round1(safetyScore))
+        val smoothness = 30.0 - (s.hardAccels * ACCEL_PENALTY_PER_10KM + s.hardBrakes * BRAKE_PENALTY_PER_10KM) / per10km
 
-        // 5. 꾸준함 (최대 10점)
-        // 연속 안전 주행 10일 이상 시 만점(7점 기본 + 일수 비례 3점)
-        val streakScore = min(10.0, 5.0 + (streakDays * 0.5))
-        val consistency = LeagueCalculator.round1(streakScore)
+        val manner = if (s.laneChanges == 0) 25.0
+        else 25.0 * (1.0 - s.unindicatedLaneChanges.toDouble() / s.laneChanges)
+
+        val ratio = s.efficiency?.takeIf { it.isFinite() && it > 0 && s.leagueAvgEfficiency > 0 }
+            ?.let { it / s.leagueAvgEfficiency } ?: 1.0
+        val eco = 20.0 * (ratio - ECO_FLOOR_RATIO) / (ECO_FULL_RATIO - ECO_FLOOR_RATIO)
+
+        val safety = 15.0 -
+            (if (s.allBeltsFastened) 0.0 else BELT_PENALTY) -
+            (s.unresolvedWarningSeconds / 30) * WARNING_PENALTY_PER_30S -
+            s.doorOpenWhileMoving * DOOR_PENALTY
+
+        val consistency = STREAK_POINTS * minOf(s.streakDays / STREAK_FULL_DAYS, 1.0) +
+            DISTANCE_POINTS * minOf(s.km / DISTANCE_FULL_KM, 1.0)
 
         return DetailScore(
-            smoothness = min(30.0, smoothness),
-            manner = min(25.0, manner),
-            eco = min(20.0, eco),
-            safety = min(15.0, safety),
-            consistency = min(10.0, consistency)
+            smoothness = clampRound(smoothness, 30.0),
+            manner = clampRound(manner, 25.0),
+            eco = clampRound(eco, 20.0),
+            safety = clampRound(safety, 15.0),
+            consistency = clampRound(consistency, 10.0)
         )
     }
+
+    private fun clampRound(v: Double, max: Double) = LeagueCalculator.round1(v.coerceIn(0.0, max))
 }
