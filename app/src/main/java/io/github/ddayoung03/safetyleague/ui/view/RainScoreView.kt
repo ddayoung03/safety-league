@@ -1,5 +1,9 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -38,9 +42,22 @@ class RainScoreView @JvmOverloads constructor(
     private var animator: ValueAnimator? = null
 
 
+    private var owner: LifecycleOwner? = null
+    private val observer = object : DefaultLifecycleObserver {
+        override fun onResume(owner: LifecycleOwner) { if (isShown) startRainAnimation() }
+        override fun onPause(owner: LifecycleOwner) { stopRainAnimation() }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        owner = findViewTreeLifecycleOwner()
+        owner?.lifecycle?.addObserver(observer)
+    }
+
     private var lastFrameMs = 0L
 
     fun startRainAnimation() {
+        if (!isShown || owner?.lifecycle?.currentState != Lifecycle.State.RESUMED) return
         if (animator?.isRunning == true) return
         animator?.cancel()
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -49,7 +66,7 @@ class RainScoreView @JvmOverloads constructor(
             interpolator = LinearInterpolator()
             addUpdateListener {
                 val now = android.os.SystemClock.uptimeMillis()
-                if (now - lastFrameMs < 33) return@addUpdateListener // 30fps 상한
+                if (now - lastFrameMs < 34) return@addUpdateListener // 30fps 상한
                 lastFrameMs = now
                 updateDrops()
                 invalidate()
@@ -111,6 +128,8 @@ class RainScoreView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        owner?.lifecycle?.removeObserver(observer)
+        owner = null
         stopRainAnimation()
         super.onDetachedFromWindow()
     }

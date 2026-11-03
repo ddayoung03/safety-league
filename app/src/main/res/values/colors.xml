@@ -21,4 +21,6 @@
     <color name="asphalt_shadow">#1B1E22</color>
     <color name="track_empty">#2B2F35</color>
     <color name="track_qualifying">#5C5A4E</color>
+    <color name="flame_orange">#FF7800</color>
+    <color name="flame_glow">#FFA014</color>
 </resources>

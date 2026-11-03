@@ -255,6 +255,13 @@ class MainActivity : AppCompatActivity() {
     private fun showResultWin() {
         val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
+        b.tvScore.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            val rect = android.graphics.Rect()
+            b.tvScore.getDrawingRect(rect)
+            b.root.offsetDescendantRectToMyCoords(b.tvScore, rect)
+            rect.offset(-b.flameScoreView.left, -b.flameScoreView.top)
+            b.flameScoreView.scoreBounds = android.graphics.RectF(rect)
+        }
         val day = "2026-11-07"
         val t = realTrip
         val me = DemoData.ranks.getValue(day)

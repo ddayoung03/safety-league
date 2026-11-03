@@ -278,3 +278,16 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 정수 km 상태에 따라 채워지는 -14° 트랙, 목적지가 있을 때만 60dp 결승 칸(22dp 체커 타일), 앞 3칸에 맞춘 밑줄. 자동차는 마지막 채운 칸 끝으로 즉시 이동하며 animator 없음.
 - 실제 목적지 미연동 상태는 기존대로 결승 칸 없이 늘어남. UI 상태 계산만 ui/view에 분리, core 변경 없음.
 - 검증: DrivingTrackStateTest 3개(1km 경계·목적지 없음·도착 초과), 미구현 실패 확인 후 구현. `testDebugUnitTest assembleDebug` 성공.
+
+## 2026-11-03 Codex polish — 5. 점수 영역 불꽃 제외
+- 실제 점수 TextView의 배치 영역을 불꽃 좌표로 변환해 영역에 닿는 입자 전체를 제외. 숫자 뒤의 은은한 조명과 주변 불꽃 모션은 유지.
+- 불꽃·비 효과가 Lifecycle onPause에서 멈추고 onResume 및 실제 표시 여부에 따라 재개. 프레임 간격 34ms로 30fps 이내 유지. 불꽃 색상은 colors.xml 토큰으로 이동.
+- 검증: `testDebugUnitTest assembleDebug` 성공, APK를 Pleos_Connect에 설치·실행. 최종 화면 비교 진행 중.
+
+### 최종 검증 및 검토
+- `testDebugUnitTest assembleDebug lintDebug` 성공. 단위 테스트 42개, 실패 0. `core/` 변경 없음.
+- 독립 코드 검토에서 긴 주행(약 185km 이후)의 고정 간격으로 칸 너비가 음수가 되는 경우 발견. 185/500/1000km 회귀 테스트 실패 재현 후 칸 수에 따라 간격을 줄여 해결.
+- Pleos_Connect GPU host·cold boot, 최종 APK 설치·실행. 6개 화면 캡처와 시안 나란히 비교, 점수·순위·문구 잘림 없음. 아쉬운 날은 회색 연석·빨강 없음. 주행 실루엣은 글자와 분리됨.
+- 캡처·비교 자료: 로컬 `captures/polish/` (원본 6장, `*-compare.png`, `comparison-sheet.png`; git 제외). Pleos의 더 긴 세로 영역을 사용하는 기존 배치 차이는 유지.
+- 불꽃은 숫자 영역에 닿는 원 전체를 숨겨 반원으로 잘리는 경계도 방지. 일시정지·재개는 Lifecycle 연결을 코드 검토로 확인; 별도 계측 테스트는 하지 않음.
+- main 병합·push 없음. 기존 미추적 `.impeccable/` 보존. 후속 검토: Claude의 브랜치 검토.
