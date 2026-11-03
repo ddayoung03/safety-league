@@ -278,30 +278,23 @@ class MainActivity : AppCompatActivity() {
         val streakBefore = if (t != null) service?.streakBeforeToday ?: 0 else DemoData.lowDayStreakBefore
         b.tvStreakChange.text = "${streakBefore}일 → 0일"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
-
-        // 피트 보드: 가장 많이 나온 사건 하나만
-        val events = t?.events ?: DemoData.lowDayEvents
-        val kind = listOf("lane", "brake", "accel").maxByOrNull { k -> events.count { it.kind == k } * 10 - listOf("lane", "brake", "accel").indexOf(k) }
-        val count = events.count { it.kind == kind }
-        val detail = t?.trip?.detailScore
-        when {
-            count == 0 -> { b.tvPitTip.text = "출발 전 모든 좌석 벨트 확인하기"; b.tvPitReason.text = "오늘 안전 기본기에서 놓친 점이 있어요"; b.tvPitGain.text = "" }
-            kind == "lane" -> {
-                b.tvPitTip.text = "차선 바꿀 때 깜빡이부터 켜기"
-                b.tvPitReason.text = "오늘 깜빡이 없이 차선 변경 ${count}회"
-                b.tvPitGain.text = "매너 +${detail?.let { (25 - it.manner).roundToInt() } ?: 9}점 가능"
-            }
-            kind == "brake" -> {
-                b.tvPitTip.text = "멈출 때는 미리, 천천히 밟기"
-                b.tvPitReason.text = "오늘 급제동 ${count}회"
-                b.tvPitGain.text = "부드러움 +${detail?.let { (30 - it.smoothness).roundToInt() } ?: 8}점 가능"
-            }
-            else -> {
-                b.tvPitTip.text = "출발은 부드럽게"
-                b.tvPitReason.text = "오늘 급가속 ${count}회"
-                b.tvPitGain.text = "부드러움 +${detail?.let { (30 - it.smoothness).roundToInt() } ?: 3}점 가능"
-            }
+        b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
+        if (t != null && !t.isEligible) {
+            // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
+            b.tvScore.text = "–"
+            b.tvStreakChange.text = "${streakBefore}일 그대로"
+            b.tvPitTip.text = "3km 이상 달리면 기록돼요"
+            b.tvPitReason.text = "이번 주행 ${t.trip.km}km"
+            b.tvPitGain.text = ""
+            b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
+            b.layoutTowerRows.removeAllViews()
+            return
         }
+
+        val pit = pitBoard(t?.events ?: DemoData.lowDayEvents, t?.trip?.detailScore, demo = t == null)
+        b.tvPitTip.text = pit.tip
+        b.tvPitReason.text = pit.reason
+        b.tvPitGain.text = pit.gain
 
         val rows = DemoData.lowBoard
         val me = rows.first { it.name == "나" }
@@ -323,10 +316,14 @@ class MainActivity : AppCompatActivity() {
         val b = ViewReplayBinding.inflate(layoutInflater, binding.screenContainer, true)
         val t = realTrip
         val events: List<ReplayEvent> = t?.events ?: DemoData.lowDayEvents
+        b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
         b.tvReplayMeta.text = if (t != null) "${t.startTime} ~ ${t.endTime} · ${t.trip.km}km"
         else "${DemoData.lowDayStart} ~ ${DemoData.lowDayEnd} · ${DemoData.lowDayKm}km"
         b.routeReplayView.isBackgroundMode = false
-        b.routeReplayView.routePoints = t?.route?.let { RouteNormalizer.normalize(it) }?.ifEmpty { null } ?: DemoData.route
+        val moved = t == null || t.route.distinct().size >= 2
+        b.routeReplayView.routePoints = if (t == null) DemoData.route else RouteNormalizer.normalize(t.route)
+        b.routeReplayView.visibility = if (moved) View.VISIBLE else View.INVISIBLE
+        if (!moved) b.tvReplayMeta.text = "${t!!.startTime} ~ ${t.endTime} · ${t.trip.km}km · 위치 변화가 없어 경로를 그리지 못했어요"
         b.routeReplayView.replayEvents = events
 
         val names = mapOf("accel" to "급가속", "brake" to "급제동", "lane" to "깜빡이 없이 차선 변경")
@@ -344,6 +341,7 @@ class MainActivity : AppCompatActivity() {
             item.addView(text(names[e.kind] ?: e.kind, if (e.kind == "lane") R.color.yellow else R.color.white))
             b.layoutEventList.addView(item)
         }
+        b.tvReplayTip.text = pitBoard(events, t?.trip?.detailScore, demo = t == null).tip
         b.btnBack.setOnClickListener {
             if (realTrip != null) showResult(realTrip!!) else show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
         }
@@ -453,6 +451,24 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(dp(48), dp(36)).apply { setMargins(dp(4), 0, 0, 0) }
             setBackgroundColor(color(R.color.white))
         })
+    }
+
+    // ---------- 피트 보드: 가장 많이 나온 사건 하나만 ----------
+
+    private data class Pit(val tip: String, val reason: String, val gain: String)
+
+    private fun pitBoard(events: List<ReplayEvent>, detail: io.github.ddayoung03.safetyleague.core.model.DetailScore?, demo: Boolean): Pit {
+        val order = listOf("lane", "brake", "accel")
+        val kind = order.maxByOrNull { k -> events.count { it.kind == k } * 10 - order.indexOf(k) }
+        val n = events.count { it.kind == kind }
+        fun gain(label: String, max: Double, got: Double?, demoValue: Int) =
+            "$label +${if (demo || got == null) demoValue else (max - got).roundToInt()}점 가능"
+        return when {
+            n == 0 -> Pit("출발 전 모든 좌석 벨트 확인하기", "오늘은 큰 실수 없이 달렸어요", "")
+            kind == "lane" -> Pit("차선 바꿀 때 깜빡이부터 켜기", "오늘 깜빡이 없이 차선 변경 ${n}회", gain("매너", 25.0, detail?.manner, 9))
+            kind == "brake" -> Pit("멈출 때는 미리, 천천히 밟기", "오늘 급제동 ${n}회", gain("부드러움", 30.0, detail?.smoothness, 8))
+            else -> Pit("출발은 부드럽게", "오늘 급가속 ${n}회", gain("부드러움", 30.0, detail?.smoothness, 3))
+        }
     }
 
     // ---------- 헬퍼 ----------

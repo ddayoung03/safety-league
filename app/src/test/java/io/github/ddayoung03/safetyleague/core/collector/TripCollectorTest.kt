@@ -196,6 +196,28 @@ class TripCollectorTest {
     }
 
     @Test
+    fun jitteryAccelerationFromRealSignalsCountsOnce() {
+        // 에뮬레이터 실측: 10Hz로 들어오는 속도가 계단처럼 올라 표본 사이 가속도가 기준 위아래로 흔들린다
+        val c = collector()
+        c.depart(1_000, speed = 1f)
+        var v = 1f
+        for (i in 1..30) { v += if (i % 2 == 0) 0.45f else 0.28f; c.onSpeedChanged(v, 1_100L + i * 100) }
+        c.park(60_000, 110.0)
+        assertEquals(1, trips.single().events.count { it.kind == "accel" })
+    }
+
+    @Test
+    fun distanceFallsBackToSpeedWhenOdometerDoesNotMove() {
+        // 에뮬레이터 실측: 주행해도 오도미터가 그대로다. 그때는 속도를 시간으로 적분한다.
+        val c = collector()
+        c.depart(1_000, speed = 10f, odometer = 500.0)
+        for (s in 1..400) c.onSpeedChanged(10f, 1_100L + s * 1_000L)
+        c.onOdometerChanged(500.0, 402_000)
+        c.onGearChanged(GearState.PARK, 402_000)
+        assertEquals(4.0, trips.single().trip.km, 0.1)
+    }
+
+    @Test
     fun noTripBeforeAnyDrive() {
         val c = collector()
         c.onGearChanged(GearState.PARK, 0)

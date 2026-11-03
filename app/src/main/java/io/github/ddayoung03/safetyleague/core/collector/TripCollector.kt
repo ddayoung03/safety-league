@@ -35,6 +35,7 @@ class TripCollector(
         const val LANE_MIN_MS = 1_000L
         const val LANE_MAX_MS = 6_000L      // 이보다 길게 꺾고 있으면 회전·램프·곡선
         const val SIGNAL_GRACE_MS = 5_000L  // 깜빡이가 자동으로 꺼진 직후의 조향도 정상
+        const val ACCEL_WINDOW_MS = 500L    // 실제 속도 신호는 잘게 계단식으로 와서, 가속도는 0.5초 이상 간격으로 잰다
     }
 
     private var gear = GearState.PARK
@@ -62,6 +63,9 @@ class TripCollector(
 
     private var lastSpeed = 0f
     private var lastSpeedMs = 0L
+    private var anchorSpeed = 0f
+    private var anchorMs = 0L
+    private var integratedMeters = 0.0
     private var inHardAccel = false
     private var inHardBrake = false
 
@@ -72,7 +76,11 @@ class TripCollector(
 
     /** 이번 트립에서 지금까지 달린 거리 (주행 중 화면용) */
     val currentTripKm: Double
-        get() = if (isTracking && startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+        get() {
+            if (!isTracking) return 0.0
+            val odoKm = if (startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+            return if (odoKm > 0.0) odoKm else integratedMeters / 1000.0
+        }
 
     private val rawEvents = mutableListOf<Pair<Long, String>>()
     val route = mutableListOf<Point2D>()
@@ -84,6 +92,7 @@ class TripCollector(
         hardAccels = 0; hardBrakes = 0; laneChanges = 0; unindicatedLaneChanges = 0
         doorOpenWhileMoving = 0; unresolvedWarningSeconds = 0L; warningStartMs = 0L
         inHardAccel = false; inHardBrake = false; inManeuver = false
+        anchorSpeed = lastSpeed; anchorMs = t; integratedMeters = 0.0
         efficiency = null
         rawEvents.clear(); route.clear()
         allBeltsFastened = seatBelts.isEmpty() || seatBelts.values.all { it }
@@ -97,22 +106,29 @@ class TripCollector(
     override fun onSpeedChanged(speedMps: Float, timestampMs: Long) {
         if (!isTracking && gear != GearState.PARK && speedMps > MOVING_MPS) startTrip(timestampMs)
         if (isTracking && lastSpeedMs > 0L) {
-            val dt = (timestampMs - lastSpeedMs) / 1000.0
-            if (dt in 0.1..3.0) {
-                val accel = (speedMps - lastSpeed) / dt
-                // 임계값을 넘은 구간 하나가 사건 하나
+            // 오도미터가 안 움직이는 환경(에뮬레이터)을 위해 속도 × 시간도 쌓아 둔다
+            val gap = (timestampMs - lastSpeedMs) / 1000.0
+            if (gap in 0.0..5.0) integratedMeters += (lastSpeed + speedMps) / 2.0 * gap
+
+            val dt = (timestampMs - anchorMs) / 1000.0
+            if (dt > 3.0) {
+                anchorSpeed = speedMps; anchorMs = timestampMs
+                inHardAccel = false; inHardBrake = false
+            } else if (timestampMs - anchorMs >= ACCEL_WINDOW_MS) {
+                val accel = (speedMps - anchorSpeed) / dt
+                // 임계값을 넘은 구간 하나가 사건 하나. 기준의 절반 아래로 확실히 떨어져야 끝난 것으로 본다.
                 if (accel > HARD_ACCEL_MPS2) {
                     if (!inHardAccel) { hardAccels++; rawEvents += timestampMs to "accel" }
                     inHardAccel = true
-                } else inHardAccel = false
+                } else if (accel < HARD_ACCEL_MPS2 / 2) inHardAccel = false
                 if (accel < HARD_BRAKE_MPS2 && brakePressed) {
                     if (!inHardBrake) { hardBrakes++; rawEvents += timestampMs to "brake" }
                     inHardBrake = true
-                } else inHardBrake = false
-            } else {
-                inHardAccel = false; inHardBrake = false
+                } else if (accel > HARD_BRAKE_MPS2 / 2) inHardBrake = false
+                anchorSpeed = speedMps; anchorMs = timestampMs
             }
         }
+        if (!isTracking) { anchorSpeed = speedMps; anchorMs = timestampMs }
         lastSpeed = speedMps
         lastSpeedMs = timestampMs
     }
@@ -186,7 +202,9 @@ class TripCollector(
     private fun finishTrip(endMs: Long) {
         isTracking = false
         if (warningStartMs > 0L) closeWarning(endMs)
-        val km = if (startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+        val odoKm = if (startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+        // 오도미터가 있으면 그것을 믿고, 안 움직이면(에뮬레이터) 속도 적분값을 쓴다
+        val km = if (odoKm > 0.0) odoKm else integratedMeters / 1000.0
         val detail = ScoreCalculator.calculate(
             TripStats(
                 km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, efficiency,
@@ -200,7 +218,7 @@ class TripCollector(
         }
         onTripCompleted(
             CompletedTrip(
-                trip = Trip(date, if (eligible) detail.total else 0.0, LeagueCalculator.round1(km), detail),
+                trip = Trip(date, if (eligible) LeagueCalculator.round1(detail.total) else 0.0, LeagueCalculator.round1(km), detail),
                 events = events,
                 route = route.toList(),
                 startTime = formatTime(startTimeMs),

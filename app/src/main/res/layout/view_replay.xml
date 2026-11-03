@@ -61,6 +61,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tv_demo_note"
             android:text="다른 날의 예시"
             android:textColor="@color/grey"
             android:textSize="24sp" />
@@ -128,6 +129,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:id="@+id/tv_replay_tip"
             android:text="차선 바꿀 때 깜빡이부터 켜기"
             android:textColor="@color/asphalt"
             android:textSize="26sp" />
