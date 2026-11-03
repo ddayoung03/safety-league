@@ -44,7 +44,7 @@
         android:layout_marginTop="52dp"
         android:text="아이오닉 5 리그 · 오늘의 레이스 종료"
         android:textColor="@color/yellow"
-        android:textSize="30sp" />
+        android:textSize="26sp" />
 
     <!-- 고득점 시 불꽃 모션 (점수 뒤) -->
     <io.github.ddayoung03.safetyleague.ui.view.FlameScoreView
@@ -58,11 +58,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
-        android:layout_marginTop="105dp"
+        android:layout_marginTop="78dp"
         android:gravity="bottom"
         android:orientation="horizontal">
 
-        <TextView
+        <io.github.ddayoung03.safetyleague.ui.view.MetalTextView
             android:id="@+id/tv_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
             android:letterSpacing="-0.035"
             android:text="92"
             android:textColor="@color/white"
-            android:textSize="340sp"
+            android:textSize="300sp"
             android:fontFamily="@font/saira_condensed"
             android:textStyle="italic"
             android:shadowColor="#01000000"
@@ -84,7 +84,7 @@
             android:layout_marginStart="-20dp"
             android:text="점"
             android:textColor="@color/grey"
-            android:textSize="84sp" />
+            android:textSize="72sp" />
     </LinearLayout>
 
     <!-- 순위 상승 · 승급 라인 띠 -->
@@ -92,7 +92,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
-        android:layout_marginTop="430dp"
+        android:layout_marginTop="392dp"
         android:orientation="horizontal">
 
         <TextView
@@ -105,7 +105,7 @@
             android:paddingVertical="6dp"
             android:text="▲3"
             android:textColor="@color/white"
-            android:textSize="38sp" />
+            android:textSize="30sp" />
 
         <TextView
             android:id="@+id/tv_to_promotion"
@@ -118,7 +118,7 @@
             android:paddingVertical="6dp"
             android:text="승급 라인까지 6계단"
             android:textColor="@color/white"
-            android:textSize="38sp" />
+            android:textSize="30sp" />
     </LinearLayout>
 
     <!-- 하단 통계 -->
@@ -127,7 +127,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="64dp"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="34dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -149,7 +149,7 @@
                 android:includeFontPadding="false"
                 android:text="13일"
                 android:textColor="@color/white"
-                android:textSize="56sp"
+                android:textSize="50sp"
                 android:fontFamily="@font/saira_condensed"
                 android:textStyle="italic"
                 android:shadowColor="#01000000"
@@ -177,7 +177,7 @@
                 android:includeFontPadding="false"
                 android:text="18.4km"
                 android:textColor="@color/white"
-                android:textSize="56sp"
+                android:textSize="50sp"
                 android:fontFamily="@font/saira_condensed"
                 android:textStyle="italic"
                 android:shadowColor="#01000000"

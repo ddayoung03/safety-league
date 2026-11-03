@@ -255,7 +255,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultWin() {
         val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
-        b.root.background = AsphaltDrawable(this)
+        b.root.background = AsphaltDrawable(this, streak = true)
+        b.routeBg.isBackgroundMode = true
         b.tvScore.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             val rect = android.graphics.Rect()
             b.tvScore.getDrawingRect(rect)
