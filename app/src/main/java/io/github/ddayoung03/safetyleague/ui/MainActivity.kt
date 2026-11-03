@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
 import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
+import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
@@ -533,7 +534,11 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(if (isMe) size.meH else size.h))
                 .apply { if (isMe) setMargins(-dp(size.meOut), dp(size.meTop), 0, dp(size.meBottom)) else setMargins(0, 0, 0, dp(6)) }
             setPadding(dp(20), 0, dp(20), 0)
-            background = SkewDrawable(color(if (isMe) size.meBg else R.color.cell))
+            background = SkewDrawable(color(if (isMe) size.meBg else R.color.cell), density = resources.displayMetrics.density,
+                gradientColors = (if (isMe && size.meBg == R.color.yellow) intArrayOf(R.color.yellow_light, R.color.yellow, R.color.yellow_dark)
+                else if (isMe) intArrayOf(R.color.metal_top, R.color.white_bottom)
+                else intArrayOf(R.color.glass_top, R.color.glass_bottom)).map(::color).toIntArray())
+            elevation = dp(if (isMe) 8 else 3).toFloat()
         }
         val fg = when {
             isMe -> R.color.asphalt

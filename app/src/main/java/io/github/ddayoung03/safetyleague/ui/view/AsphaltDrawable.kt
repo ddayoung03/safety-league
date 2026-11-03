@@ -7,14 +7,19 @@ import io.github.ddayoung03.safetyleague.R
 import kotlin.random.Random
 
 /** Cached noise tile; the gradient changes only when bounds change. */
-class AsphaltDrawable(context: Context, private val subdued: Boolean = false) : Drawable() {
+class AsphaltDrawable(context: Context, private val subdued: Boolean = false, private val streak: Boolean = false) : Drawable() {
     private val base = context.getColor(R.color.asphalt_deep)
     private val colors = intArrayOf(context.getColor(R.color.asphalt_light), context.getColor(R.color.asphalt), context.getColor(R.color.asphalt_shadow))
     private val paint = Paint()
     private val noise = Paint().apply { shader = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT) }
     private var gradient: Shader? = null
+    private var beam: Shader? = null
+    private val beamColor = context.getColor(R.color.beam)
     override fun onBoundsChange(bounds: Rect) {
         if (bounds.isEmpty) return
+        beam = LinearGradient(0f, 0f, bounds.width().toFloat(), bounds.height() * .25f,
+            intArrayOf(Color.TRANSPARENT, Color.TRANSPARENT, beamColor, Color.TRANSPARENT, Color.TRANSPARENT),
+            floatArrayOf(0f, .58f, .64f, .70f, 1f), Shader.TileMode.CLAMP)
         gradient = RadialGradient(0f, 0f, 1f, colors, floatArrayOf(0f, .6f, 1f), Shader.TileMode.CLAMP).apply {
             setLocalMatrix(Matrix().apply {
                 setScale(bounds.width() * .7f, bounds.height() * .9f)
@@ -32,6 +37,11 @@ class AsphaltDrawable(context: Context, private val subdued: Boolean = false) : 
         canvas.drawRect(bounds, paint)
         noise.alpha = if (subdued) 128 else 255
         canvas.drawRect(bounds, noise)
+        if (streak) {
+            paint.shader = beam
+            paint.alpha = 255
+            canvas.drawRect(bounds, paint)
+        }
     }
     override fun setAlpha(alpha: Int) { /* Opacity is fixed by the screen design. */ }
     override fun setColorFilter(colorFilter: ColorFilter?) { paint.colorFilter = colorFilter; noise.colorFilter = colorFilter; invalidateSelf() }

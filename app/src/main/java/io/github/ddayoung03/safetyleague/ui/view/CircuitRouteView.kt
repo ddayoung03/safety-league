@@ -1,6 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
 import android.content.Context
+import io.github.ddayoung03.safetyleague.R
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
