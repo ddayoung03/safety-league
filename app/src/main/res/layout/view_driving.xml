@@ -95,7 +95,9 @@
                 android:textSize="32sp"
                 android:fontFamily="@font/saira_condensed"
                 android:textStyle="italic"
-                android:paddingEnd="4dp" />
+                android:shadowColor="#01000000"
+                android:shadowRadius="6"
+                android:paddingEnd="6dp" />
 
             <TextView
                 android:layout_width="wrap_content"

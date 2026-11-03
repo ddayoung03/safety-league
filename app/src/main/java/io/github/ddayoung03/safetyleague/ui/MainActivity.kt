@@ -484,7 +484,11 @@ class MainActivity : AppCompatActivity() {
         textSize = sizeSp
         if (number) {
             setTypeface(numberFont, Typeface.ITALIC)
-            setPadding(0, 0, dp(maxOf(4f, sizeSp * 0.12f)), 0) // 기울임 글자 오른쪽 끝 잘림 방지
+            // 기울임(글꼴을 비틀어 그림)은 오른쪽 끝이 글자 칸 밖으로 나온다(7의 윗획이 가장 많이).
+            // TextView는 패딩 안쪽으로 잘라 그리므로 여백만으로는 안 되고, 투명 그림자 반경만큼 그리는 범위를 넓힌다.
+            val overhang = dp(maxOf(4f, sizeSp * 0.2f))
+            setPadding(0, 0, overhang, 0)
+            setShadowLayer(overhang.toFloat(), 0f, 0f, Color.TRANSPARENT)
         }
     }
 
@@ -532,7 +536,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(12), dp(2), dp(12), dp(2))
             setBackgroundResource(if (tag == "추월") R.color.red else R.color.yellow)
         })
-        row.addView(text(String.format("%.1f", r.avg), fg, size.s, number = true).apply { setPadding(dp(16), 0, dp(6), 0) })
+        row.addView(text(String.format("%.1f", r.avg), fg, size.s, number = true).apply { setPadding(dp(16), 0, paddingEnd, 0) })
         if (target) row.setBackgroundResource(R.drawable.shape_target_row)
         return row
     }
