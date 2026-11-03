@@ -271,6 +271,7 @@ class MainActivity : AppCompatActivity() {
         b.tvScore.text = (t?.trip?.score ?: DemoData.trips.first { it.date == day }.score).roundToInt().toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
         b.tvStreak.text = "${if (t != null) repository.getStreak(today) else DemoData.streakAt(day)}일"
+        b.tvRadioMessage.text = if (t == null) "멋진 레이스였어요!\n오늘 ${before - me}계단 올라섰어요" else "안전하게 완주했어요!\n다음 레이스도 함께해요"
         b.tvRankChange.text = "▲${before - me}"
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
@@ -293,7 +294,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultLow() {
         val b = ViewResultLowBinding.inflate(layoutInflater, binding.screenContainer, true)
-        b.root.background = AsphaltDrawable(this)
+        b.root.background = AsphaltDrawable(this, streak = true)
+        b.tvScore.dull = true
+        b.routeBg.isBackgroundMode = true
         val t = realTrip
         b.kerbTop.isMuted = true
         b.kerbBottom.isMuted = true
@@ -307,6 +310,7 @@ class MainActivity : AppCompatActivity() {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
             b.tvScore.text = "–"
             b.tvStreakChange.text = "${streakBefore}일 그대로"
+            b.tvPitWord.text = "다음에!"
             b.tvPitTip.text = "3km 이상 달리면 기록돼요"
             b.tvPitReason.text = "이번 주행 ${t.trip.km}km"
             b.tvPitGain.text = ""
@@ -316,6 +320,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pit = pitBoard(t?.events ?: DemoData.lowDayEvents, t?.trip?.detailScore, demo = t == null)
+        b.tvPitWord.text = when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
         b.tvPitTip.text = pit.tip
         b.tvPitReason.text = pit.reason
         b.tvPitGain.text = pit.gain
