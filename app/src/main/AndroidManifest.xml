@@ -20,6 +20,11 @@
     <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
     <uses-permission android:name="android.car.permission.CAR_INFO" />
 
+    <!-- Optional read-only ambient signals. Unsupported permissions degrade to unknown. -->
+    <uses-permission android:name="android.car.permission.CAR_EXTERIOR_ENVIRONMENT" />
+    <uses-permission android:name="android.car.permission.READ_CAR_EXTERIOR_LIGHTS" />
+    <uses-permission android:name="android.car.permission.READ_WINDSHIELD_WIPERS" />
+
     <!-- Pleos Connect Vehicle SDK Permissions -->
     <!-- 이름은 Vehicle SDK 2.3.2 클래스 안의 권한 문자열과 대조함 -->
     <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
@@ -29,6 +34,7 @@
     <uses-permission android:name="pleos.car.permission.PRIVATE_CAR_SAFETY" />
     <uses-permission android:name="pleos.car.permission.CAR_SEATS" />
     <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
+    <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
     <uses-permission android:name="pleos.car.permission.CAR_ENERGY" />
     <uses-permission android:name="pleos.car.permission.CAR_INFO" />
 

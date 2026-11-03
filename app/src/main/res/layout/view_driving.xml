@@ -4,6 +4,10 @@
     android:layout_height="match_parent"
     android:background="@color/asphalt_deep">
 
+    <io.github.ddayoung03.safetyleague.ui.view.WeatherAmbientView
+        android:id="@+id/weather_ambient" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
     <ImageView
         android:layout_width="480dp"
         android:layout_height="176dp"

@@ -45,6 +45,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewReportBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewResultLowBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewResultWinBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
+import io.github.ddayoung03.safetyleague.weather.*
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -72,13 +73,24 @@ class MainActivity : AppCompatActivity() {
     /** 결과 카드와 리플레이가 보여 줄 실제 트립 (없으면 시연 데이터) */
     private var shownTrip: CompletedTrip? = null
     private var drivingKmShown = -1
+    private var drivingBinding: ViewDrivingBinding? = null
+    private var weatherSignals = WeatherSignals()
+    private val weatherGate = WeatherTransitionGate()
+    private var displayedWeather: Weather? = null
+    private var demoWeather = Weather.SUN
+    private val weatherSource by lazy {
+        VehicleWeatherSource(this) { signals ->
+            runOnUiThread { weatherSignals = signals; updateWeather() }
+        }
+    }
 
     private val handler = Handler(Looper.getMainLooper())
     private val drivingTick = object : Runnable {
         override fun run() {
             if (screen == Screen.DRIVING) {
                 val km = service?.currentTripKm?.toInt() ?: 0
-                if (km != drivingKmShown) showDriving() // 1km 단위로만 다시 그린다
+                if (km != drivingKmShown) updateDrivingProgress() // keep weather phase and transition gate
+                updateWeather()
                 handler.postDelayed(this, 5_000)
             }
         }
@@ -125,9 +137,24 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         bindService(Intent(this, TripTrackingService::class.java), connection, Context.BIND_AUTO_CREATE)
         connectUxRestrictions()
+        weatherSource.start()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (screen == Screen.DRIVING) {
+            handler.removeCallbacks(drivingTick)
+            handler.postDelayed(drivingTick, 5_000)
+        }
+    }
+
+    override fun onPause() {
+        handler.removeCallbacks(drivingTick)
+        super.onPause()
     }
 
     override fun onStop() {
+        weatherSource.stop()
         service?.onResult = null
         runCatching { unbindService(connection) }
         service = null
@@ -194,6 +221,11 @@ class MainActivity : AppCompatActivity() {
         binding.tabLeague.setOnClickListener { show(Screen.LEAGUE) }
         binding.tabReport.setOnClickListener { show(Screen.REPORT) }
         binding.tabDriving.setOnClickListener { show(Screen.DRIVING) }
+        binding.btnWeather.setOnClickListener {
+            if (restricted) return@setOnClickListener
+            demoWeather = Weather.entries[(demoWeather.ordinal + 1) % Weather.entries.size]
+            binding.btnWeather.text = "날씨: ${demoWeather.label}"
+        }
         binding.btnSimWin.setOnClickListener { runDemo(true) }
         binding.btnSimLow.setOnClickListener { runDemo(false) }
     }
@@ -206,7 +238,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateSdkStatus() {
-        val problems = service?.sdkProblems.orEmpty()
+        val problems = service?.sdkProblems.orEmpty() + weatherSource.problems
         binding.tvSdkStatus.visibility = if (demoMode && problems.isNotEmpty()) View.VISIBLE else View.GONE
         binding.tvSdkStatus.text = "차량 신호 연결 문제\n" + problems.joinToString("\n")
     }
@@ -228,6 +260,10 @@ class MainActivity : AppCompatActivity() {
     private fun show(target: Screen) {
         if (restricted && target != Screen.DRIVING) return
         screen = target
+        drivingBinding = null
+        displayedWeather = null
+        if (target == Screen.DRIVING) binding.demoBar.visibility = View.GONE
+        binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
         binding.screenContainer.removeAllViews()
         when (target) {
@@ -474,7 +510,27 @@ class MainActivity : AppCompatActivity() {
     private fun showDriving() {
         binding.screenContainer.removeAllViews()
         val b = ViewDrivingBinding.inflate(layoutInflater, binding.screenContainer, true)
+        drivingBinding = b
         b.root.background = AsphaltDrawable(this, subdued = true)
+        updateDrivingProgress()
+        updateWeather()
+    }
+
+    private fun updateWeather() {
+        val b = drivingBinding ?: return
+        // System night appearance is a fallback when lighting data is absent; no invented sunset time.
+        val night = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val weather = if (demoMode && !restricted) demoWeather else inferWeather(weatherSignals, night)
+        val changed = displayedWeather != null && displayedWeather != weather
+        val transition = changed && weatherGate.allow(android.os.SystemClock.uptimeMillis())
+        displayedWeather = weather
+        b.tvWeatherStatus.text = "주행 기록 중 · ${weather.label}"
+        b.weatherAmbient.setState(weather, isAmbientMotionAllowed(weatherSignals.speedMps, weatherSignals.gear), transition)
+    }
+
+    private fun updateDrivingProgress() {
+        val b = drivingBinding ?: return
         val s = service
         val real = s?.isTracking == true && demoResultWin == null
         val doneKm = if (real) s!!.currentTripKm else 11.2
