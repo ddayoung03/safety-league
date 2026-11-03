@@ -17,4 +17,6 @@
     <color name="colorSurface">#2E3238</color>
     <color name="colorOnSurface">#F2F1EC</color>
     <color name="icon_background">#24272C</color>
+    <color name="asphalt_light">#30343B</color>
+    <color name="asphalt_shadow">#1B1E22</color>
 </resources>

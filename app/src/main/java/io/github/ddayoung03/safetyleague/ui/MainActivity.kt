@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
+import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
@@ -252,6 +253,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultWin() {
         val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val day = "2026-11-07"
         val t = realTrip
         val me = DemoData.ranks.getValue(day)
@@ -281,6 +283,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultLow() {
         val b = ViewResultLowBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val t = realTrip
         b.kerbTop.isMuted = true
         b.kerbBottom.isMuted = true
@@ -325,6 +328,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showReplay() {
         val b = ViewReplayBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val t = realTrip
         val events: List<ReplayEvent> = t?.events ?: DemoData.lowDayEvents
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
@@ -362,6 +366,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val day = "2026-11-09"
         val l = DemoData.league
         val me = DemoData.ranks.getValue(day)
@@ -394,6 +399,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showReport() {
         val b = ViewReportBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val from = LocalDate.parse("2026-11-03")
         val week = (0..6).map { from.plusDays(it.toLong()).toString() }
         val names = listOf("월", "화", "수", "목", "금", "토", "일")
@@ -441,6 +447,7 @@ class MainActivity : AppCompatActivity() {
     private fun showDriving() {
         binding.screenContainer.removeAllViews()
         val b = ViewDrivingBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this, subdued = true)
         val s = service
         val real = s?.isTracking == true && demoResultWin == null
         val doneKm = if (real) s!!.currentTripKm else 11.2

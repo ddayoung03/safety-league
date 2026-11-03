@@ -267,3 +267,8 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 ## 2026-11-03 Codex polish — 2. 체커기 띠
 - 이긴 날 오른쪽에 폭 150dp, 오른쪽 90dp 넘침, 중심 기준 -14° 기울임, 40dp 체커, alpha 0.85 적용. 화면 가장자리에서 잘리며 다른 화면에는 표시하지 않음.
 - 검증: `testDebugUnitTest assembleDebug` 성공. Pleos_Connect cold boot 부팅 확인.
+
+## 2026-11-03 Codex polish — 3. 아스팔트 배경
+- 결과 2장·리플레이·리그·리포트에 타원형 방사 조명과 240×240 고정 노이즈 타일 반복 적용. 타일은 최초 한 번 생성하고 재사용하며 프레임마다 생성하지 않음.
+- 주행 중은 기존 바탕 위 조명·노이즈 강도를 0.5로 낮춤. 조명 색상은 colors.xml 토큰 추가.
+- 검증: `testDebugUnitTest assembleDebug` 성공. 다음 항목의 미구현 테스트가 먼저 포함되어 실패한 실행은 분리 후 재검증.
