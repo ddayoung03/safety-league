@@ -94,7 +94,8 @@
                 android:textColor="@color/white"
                 android:textSize="32sp"
                 android:fontFamily="@font/saira_condensed"
-                android:textStyle="italic" />
+                android:textStyle="italic"
+                android:paddingEnd="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"

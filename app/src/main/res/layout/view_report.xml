@@ -77,12 +77,13 @@
                 android:includeFontPadding="false"
                 android:letterSpacing="-0.03"
                 android:fontFamily="@font/saira_condensed"
-                android:textStyle="italic" />
+                android:textStyle="italic"
+                android:paddingEnd="18dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
+                android:layout_marginStart="0dp"
                 android:background="@color/yellow"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="6dp"

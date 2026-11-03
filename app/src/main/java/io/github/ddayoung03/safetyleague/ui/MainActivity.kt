@@ -482,7 +482,10 @@ class MainActivity : AppCompatActivity() {
         text = s
         setTextColor(color(colorId))
         textSize = sizeSp
-        if (number) setTypeface(numberFont, Typeface.ITALIC)
+        if (number) {
+            setTypeface(numberFont, Typeface.ITALIC)
+            setPadding(0, 0, dp(maxOf(4f, sizeSp * 0.12f)), 0) // 기울임 글자 오른쪽 끝 잘림 방지
+        }
     }
 
     private fun note(s: String) = text(s, R.color.yellow).apply { setPadding(dp(12), dp(4), 0, dp(10)) }
