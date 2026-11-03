@@ -5,26 +5,28 @@
 <title>주간 리포트</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-  .head { position: absolute; left: 64px; top: 40px; font-size: 34px; }
-  .head span { color: var(--grey); font-size: 24px; margin-left: 16px; }
-  .sc { position: absolute; left: 64px; top: 118px; }
+  .head { position: absolute; left: 64px; top: 36px; font-size: 34px; font-weight: 800; }
+  .head span { color: var(--grey); font-size: 24px; margin-left: 16px; font-weight: 700; }
+  .sc { position: absolute; left: 64px; top: 112px; }
   .sc .k { font-size: 24px; color: var(--grey); }
-  .sc .big { font-size: 150px; line-height: .9; letter-spacing: -4px; }
-  .sc .chg { display: inline-block; margin-left: 18px; vertical-align: 28px; background: var(--yellow); color: var(--asphalt); font-size: 30px; padding: 6px 18px; }
+  .sc .big { font-size: 150px; line-height: .9; letter-spacing: -3px; }
+  .sc .chg { display: inline-block; margin-left: 18px; vertical-align: 30px; color: var(--asphalt-deep); font-size: 30px; font-weight: 800; padding: 6px 18px;
+    background-color: var(--yellow); background-image: linear-gradient(180deg, #FFD65C, var(--yellow)); box-shadow: 0 10px 24px rgba(255, 197, 46, .3); }
   .sc .last { font-size: 24px; color: var(--grey); margin-top: 6px; }
-  .bars { position: absolute; left: 64px; top: 380px; width: 520px; height: 190px; display: flex; align-items: flex-end; gap: 14px; border-bottom: 2px solid #3A3E45; }
+  .bars { position: absolute; left: 64px; top: 356px; width: 520px; height: 196px; display: flex; align-items: flex-end; gap: 14px; border-bottom: 2px solid #3A3E45; }
   .bars div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-  .bars b { font-weight: 400; font-size: 24px; }
-  .bars i { display: block; width: 100%; background: #4A4F57; transform: skewX(-8deg); }
-  .bars i.hi { background: var(--yellow); }
+  .bars b { font-size: 26px; }
+  .bars i { display: block; width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #5A6069, #3E434B); transform: skewX(-8deg); }
+  .bars i.hi { background: linear-gradient(180deg, #FFD65C, var(--yellow) 55%, #D9A21A); box-shadow: 0 0 22px rgba(255, 197, 46, .35); }
+  .bars b.rt { font-size: 24px; color: var(--grey); }
   .bars i.rest { background: none; border: 2px dashed #3A3E45; border-bottom: none; height: 24px; }
-  .days { position: absolute; left: 64px; top: 582px; width: 520px; display: flex; gap: 14px; }
+  .days { position: absolute; left: 64px; top: 562px; width: 520px; display: flex; gap: 14px; }
   .days span { flex: 1; text-align: center; font-size: 24px; color: var(--grey); }
-  .pos { position: absolute; right: 64px; top: 118px; width: 560px; }
+  .pos { position: absolute; right: 64px; top: 104px; width: 560px; padding: 18px 0 0; }
   .pos .k { font-size: 24px; color: var(--grey); display: flex; justify-content: space-between; }
-  .pos .k b { font-weight: 400; color: var(--yellow); }
+  .pos .k b { color: var(--yellow); }
   .pos svg { display: block; margin-top: 12px; }
-  .pit { position: absolute; left: 64px; right: 64px; bottom: 36px; display: flex; align-items: center; gap: 20px; background: var(--cell); padding: 16px 24px; }
+  .pit { position: absolute; left: 64px; right: 64px; bottom: 30px; display: flex; align-items: center; gap: 18px; padding: 10px 24px 10px 14px; border-radius: 12px; }
   .pit .h { color: var(--yellow); font-size: 24px; white-space: nowrap; }
   .pit .m { font-size: 26px; }
 </style>
@@ -35,7 +37,7 @@
 <div class="head">11월 2주차 리포트<span data-bind="range"></span></div>
 <div class="sc">
   <div class="k">이번 주 평균 점수</div>
-  <div><span class="big num" data-bind="avg"></span><span class="chg skew"><span class="unskew" data-bind="chg"></span></span></div>
+  <div><span class="big num metal" data-bind="avg"></span><span class="chg skew"><span class="unskew" data-bind="chg"></span></span></div>
   <div class="last" data-bind="last"></div>
 </div>
 <div class="bars" id="bars" aria-hidden="true"></div>
@@ -44,7 +46,7 @@
   <div class="k"><span>순위 변동 · 골드 리그</span><b data-bind="move"></b></div>
   <svg id="chart" width="560" height="400" viewBox="0 0 560 400" role="img" aria-label="요일별 순위 변화"></svg>
 </div>
-<div class="pit skew"><span class="unskew h">다음 주 작전</span><span class="unskew m" data-bind="next"></span></div>
+<div class="pit glass"><span class="face" aria-hidden="true"></span><span class="h">다음 주 작전</span><span class="m" data-bind="next"></span></div>
 
 <script src="demo-data.js"></script>
 <script src="page.js"></script>
@@ -74,8 +76,8 @@
   const best = Math.max(...days.filter(d => d.score).map(d => d.score));
   document.getElementById('bars').innerHTML = days.map(d => d.score
     ? `<div><b class="num">${d.score}</b><i class="${d.score === best ? 'hi' : ''}" style="height:${Math.round((d.score - 60) / 40 * 170)}px"></i></div>`
-    : '<div><i class="rest"></i></div>').join('');
-  document.getElementById('days').innerHTML = days.map(d => `<span>${d.n}${d.score ? '' : ' 휴식'}</span>`).join('');
+    : '<div><b class="rt">휴식</b><i class="rest"></i></div>').join('');
+  document.getElementById('days').innerHTML = days.map(d => `<span>${d.n}</span>`).join('');
 
   // 포지션 차트: 위가 승급 라인, 가장 많이 오른 날 강조
   const lo = line, hi = Math.max(...days.map(d => d.rank));

@@ -5,32 +5,34 @@
 <title>리그 순위</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-  .head { position: absolute; left: 64px; right: 64px; top: 40px; display: flex; justify-content: space-between; align-items: center; }
-  .head .t { font-size: 34px; }
-  .head .t .sub { color: var(--grey); font-size: 24px; margin-left: 16px; }
+  .head { position: absolute; left: 64px; right: 64px; top: 34px; display: flex; justify-content: space-between; align-items: center; }
+  .head .t { font-size: 34px; font-weight: 800; }
+  .head .t .sub { color: var(--grey); font-size: 24px; margin-left: 16px; font-weight: 700; }
   .tabs { display: flex; gap: 8px; }
-  .tabs b { font-weight: 400; font-size: 24px; padding: 12px 22px; background: var(--cell); color: var(--grey); }
-  .tabs b.on { background: var(--white); color: var(--asphalt); }
-  .mine { position: absolute; left: 64px; top: 128px; width: 500px; }
+  .tabs b { font-weight: 700; font-size: 24px; padding: 12px 24px; background: var(--glass); border: 1px solid var(--line); color: var(--grey); }
+  .tabs b.on { background-color: var(--white); background-image: linear-gradient(180deg, #FFFFFF, #E4E2DB); color: var(--asphalt-deep); border: 0; }
+  .mine { position: absolute; left: 64px; top: 124px; width: 520px; }
   .mine .k { font-size: 24px; color: var(--grey); }
-  .mine .big { font-size: 200px; line-height: .85; letter-spacing: -6px; margin-top: 6px; }
-  .mine .line { display: inline-block; margin-top: 14px; background: var(--yellow); color: var(--asphalt); font-size: 28px; padding: 8px 20px; }
-  .tiers { display: flex; gap: 6px; margin-top: 28px; }
-  .tiers i { font-style: normal; flex: 1; text-align: center; font-size: 24px; padding: 8px 0; background: var(--cell); color: var(--grey); }
-  .tiers i.on { background: var(--gold); color: var(--asphalt); }
-  .gain { position: absolute; left: 64px; bottom: 44px; width: 500px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .gain div { background: var(--cell); padding: 16px 18px 18px; font-size: 24px; color: var(--grey); line-height: 1.3; }
-  .gain b { display: block; font-weight: 400; font-size: 46px; color: var(--white); line-height: 1.05; margin-bottom: 4px; }
+  .mine .big { font-size: 200px; line-height: .85; letter-spacing: -4px; margin-top: 6px; }
+  .mine .line { display: inline-block; margin-top: 12px; color: var(--asphalt-deep); font-size: 28px; font-weight: 800; padding: 8px 22px;
+    background-color: var(--yellow); background-image: linear-gradient(180deg, #FFD65C, var(--yellow)); box-shadow: 0 10px 24px rgba(255, 197, 46, .3); }
+  .tiers { display: flex; gap: 6px; margin-top: 26px; }
+  .tiers i { font-style: normal; flex: 1; text-align: center; font-size: 24px; padding: 9px 0; background: var(--glass); border: 1px solid var(--line); color: var(--grey); }
+  .tiers i.on { background-color: var(--gold); background-image: linear-gradient(180deg, #F7D27A, var(--gold) 55%, #B9862A); color: var(--asphalt-deep);
+    border: 0; box-shadow: 0 8px 22px rgba(227, 178, 74, .45), inset 0 1px 0 rgba(255, 255, 255, .7); }
+  .gain { position: absolute; left: 64px; bottom: 40px; width: 520px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gain div { padding: 16px 18px 18px; font-size: 24px; color: var(--grey); line-height: 1.3; border-radius: 12px; }
+  .gain b { display: block; font-size: 46px; color: var(--white); line-height: 1.05; margin-bottom: 4px; }
   .gain .team b { color: var(--yellow); }
   .tower { position: absolute; right: 64px; top: 112px; width: 560px; }
-  .tower h4 { margin: 0 0 10px; font-weight: 400; font-size: 24px; color: var(--grey); display: flex; justify-content: space-between; padding: 0 20px; }
+  .tower h4 { margin: 0 0 10px; font-weight: 700; font-size: 24px; color: var(--grey); display: flex; justify-content: space-between; padding: 0 20px; }
   .tower .row { grid-template-columns: 100px minmax(0, 1fr) 90px; height: 50px; margin-bottom: 5px; }
   .tower .row .p { font-size: 32px; }
   .tower .row .n { font-size: 24px; }
   .tower .row .s { font-size: 28px; }
   .tower .row.top1 .p { color: var(--gold); }
   .tower .row.me { height: 62px; margin: 6px 0 6px -24px; }
-  .dots { text-align: center; color: #9BA1A8; font-size: 24px; line-height: 26px; }
+  .dots { text-align: center; color: var(--grey); font-size: 24px; line-height: 26px; }
   .zone { display: flex; align-items: center; gap: 14px; height: 30px; margin: 2px 0 6px; --c: var(--yellow); }
   .zone::before, .zone::after { content: ''; flex: 1; border-top: 3px dashed var(--c); }
   .zone span { color: var(--yellow); font-size: 24px; white-space: nowrap; }
@@ -48,14 +50,14 @@
 
 <div class="mine">
   <div class="k">내 순위 · <span data-bind="tier"></span> 리그 <span data-bind="total"></span>명 중</div>
-  <div class="big num" data-bind="rank"></div>
+  <div class="big num metal" data-bind="rank"></div>
   <div class="line skew"><span class="unskew" data-bind="toLine"></span></div>
   <div class="tiers"><i class="skew">브론즈</i><i class="skew">실버</i><i class="skew on">골드</i><i class="skew">플래티넘</i><i class="skew">다이아</i></div>
 </div>
 
 <div class="gain">
-  <div>내가 아낀 돈<b class="num">₩8,400</b>이번 달</div>
-  <div class="team">리그가 줄인 급제동<b class="num">3,120회</b>이번 주, 12% 감소</div>
+  <div class="glass">내가 아낀 돈<b class="num">₩8,400</b>이번 달</div>
+  <div class="team glass">리그가 줄인 급제동<b class="num">3,120회</b>이번 주, 12% 감소</div>
 </div>
 
 <div class="tower">

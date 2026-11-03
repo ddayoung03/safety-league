@@ -7,19 +7,19 @@
 <style>
   body { background: var(--asphalt-deep); color: #C9CDD2; }
   .rec { position: absolute; left: 80px; top: 64px; display: flex; align-items: center; gap: 14px; font-size: 26px; color: var(--grey); }
-  .rec i { width: 16px; height: 16px; border-radius: 50%; background: var(--yellow); }
-  h1 { position: absolute; left: 80px; top: 180px; margin: 0; font-weight: 400; font-size: 84px; color: var(--white); line-height: 1.1; }
-  .sub { position: absolute; left: 84px; top: 290px; font-size: 30px; color: #9BA1A8; }
-  .sil { position: absolute; right: 70px; top: 318px; width: 480px; height: 176px; opacity: .18; }
+  .rec i { width: 16px; height: 16px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 12px rgba(255, 197, 46, .8); }
+  h1 { position: absolute; left: 80px; top: 176px; margin: 0; font-weight: 900; font-size: 84px; color: var(--white); line-height: 1.1; letter-spacing: -.02em; }
+  .sub { position: absolute; left: 84px; top: 290px; font-size: 30px; color: var(--grey); }
+  .sil { position: absolute; right: 70px; top: 300px; width: 480px; height: 176px; opacity: .16; }
   .wrap { position: absolute; left: 80px; right: 80px; bottom: 150px; height: 44px; }
   .track { position: absolute; inset: 0; display: flex; gap: 6px; }
-  .track span { flex: 1; background: #2B2F35; }
-  .track span.on { background: var(--yellow); opacity: .8; }
-  .track span.flag { flex: 0 0 60px; background: repeating-conic-gradient(#9BA1A8 0 25%, #2B2F35 0 50%) 0 0/22px 22px; }
-  .qlabel { position: absolute; top: -44px; left: 0; border-bottom: 3px solid #5C5A4E; font-size: 24px; color: #9BA1A8; padding-bottom: 6px; white-space: nowrap; }
-  .car { position: absolute; top: -34px; }
-  .meta { position: absolute; left: 80px; right: 80px; bottom: 72px; display: flex; justify-content: space-between; font-size: 26px; color: #9BA1A8; }
-  .meta b { font-size: 40px; color: var(--white); margin-right: 8px; }
+  .track span { flex: 1; background: linear-gradient(180deg, #30343B, #262A30); border-top: 1px solid rgba(255, 255, 255, .06); }
+  .track span.on { background: linear-gradient(180deg, #FFD65C, var(--yellow) 60%, #D9A21A); opacity: .85; box-shadow: 0 0 14px rgba(255, 197, 46, .25); }
+  .track span.flag { flex: 0 0 60px; background: repeating-conic-gradient(#C9CDD2 0 25%, #2B2F35 0 50%) 0 0/22px 22px; }
+  .qlabel { position: absolute; top: -46px; left: 0; border-bottom: 3px solid #6B6750; font-size: 24px; color: var(--grey); padding-bottom: 6px; white-space: nowrap; }
+  .car { position: absolute; top: -36px; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .5)); }
+  .meta { position: absolute; left: 80px; right: 80px; bottom: 72px; display: flex; justify-content: space-between; font-size: 26px; color: var(--grey); }
+  .meta b { font-size: 42px; color: var(--white); margin-right: 8px; }
   .meta .streak { color: var(--yellow); }
 </style>
 </head>
@@ -43,13 +43,13 @@
 <div class="wrap">
   <div class="qlabel">3km부터 기록 인정</div>
   <div class="track skew" id="track" aria-hidden="true"></div>
-  <svg class="car" width="64" height="30" viewBox="0 0 64 30" aria-hidden="true">
-    <rect x="4" y="8" width="54" height="14" rx="7" fill="#F2F1EC"/>
-    <path d="M18 8l6-6h14l7 6z" fill="#F2F1EC"/>
-    <rect x="24" y="4" width="12" height="5" fill="#1E2125"/>
+  <svg class="car" width="70" height="32" viewBox="0 0 64 30" aria-hidden="true">
+    <defs><linearGradient id="cb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#E4E2DB"/><stop offset="1" stop-color="#A9A7A0"/></linearGradient></defs>
+    <path d="M4 20c0-5 3-9 9-10l8-1 6-6h14l8 6 9 2c3 1 4 4 4 7v2H4z" fill="url(#cb)"/>
+    <path d="M24 9l5-4h7v4zM38 5h3l5 4h-8z" fill="#1E2125"/>
     <circle cx="16" cy="23" r="5" fill="#1E2125" stroke="#F2F1EC" stroke-width="2.5"/>
-    <circle cx="46" cy="23" r="5" fill="#1E2125" stroke="#F2F1EC" stroke-width="2.5"/>
-    <rect x="54" y="11" width="6" height="4" rx="2" fill="#FFC52E"/>
+    <circle cx="48" cy="23" r="5" fill="#1E2125" stroke="#F2F1EC" stroke-width="2.5"/>
+    <rect x="56" y="13" width="6" height="3" rx="1.5" fill="#FFC52E"/>
   </svg>
 </div>
 <div class="meta">
