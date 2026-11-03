@@ -462,7 +462,7 @@ class MainActivity : AppCompatActivity() {
             col.addView(View(this).apply {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     if (s == null) dp(4) else dp(((s - 60) / 40f * 150).roundToInt().coerceIn(16, 150)))
-                setBackgroundColor(when { s == null -> Color.parseColor("#3A3E45"); s == best -> color(R.color.yellow); else -> Color.parseColor("#4A4F57") })
+                setBackgroundColor(when { s == null -> color(R.color.bar_rest); s == best -> color(R.color.yellow); else -> color(R.color.bar_normal) })
             })
             col.addView(text(day, R.color.grey).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
             b.layoutScoreBars.addView(col)

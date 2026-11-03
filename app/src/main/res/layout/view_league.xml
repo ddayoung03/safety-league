@@ -112,7 +112,7 @@
             android:textColor="@color/grey"
             android:textSize="24sp" />
 
-        <TextView
+        <io.github.ddayoung03.safetyleague.ui.view.MetalTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tv_big_rank"
