@@ -25,6 +25,6 @@ class MetalTextView @JvmOverloads constructor(context: Context, attrs: Attribute
         val top = baseline + paint.fontMetrics.ascent
         paint.shader = LinearGradient(0f, top, 0f, baseline.toFloat(), ids.map(context::getColor).toIntArray(),
             floatArrayOf(0f, .46f, .52f, 1f), Shader.TileMode.CLAMP)
-        setShadowLayer(12 * resources.displayMetrics.density, 0f, 8 * resources.displayMetrics.density, context.getColor(R.color.shadow))
+        setShadowLayer(maxOf(12 * resources.displayMetrics.density, textSize * .2f), 0f, 8 * resources.displayMetrics.density, context.getColor(R.color.shadow))
     }
 }

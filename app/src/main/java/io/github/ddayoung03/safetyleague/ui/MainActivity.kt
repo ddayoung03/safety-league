@@ -481,8 +481,7 @@ class MainActivity : AppCompatActivity() {
         val destKm: Double? = if (real) null else DemoData.trips.first { it.date == "2026-11-07" }.km // 내비 목적지가 없으면 null
         drivingKmShown = doneKm.toInt()
         b.tvProgress.text = if (destKm != null) "${LeagueCalculator.round1(doneKm)} / ${destKm}km · 해운대까지" else "${LeagueCalculator.round1(doneKm)}km 기록됨"
-        val streak = if (real) s!!.streakBeforeToday else DemoData.streakAt("2026-11-06")
-        b.tvGoal.text = "70점 넘기면 연속 ${streak + 1}일째"
+        b.tvGoal.text = "안전하게, 다음 한 칸까지"
 
         b.layoutTrackBar.state = DrivingTrackState.from(doneKm, destKm)
     }
