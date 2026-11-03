@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "ai.pleos.safetyleague"
+    namespace = "io.github.ddayoung03.safetyleague"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ai.pleos.safetyleague"
+        applicationId = "io.github.ddayoung03.safetyleague"
         minSdk = 28
         targetSdk = 34
         versionCode = 1

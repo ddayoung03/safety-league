@@ -5,7 +5,7 @@
     android:background="@color/asphalt">
 
     <!-- 상단 회색 연석 띠 -->
-    <ai.pleos.safetyleague.ui.view.KerbView
+    <io.github.ddayoung03.safetyleague.ui.view.KerbView
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:layout_gravity="top"
@@ -67,7 +67,7 @@
     </LinearLayout>
 
     <!-- 왼쪽 대형 서킷 뷰 -->
-    <ai.pleos.safetyleague.ui.view.CircuitRouteView
+    <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
         android:id="@+id/route_replay_view"
         android:layout_width="720dp"
         android:layout_height="480dp"

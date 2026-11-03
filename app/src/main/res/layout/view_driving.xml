@@ -5,7 +5,7 @@
     android:background="@color/asphalt_deep">
 
     <!-- 현재 날씨 앰비언트 모션 레이어 (맑음, 비, 눈) -->
-    <ai.pleos.safetyleague.ui.view.WeatherAmbientView
+    <io.github.ddayoung03.safetyleague.ui.view.WeatherAmbientView
         android:id="@+id/weather_ambient_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

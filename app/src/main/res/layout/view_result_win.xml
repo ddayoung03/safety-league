@@ -5,21 +5,21 @@
     android:background="@color/asphalt">
 
     <!-- 상단 얇은 연석 띠 -->
-    <ai.pleos.safetyleague.ui.view.KerbView
+    <io.github.ddayoung03.safetyleague.ui.view.KerbView
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:layout_gravity="top"
         android:alpha="0.5" />
 
     <!-- 하단 서킷 연석 띠 -->
-    <ai.pleos.safetyleague.ui.view.KerbView
+    <io.github.ddayoung03.safetyleague.ui.view.KerbView
         android:layout_width="match_parent"
         android:layout_height="18dp"
         android:layout_gravity="bottom"
         android:alpha="0.9" />
 
     <!-- 주행 경로 배경 흐림 -->
-    <ai.pleos.safetyleague.ui.view.CircuitRouteView
+    <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
         android:id="@+id/route_bg"
         android:layout_width="720dp"
         android:layout_height="432dp"
@@ -52,7 +52,7 @@
             android:layout_marginTop="16dp">
 
             <!-- 고득점 시 불타는 모션 뷰 -->
-            <ai.pleos.safetyleague.ui.view.FlameScoreView
+            <io.github.ddayoung03.safetyleague.ui.view.FlameScoreView
                 android:id="@+id/flame_score_view"
                 android:layout_width="480dp"
                 android:layout_height="280dp"
