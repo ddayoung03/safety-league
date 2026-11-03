@@ -7,9 +7,9 @@
         <item name="android:windowBackground">@color/asphalt</item>
         <item name="android:statusBarColor">@color/asphalt_deep</item>
         <item name="android:navigationBarColor">@color/asphalt_deep</item>
-        <!-- 시안 글꼴: 한글 Black Han Sans, 숫자는 NumberText 스타일의 Saira Condensed -->
-        <item name="android:fontFamily">@font/black_han_sans</item>
-        <item name="fontFamily">@font/black_han_sans</item>
+        <!-- 시안 글꼴: 한글 Pretendard 700, 숫자는 NumberText 스타일의 Saira Condensed -->
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="fontFamily">@font/pretendard_bold</item>
     </style>
 
     <!-- 숫자(점수·순위·km): Saira Condensed 800, 기울임 -->

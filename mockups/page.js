@@ -5,7 +5,7 @@
 function finishPage() {
   document.fonts.ready.then(() => {
     const ok = f => document.fonts.check(`800 40px "${f}"`) && [...document.fonts].some(x => x.family.replace(/"/g, '') === f && x.status === 'loaded');
-    document.body.dataset.fonts = ok('Black Han Sans') && ok('Saira Condensed') ? 'loaded' : 'missing';
+    document.body.dataset.fonts = ok('Pretendard') && ok('Saira Condensed') ? 'loaded' : 'missing';
 
     // 글꼴마다 글자 폭이 달라서, 실제 글꼴로 그려진 뒤에 재야 한다.
     const bad = [...document.body.querySelectorAll('*')].find(el => {
@@ -32,7 +32,8 @@ function drawRoute(svg, opts = {}) {
   const pts = DEMO.route.map(([x, y]) => [x * 10, y * 10]);
   const d = 'M' + pts.map(p => p.join(' ')).join(' L');
   const [sx, sy] = pts[0], [fx, fy] = pts[pts.length - 1];
-  let s = `<path d="${d}" stroke="#F2F1EC" stroke-opacity="${opts.road || .07}" stroke-width="${opts.width || 34}" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
+  let s = `<path d="${d}" stroke="#000" stroke-opacity=".35" stroke-width="${(opts.width || 34) + 10}" stroke-linejoin="round" stroke-linecap="round" fill="none" transform="translate(0 8)"/>`
+    + `<path d="${d}" stroke="#F2F1EC" stroke-opacity="${opts.road || .07}" stroke-width="${opts.width || 34}" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
     + `<path d="${d}" stroke="#FFC52E" stroke-opacity="${opts.line || .25}" stroke-width="3" stroke-dasharray="2 14" fill="none"/>`
     + `<circle cx="${sx}" cy="${sy}" r="12" fill="#F2F1EC" fill-opacity="${opts.marks || .35}"/>`
     + `<g opacity="${opts.marks || .35}"><rect x="${fx - 16}" y="${fy - 16}" width="32" height="32" fill="#F2F1EC"/><path d="M${fx - 16} ${fy - 16}h16v16h-16zM${fx} ${fy}h16v16h-16z" fill="#24272C"/></g>`;

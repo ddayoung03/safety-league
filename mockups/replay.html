@@ -5,20 +5,24 @@
 <title>레이스 리플레이</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-  .head { position: absolute; left: 64px; top: 40px; display: flex; align-items: center; gap: 18px; }
-  .back { width: 76px; height: 76px; border: 2px solid #3A3E45; display: flex; align-items: center; justify-content: center; }
-  .head h1 { margin: 0; font-weight: 400; font-size: 34px; }
+  .head { position: absolute; left: 64px; top: 36px; display: flex; align-items: center; gap: 18px; }
+  .back { width: 76px; height: 76px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .head h1 { margin: 0; font-weight: 800; font-size: 36px; }
   .head .sub { color: var(--grey); font-size: 24px; }
-  .note { position: absolute; right: 64px; top: 52px; font-size: 24px; color: var(--grey); }
-  #map { position: absolute; left: 30px; top: 108px; width: 760px; height: 456px; }
-  .list { position: absolute; right: 64px; top: 120px; width: 380px; margin: 0; padding: 0; list-style: none; }
-  .list li { display: grid; grid-template-columns: 70px 44px 1fr; align-items: center; height: 52px; border-bottom: 1px solid #3A3E45; font-size: 24px; }
-  .list li .time { font-size: 26px; color: var(--grey); }
+  .note { position: absolute; right: 64px; top: 58px; font-size: 24px; color: var(--grey); }
+  .mapcard { position: absolute; left: 40px; top: 128px; width: 760px; height: 456px; border-radius: 18px;
+    background: radial-gradient(ellipse at 40% 40%, #2F343B, #1F2227); border: 1px solid var(--line); box-shadow: inset 0 0 60px rgba(0, 0, 0, .45); }
+  #map { position: absolute; left: 40px; top: 128px; width: 760px; height: 456px; }
+  .list { position: absolute; right: 64px; top: 128px; width: 400px; margin: 0; padding: 0; list-style: none; }
+  .list li { display: grid; grid-template-columns: 74px 46px 1fr; align-items: center; height: 58px; margin-bottom: 7px; padding: 0 14px;
+    border-radius: 10px; background: var(--glass); border: 1px solid var(--line); font-size: 24px; }
+  .list li .time { font-size: 28px; color: var(--grey); }
+  .list li.lane { border-color: rgba(255, 197, 46, .45); }
   .list li.lane .what { color: var(--yellow); }
-  .pit { position: absolute; left: 64px; right: 64px; bottom: 40px; display: flex; align-items: center; gap: 24px; background: var(--yellow); color: var(--asphalt); padding: 18px 28px; }
-  .pit .h { font-size: 24px; opacity: .75; white-space: nowrap; }
-  .pit .m { font-size: 30px; white-space: nowrap; }
-  .pit .r { margin-left: auto; font-size: 24px; white-space: nowrap; }
+  .pit { position: absolute; left: 64px; right: 64px; bottom: 34px; display: flex; align-items: center; gap: 22px; color: var(--asphalt-deep);
+    padding: 14px 28px 14px 18px; border-radius: 12px; background-color: var(--yellow); background-image: linear-gradient(135deg, #FFD65C, var(--yellow) 60%, #F2B312); }
+  .pit .h { font-size: 24px; white-space: nowrap; }
+  .pit .m { font-size: 32px; font-weight: 900; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -26,18 +30,20 @@
 <div class="kerb t muted" aria-hidden="true"></div>
 
 <div class="head">
-  <a class="back" href="result-low.html" aria-label="결과로 돌아가기"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#F2F1EC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <a class="back glass" href="result-low.html" aria-label="결과로 돌아가기"><svg width="26" height="26" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#F2F1EC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   <h1>레이스 리플레이</h1>
   <span class="sub" data-bind="meta"></span>
 </div>
 <div class="note">다른 날의 예시</div>
 
+<div class="mapcard" aria-hidden="true"></div>
 <svg id="map" role="img" aria-label="오늘 주행 경로와 사건 지점"></svg>
 <ol class="list" id="list"></ol>
 
-<div class="pit skew">
-  <span class="unskew h">다음 주행 작전</span>
-  <span class="unskew m">차선 바꿀 때 깜빡이부터 켜기</span>
+<div class="pit">
+  <span class="face" aria-hidden="true"></span>
+  <span class="h">다음 주행 작전</span>
+  <span class="m">차선 바꿀 때 깜빡이부터 켜기</span>
 </div>
 
 <script src="demo-data.js"></script>

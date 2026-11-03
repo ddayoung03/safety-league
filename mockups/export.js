@@ -11,6 +11,9 @@ const PAGES = [
   ['replay.html', '3-replay.png'],
   ['league.html', '4-league.png'],
   ['driving.html', '5-driving.png'],
+  ['driving.html?w=rain', '5b-driving-rain.png'],
+  ['driving.html?w=snow', '5c-driving-snow.png'],
+  ['driving.html?w=night', '5d-driving-night.png'],
   ['report.html', '6-report.png'],
 ];
 
