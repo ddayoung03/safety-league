@@ -21,10 +21,23 @@
   .meta { position: absolute; left: 80px; right: 80px; bottom: 72px; display: flex; justify-content: space-between; font-size: 26px; color: var(--grey); }
   .meta b { font-size: 42px; color: var(--white); margin-right: 8px; }
   .meta .streak { color: var(--yellow); }
+  /* 날씨 배경: 차량 신호(와이퍼·외기온도·전조등)로 정한 정지 그림. 움직임 없음, 날씨가 바뀔 때만 교체 */
+  .wx { position: absolute; inset: 0; }
+  .wx svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wx.sun { background: radial-gradient(circle at 88% -6%, rgba(255, 197, 46, .20), rgba(255, 197, 46, .06) 28%, transparent 48%),
+    linear-gradient(180deg, rgba(150, 175, 205, .07), transparent 50%); }
+  .wx.rain { background: linear-gradient(180deg, rgba(95, 125, 165, .20), transparent 62%),
+    linear-gradient(0deg, rgba(150, 185, 230, .07), transparent 22%); }
+  .wx.snow { background: linear-gradient(180deg, rgba(190, 210, 235, .14), transparent 60%); }
+  .wx.night { background: radial-gradient(circle at 86% 14%, rgba(200, 210, 235, .10), transparent 30%),
+    linear-gradient(180deg, rgba(10, 14, 30, .55), transparent 70%); }
+  .rec .wxname { color: var(--grey); }
+  .rec .wxname::before { content: '·'; margin-right: 14px; }
 </style>
 </head>
 <body>
 <div class="bg" aria-hidden="true" style="opacity:.5"></div>
+<div class="wx" id="wx" aria-hidden="true"></div>
 <svg class="sil" viewBox="0 0 4800 1760" fill="none" stroke="#F2F1EC" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
 <path vector-effect="non-scaling-stroke" d="M130 1500 L505 1500 A450 450 0 1 1 1345 1500 L3505 1500 A450 450 0 1 1 4345 1500 L4680 1500 L4712 1180 L4700 760 L3420 640 L2660 112 L860 96 L205 128 L92 560 L86 1150 Z"/>
 <path vector-effect="non-scaling-stroke" d="M3230 680 L2630 218 L700 205 L335 640 Z"/>
@@ -37,7 +50,7 @@
 <circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="360"/><circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="250"/><circle vector-effect="non-scaling-stroke" cx="3925" cy="1340" r="60"/>
 <path vector-effect="non-scaling-stroke" d="M0 1740 H4800" stroke-dasharray="14 10"/>
 </svg>
-<div class="rec"><i></i>주행 기록 중</div>
+<div class="rec"><i></i>주행 기록 중<span class="wxname" id="wxname"></span></div>
 <h1>오늘의 레이스 진행 중</h1>
 <div class="sub">결과는 주차하면 공개돼요</div>
 <div class="wrap">
@@ -74,6 +87,34 @@
 
   const vals = { done: DONE, dest: DEST + 'km · 해운대까지', goal: '70점 넘기면 연속 ' + (DEMO.streakAt('2026-11-06') + 1) + '일째' };
   for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
+
+  // 날씨: ?w=sun|rain|snow|night. 앱에서는 와이퍼 작동=비, 외기 0℃ 이하+와이퍼=눈, 전조등·해진 뒤=밤, 그 밖=맑음.
+  // 빗줄기·눈송이는 고정 시드로 한 번만 그린다(움직이지 않음). 글자가 있는 왼쪽 위·트랙 줄은 비워 둔다.
+  const W = { sun: '맑음', rain: '비', snow: '눈', night: '밤' };
+  const w = W[new URLSearchParams(location.search).get('w')] ? new URLSearchParams(location.search).get('w') : 'sun';
+  const wx = document.getElementById('wx');
+  wx.className = 'wx ' + w;
+  document.getElementById('wxname').textContent = W[w];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const clear = (x, y) => (x < 820 && y > 150 && y < 340) || (y > 480 && y < 640);
+  let g = '';
+  if (w === 'rain') for (let i = 0; i < 140; i++) {
+    const x = rnd() * 1300, y = rnd() * 700, l = 18 + rnd() * 26;
+    if (!clear(x, y)) g += `<line x1="${x}" y1="${y}" x2="${x - l * .27}" y2="${y + l}" stroke="#C8D6EA" stroke-opacity="${.12 + rnd() * .14}" stroke-width="2" stroke-linecap="round"/>`;
+  }
+  if (w === 'snow') for (let i = 0; i < 110; i++) {
+    const x = rnd() * 1280, y = rnd() * 720, r = 1.5 + rnd() * 3.5;
+    if (!clear(x, y)) g += `<circle cx="${x}" cy="${y}" r="${r}" fill="#F2F1EC" fill-opacity="${.18 + rnd() * .3}"/>`;
+  }
+  if (w === 'night') {
+    for (let i = 0; i < 40; i++) {
+      const x = 600 + rnd() * 680, y = rnd() * 260;
+      if (!clear(x, y)) g += `<circle cx="${x}" cy="${y}" r="${.8 + rnd() * 1.4}" fill="#F2F1EC" fill-opacity="${.2 + rnd() * .4}"/>`;
+    }
+    g += '<mask id="m"><circle cx="1100" cy="100" r="34" fill="#fff"/><circle cx="1116" cy="88" r="30" fill="#000"/></mask><circle cx="1100" cy="100" r="34" fill="#E8E6DF" fill-opacity=".55" mask="url(#m)"/>';
+  }
+  if (w === 'sun') g = '<circle cx="1126" cy="-10" r="70" fill="#FFC52E" fill-opacity=".10"/>';
+  wx.innerHTML = `<svg viewBox="0 0 1280 720">${g}</svg>`;
   finishPage();
 </script>
 </body>
