@@ -6,8 +6,11 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
+import io.github.ddayoung03.safetyleague.R
 
 /**
  * 주간 리포트용 F1식 포지션 순위 변동 차트 뷰
@@ -38,14 +41,19 @@ class PositionChartView @JvmOverloads constructor(
         pathEffect = DashPathEffect(floatArrayOf(12f, 10f), 0f)
     }
 
+    // 순위 숫자는 앱 숫자 글꼴(Saira Condensed 기울임), 요일은 앱 한글 글꼴
+    private val numberFont: Typeface? = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.saira_condensed)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 24f * resources.displayMetrics.scaledDensity
         color = Color.parseColor("#9BA1A8")
     }
+    private val rankPaint = Paint(textPaint).apply { typeface = Typeface.create(numberFont, Typeface.ITALIC) }
+    private val dayFont: Typeface? = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.black_han_sans)
 
     private val highlightTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 26f * resources.displayMetrics.scaledDensity
         color = Color.parseColor("#FFC52E")
+        if (!isInEditMode) typeface = ResourcesCompat.getFont(context, R.font.black_han_sans)
         textAlign = Paint.Align.CENTER
     }
 
@@ -97,11 +105,11 @@ class PositionChartView @JvmOverloads constructor(
                 // 승급 라인 (노란 점선)
                 canvas.drawLine(paddingLeft, gy, width - paddingRight, gy, promoPaint)
                 highlightTextPaint.textAlign = Paint.Align.RIGHT
-                canvas.drawText("승급 라인 P119", width - paddingRight, gy - 8f, highlightTextPaint)
+                canvas.drawText("승급 라인 P$promotionLine", width - paddingRight, gy - 16f, highlightTextPaint)
             } else {
                 canvas.drawLine(paddingLeft, gy, width - paddingRight, gy, gridPaint)
-                textPaint.textAlign = Paint.Align.RIGHT
-                canvas.drawText("P$r", paddingLeft - 16f, gy + 8f, textPaint)
+                rankPaint.textAlign = Paint.Align.RIGHT
+                canvas.drawText("P$r", paddingLeft - 16f, gy + 8f, rankPaint)
             }
         }
 
@@ -114,7 +122,9 @@ class PositionChartView @JvmOverloads constructor(
         canvas.drawPath(path, linePaint)
 
         // 3. 요일별 점 및 텍스트 렌더링
-        val bestJumpIndex = 4 // 금요일 (P128 -> P125 ▲3)
+        // 전날보다 가장 많이 오른 날 강조
+        val bestJumpIndex = (1 until ranks.size).maxByOrNull { ranks[it - 1] - ranks[it] } ?: 0
+        val bestJump = if (bestJumpIndex > 0) ranks[bestJumpIndex - 1] - ranks[bestJumpIndex] else 0
         for (i in days.indices) {
             val px = getX(i)
             val py = getY(ranks[i])
@@ -124,7 +134,7 @@ class PositionChartView @JvmOverloads constructor(
                 pointPaint.color = Color.parseColor("#FFC52E")
                 canvas.drawCircle(px, py, 11f, pointPaint)
                 highlightTextPaint.textAlign = Paint.Align.CENTER
-                canvas.drawText("+3", px, py - 20f, highlightTextPaint)
+                canvas.drawText("+$bestJump", px, py - 20f, highlightTextPaint)
             } else {
                 pointPaint.color = Color.parseColor("#24272C")
                 canvas.drawCircle(px, py, 8f, pointPaint)
@@ -133,6 +143,7 @@ class PositionChartView @JvmOverloads constructor(
 
             // 하단 요일 라벨
             textPaint.textAlign = Paint.Align.CENTER
+            textPaint.typeface = dayFont
             canvas.drawText(days[i], px, height - 16f, textPaint)
         }
     }

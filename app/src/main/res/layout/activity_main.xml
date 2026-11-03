@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:background="@color/asphalt">
 
-    <FrameLayout
+    <!-- 시안 1280×720dp 캔버스를 창 크기에 맞춰 키움 -->
+    <io.github.ddayoung03.safetyleague.ui.view.DesignCanvas
         android:id="@+id/screen_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

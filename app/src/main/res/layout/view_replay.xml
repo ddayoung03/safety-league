@@ -18,22 +18,39 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="64dp"
-        android:paddingTop="36dp">
+        android:paddingTop="40dp">
 
         <FrameLayout
             android:id="@+id/btn_back"
             android:contentDescription="결과로 돌아가기"
-            android:layout_width="76dp"
+            android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:background="@color/cell"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:paddingHorizontal="24dp">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@android:drawable/ic_menu_revert" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_back" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="결과로"
+                    android:textColor="@color/white"
+                    android:textSize="24sp" />
+            </LinearLayout>
         </FrameLayout>
 
         <TextView
@@ -42,7 +59,7 @@
             android:layout_marginStart="20dp"
             android:text="레이스 리플레이"
             android:textColor="@color/white"
-            android:textSize="32sp" />
+            android:textSize="34sp" />
 
         <TextView
             android:id="@+id/tv_replay_meta"
@@ -70,19 +87,20 @@
     <!-- 왼쪽 대형 서킷 뷰 -->
     <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
         android:id="@+id/route_replay_view"
-        android:layout_width="720dp"
-        android:layout_height="480dp"
+        android:layout_width="760dp"
+        android:layout_height="456dp"
         android:layout_gravity="start|top"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="96dp" />
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="140dp" />
 
     <!-- 오른쪽 사건 목록 -->
     <LinearLayout
-        android:layout_width="440dp"
-        android:layout_height="480dp"
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
         android:layout_gravity="end|top"
         android:layout_marginEnd="64dp"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="140dp"
+        android:layout_marginBottom="150dp"
         android:orientation="vertical">
 
         <TextView
@@ -110,17 +128,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="40dp"
         android:layout_marginHorizontal="64dp"
         android:background="@color/yellow"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="28dp"
-        android:paddingVertical="14dp">
+        android:paddingVertical="18dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0.75"
             android:text="다음 주행 작전"
             android:textColor="@color/asphalt"
             android:textSize="24sp" />
@@ -132,7 +151,7 @@
             android:id="@+id/tv_replay_tip"
             android:text="차선 바꿀 때 깜빡이부터 켜기"
             android:textColor="@color/asphalt"
-            android:textSize="26sp" />
+            android:textSize="30sp" />
     </LinearLayout>
 
 </FrameLayout>

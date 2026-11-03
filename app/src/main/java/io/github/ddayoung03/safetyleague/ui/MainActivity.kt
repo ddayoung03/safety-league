@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity() {
             val isMe = r == me
             val isTarget = r == target
             b.layoutTowerRows.addView(towerRow(r, isMe, nameSuffix = if (isMe) " ▼${me.rank - DemoData.lowDayRankBefore}" else "",
-                tag = if (isTarget) "목표" else null, target = isTarget, dim = !isMe && !isTarget))
+                tag = if (isTarget) "목표" else null, target = isTarget, dim = !isMe && !isTarget, size = rowLow))
             if (isTarget) b.layoutTowerRows.addView(note("${LeagueCalculator.round1(target.avg - me.avg)}점 차, 한 번만 잘 달리면 되찾아요"))
         }
         b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
@@ -337,7 +337,7 @@ class MainActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                     .apply { setMargins(0, dp(4), 0, dp(4)) }
             }
-            item.addView(text(e.at, R.color.grey, number = true).apply { minWidth = dp(90) })
+            item.addView(text(e.at, R.color.grey, 26f, number = true).apply { minWidth = dp(90) })
             item.addView(text(names[e.kind] ?: e.kind, if (e.kind == "lane") R.color.yellow else R.color.white))
             b.layoutEventList.addView(item)
         }
@@ -371,7 +371,7 @@ class MainActivity : AppCompatActivity() {
         var last = 0
         for (r in rows) {
             if (last > 0 && r.rank > last + 1) b.layoutLeagueRows.addView(dots())
-            b.layoutLeagueRows.addView(towerRow(r, r.name == "나", top = r.rank <= 3))
+            b.layoutLeagueRows.addView(towerRow(r, r.name == "나", top = r.rank <= 3, size = rowLeague))
             if (r.rank == line) b.layoutLeagueRows.addView(zoneLine("승급 라인 · 상위 30%", R.color.yellow))
             last = r.rank
         }
@@ -411,16 +411,16 @@ class MainActivity : AppCompatActivity() {
             val col = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply { setMargins(dp(4), 0, dp(4), 0) }
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply { setMargins(dp(7), 0, dp(7), 0) }
             }
-            if (s != null) {
-                col.addView(text(s.toString(), R.color.white, number = true).apply { gravity = Gravity.CENTER })
-                col.addView(View(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(((s - 60) / 40f * 170).roundToInt().coerceAtLeast(16)))
-                    setBackgroundColor(if (s == best) color(R.color.yellow) else Color.parseColor("#4A4F57"))
-                })
-            }
-            col.addView(text(if (s == null) "$day 휴식" else day, R.color.grey).apply { gravity = Gravity.CENTER })
+            // 칸 230dp = 숫자 약 34 + 막대 최대 150 + 요일 약 34 (막대가 요일을 밀어내지 않게)
+            col.addView(text(s?.toString() ?: "휴식", if (s == null) R.color.grey else R.color.white, number = s != null).apply { gravity = Gravity.CENTER })
+            col.addView(View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    if (s == null) dp(4) else dp(((s - 60) / 40f * 150).roundToInt().coerceIn(16, 150)))
+                setBackgroundColor(when { s == null -> Color.parseColor("#3A3E45"); s == best -> color(R.color.yellow); else -> Color.parseColor("#4A4F57") })
+            })
+            col.addView(text(day, R.color.grey).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
             b.layoutScoreBars.addView(col)
         }
     }
@@ -443,7 +443,7 @@ class MainActivity : AppCompatActivity() {
         b.layoutTrackBar.removeAllViews()
         for (i in 0 until cells) {
             b.layoutTrackBar.addView(View(this).apply {
-                layoutParams = LinearLayout.LayoutParams(0, dp(36), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
+                layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
                 setBackgroundColor(if (i < doneKm.toInt()) color(R.color.yellow) else Color.parseColor("#2B2F35"))
             })
         }
@@ -494,26 +494,33 @@ class MainActivity : AppCompatActivity() {
         setPadding(0, dp(6), 0, dp(6))
     }
 
+    /** 순위 줄 크기 (시안 CSS px = dp). 내 줄은 더 높고 왼쪽으로 튀어나온다. */
+    private data class RowSize(val h: Int, val meH: Int, val p: Float, val meP: Float, val n: Float, val s: Float,
+                               val meOut: Int, val meTop: Int, val meBottom: Int, val meBg: Int = R.color.yellow)
+    private val rowWin = RowSize(64, 78, 36f, 46f, 26f, 34f, 28, 10, 16)
+    private val rowLow = RowSize(60, 74, 36f, 44f, 25f, 32f, 28, 10, 10, R.color.white) // 아쉬운 날: 내 줄은 흰색 (시안)
+    private val rowLeague = RowSize(50, 62, 32f, 36f, 24f, 28f, 24, 6, 6)
+
     private fun towerRow(
         r: DriverRank, isMe: Boolean, nameSuffix: String = "", tag: String? = null,
-        target: Boolean = false, dim: Boolean = false, top: Boolean = false
+        target: Boolean = false, dim: Boolean = false, top: Boolean = false, size: RowSize = rowWin
     ): View {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(if (isMe) 70 else 56))
-                .apply { setMargins(0, dp(3), 0, dp(3)) }
-            setPadding(dp(24), 0, dp(24), 0)
-            setBackgroundResource(if (isMe) R.color.yellow else R.color.cell)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(if (isMe) size.meH else size.h))
+                .apply { if (isMe) setMargins(-dp(size.meOut), dp(size.meTop), 0, dp(size.meBottom)) else setMargins(0, 0, 0, dp(6)) }
+            setPadding(dp(20), 0, dp(20), 0)
+            setBackgroundResource(if (isMe) size.meBg else R.color.cell)
         }
         val fg = when {
             isMe -> R.color.asphalt
             dim -> R.color.grey
             else -> R.color.white
         }
-        row.addView(text("P${r.rank}", if (isMe) R.color.asphalt else if (top) R.color.gold else R.color.grey, if (isMe) 32f else 28f, number = true)
-            .apply { layoutParams = LinearLayout.LayoutParams(dp(120), LinearLayout.LayoutParams.WRAP_CONTENT) })
-        row.addView(text(r.name + nameSuffix, fg, if (isMe) 26f else 24f).apply {
+        row.addView(text("P${r.rank}", if (isMe) R.color.asphalt else if (top) R.color.gold else R.color.grey, if (isMe) size.meP else size.p, number = true)
+            .apply { layoutParams = LinearLayout.LayoutParams(dp(112), LinearLayout.LayoutParams.WRAP_CONTENT) })
+        row.addView(text(r.name + nameSuffix, fg, size.n).apply {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
@@ -522,7 +529,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(12), dp(2), dp(12), dp(2))
             setBackgroundResource(if (tag == "추월") R.color.red else R.color.yellow)
         })
-        row.addView(text(String.format("%.1f", r.avg), fg, if (isMe) 28f else 26f, number = true).apply { setPadding(dp(16), 0, dp(6), 0) })
+        row.addView(text(String.format("%.1f", r.avg), fg, size.s, number = true).apply { setPadding(dp(16), 0, dp(6), 0) })
         if (target) row.setBackgroundResource(R.drawable.shape_target_row)
         return row
     }
