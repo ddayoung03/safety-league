@@ -187,6 +187,7 @@
 
         <FrameLayout
             android:id="@+id/btn_replay"
+            android:tag="skew"
             android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:layout_gravity="end"

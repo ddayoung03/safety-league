@@ -7,6 +7,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.drawable.ColorDrawable
+import android.view.ViewGroup
+import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
@@ -232,6 +235,14 @@ class MainActivity : AppCompatActivity() {
             Screen.REPORT -> showReport()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
+        applySkew(binding.screenContainer)
+    }
+
+    private fun applySkew(view: View) {
+        if (view.tag == "skew") {
+            (view.background as? ColorDrawable)?.let { view.background = SkewDrawable(it.color) }
+        }
+        if (view is ViewGroup) for (i in 0 until view.childCount) applySkew(view.getChildAt(i))
     }
 
     private val today get() = LocalDate.now().toString()
@@ -518,7 +529,7 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(if (isMe) size.meH else size.h))
                 .apply { if (isMe) setMargins(-dp(size.meOut), dp(size.meTop), 0, dp(size.meBottom)) else setMargins(0, 0, 0, dp(6)) }
             setPadding(dp(20), 0, dp(20), 0)
-            setBackgroundResource(if (isMe) size.meBg else R.color.cell)
+            background = SkewDrawable(color(if (isMe) size.meBg else R.color.cell))
         }
         val fg = when {
             isMe -> R.color.asphalt
@@ -537,7 +548,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundResource(if (tag == "추월") R.color.red else R.color.yellow)
         })
         row.addView(text(String.format("%.1f", r.avg), fg, size.s, number = true).apply { setPadding(dp(16), 0, paddingEnd, 0) })
-        if (target) row.setBackgroundResource(R.drawable.shape_target_row)
+        if (target) row.background = SkewDrawable(color(R.color.cell), color(R.color.yellow), resources.displayMetrics.density)
         return row
     }
 }

@@ -130,6 +130,7 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="40dp"
         android:layout_marginHorizontal="64dp"
+        android:tag="skew"
         android:background="@color/yellow"
         android:gravity="center_vertical"
         android:orientation="horizontal"

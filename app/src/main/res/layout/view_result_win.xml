@@ -93,7 +93,8 @@
             android:id="@+id/tv_rank_change"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/red"
+            android:tag="skew"
+        android:background="@color/red"
             android:paddingHorizontal="20dp"
             android:paddingVertical="6dp"
             android:text="▲3"
@@ -105,7 +106,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:background="@color/cell"
+            android:tag="skew"
+        android:background="@color/cell"
             android:paddingHorizontal="20dp"
             android:paddingVertical="6dp"
             android:text="승급 라인까지 6계단"
@@ -229,6 +231,7 @@
         <!-- 리플레이 보기 버튼 -->
         <FrameLayout
             android:id="@+id/btn_replay"
+            android:tag="skew"
             android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:layout_gravity="end"
