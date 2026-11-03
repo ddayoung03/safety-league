@@ -242,8 +242,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applySkew(view: View) {
-        if (view.tag == "skew") {
-            (view.background as? ColorDrawable)?.let { view.background = SkewDrawable(it.color) }
+        (view.background as? ColorDrawable)?.let { original ->
+            val shade = original.color
+            if (view.tag == "skew") {
+                val gradient = when (shade) {
+                    color(R.color.yellow) -> intArrayOf(color(R.color.yellow_light), shade, color(R.color.yellow_dark))
+                    color(R.color.white) -> intArrayOf(color(R.color.metal_top), color(R.color.white_bottom))
+                    color(R.color.cell) -> intArrayOf(color(R.color.glass_top), color(R.color.glass_bottom))
+                    else -> null
+                }
+                view.background = SkewDrawable(shade, density = resources.displayMetrics.density, gradientColors = gradient)
+            } else if (shade == color(R.color.cell)) {
+                view.background = GlassDrawable(this)
+                view.elevation = dp(3).toFloat()
+            }
         }
         if (view is ViewGroup) for (i in 0 until view.childCount) applySkew(view.getChildAt(i))
     }
