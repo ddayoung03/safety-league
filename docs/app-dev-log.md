@@ -232,3 +232,11 @@ Virtual Console에는 문서에 없는 **주행 시뮬레이터**(D + ACCEL 누�
 - 위치(GPS)가 주행해도 안 바뀌어 실제 경로 리플레이는 에뮬레이터에서 볼 수 없음. 시연은 시연 모드 각본(가상 경로)으로.
 - 오도미터 안 움직임(위 대체 처리), 전비·연비 미지원.
 - Virtual Console 조향 슬라이더는 부호가 반대(6 → -6). 감지는 절댓값이라 영향 없음.
+
+## 2026-11-03 위치 대체 순서 (FusedLocation → NaviHelper → LocationManager)
+Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 쓸 수 있어 대체 순서를 넣음.
+- `core/collector/LocationFallback.kt`(순수 로직): 앞에서부터 시작되는 출처 하나만 켬. 켜진 출처가 동작 중 실패하면 끄고 다음으로. 실패는 `problems`(시연 모드 상태 표시)에 남김. 테스트 `LocationFallbackTest` 3개.
+- `PleosVehicleDataSource`: FusedLocation(`isSupported()` false면 건너뜀) → NaviHelper(2초마다 `getCurrentLocationInfo()` 요청, 응답은 binder 스레드라 메인으로 넘김) → LocationManager(위치 권한·켜진 제공자 있을 때). 앞의 두 출처는 15초 동안 위치가 한 번도 안 오면 실패로 보고 넘김. (0,0) 좌표는 버림.
+- 매니페스트: `pleos.car.permission.NAVI_ROUTE` 추가(lint가 `getCurrentLocationInfo`에 필요하다고 알려줌).
+- 에뮬레이터 확인: 기본은 `Location source: FusedLocation`(1초마다 위치). FusedLocation을 잠시 빼고 빌드하면 `Location source: NaviHelper`로 2초마다 `onCurrentLocationInfo` 수신 확인 후 원복.
+- 단위 테스트 38개 통과, `assembleDebug`·`lintDebug` 통과.

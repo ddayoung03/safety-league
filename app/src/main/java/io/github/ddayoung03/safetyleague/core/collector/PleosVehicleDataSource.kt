@@ -27,13 +27,22 @@ import android.car.Car
 import android.car.VehiclePropertyIds
 import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
+import ai.pleos.playground.navi.data.CurrentLocationInfo
+import ai.pleos.playground.navi.helper.NaviHelper
+import ai.pleos.playground.navi.helper.listener.NaviHelperEventListener
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import io.github.ddayoung03.safetyleague.core.model.Point2D
 
 /**
  * 실제 차량 신호: Pleos Vehicle SDK(기어·브레이크·조향·방향지시등·주행거리·벨트·경고등·도어·전비/연비),
- * AAOS CarPropertyManager(속도), Pleos FusedLocation(경로).
+ * AAOS CarPropertyManager(속도), 경로는 FusedLocation → NaviHelper → LocationManager 순으로 대체([LocationFallback]).
  * 실패한 도메인은 [problems]에 남겨 화면에 드러낸다 (조용히 삼키지 않는다).
  */
 class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
@@ -41,7 +50,8 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
     private val tag = "PleosVehicleData"
     private var vehicle: Vehicle? = null
     private var car: Car? = null
-    private var location: FusedLocation? = null
+    private var location: LocationFallback? = null
+    private val main = Handler(Looper.getMainLooper())
     private var listener: VehicleSignalListener? = null
     private val seats = listOf(SeatValue.ROW_1_LEFT, SeatValue.ROW_1_RIGHT, SeatValue.ROW_2_LEFT, SeatValue.ROW_2_CENTER, SeatValue.ROW_2_RIGHT)
     private val occupied = mutableMapOf<Int, Boolean>()
@@ -151,22 +161,87 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
     }
 
     private fun startLocation(l: VehicleSignalListener) {
-        try {
-            val loc = FusedLocation(context).also { it.initialize() }
-            if (!loc.isSupported()) { problems += "Location: FusedLocation not supported"; return }
-            loc.registerFusedLocationCallback(object : FusedLocationListener {
-                override fun onChanged(d: LocationData?) { d?.let { l.onLocationChanged(Point2D(it.longitude, it.latitude), it.timestampMillis) } }
-                override fun onError(e: Exception) = fail("Location", e)
-            })
-            location = loc
-        } catch (e: Exception) {
-            fail("Location", e)
+        val chain = LocationFallback(listOf(fusedSource(), naviSource(), osSource()), problems) { p ->
+            if (p.x != 0.0 || p.y != 0.0) l.onLocationChanged(p, now())
         }
+        location = chain
+        chain.start()
+        Log.i(tag, "Location source: ${chain.activeName}")
+    }
+
+    /** 시작 후 [ms] 동안 위치가 한 번도 안 오면 실패로 보고 다음 출처로 넘긴다. */
+    private fun watchdog(ms: Long, onFailed: (String) -> Unit): () -> Unit {
+        var got = false
+        val r = Runnable { if (!got) onFailed("${ms / 1000}초 동안 위치 없음") }
+        main.postDelayed(r, ms)
+        return { got = true; main.removeCallbacks(r) }
+    }
+
+    private fun fusedSource() = object : LocationSource {
+        override val name = "FusedLocation"
+        private var loc: FusedLocation? = null
+        private var cancel: (() -> Unit)? = null
+        override fun start(onPoint: (Point2D) -> Unit, onFailed: (String) -> Unit): Boolean {
+            val f = FusedLocation(context).also { it.initialize() }
+            if (!f.isSupported()) { runCatching { f.release() }; return false }
+            loc = f
+            val seen = watchdog(15_000, onFailed).also { cancel = it }
+            f.registerFusedLocationCallback(object : FusedLocationListener {
+                override fun onChanged(d: LocationData?) { d?.let { seen(); onPoint(Point2D(it.longitude, it.latitude)) } }
+                override fun onError(e: Exception) = onFailed(e.message ?: "error")
+            })
+            return true
+        }
+        override fun stop() { cancel?.invoke(); runCatching { loc?.release() }; loc = null }
+    }
+
+    /** NaviHelper는 요청할 때만 현재 위치를 돌려주므로 2초마다 묻는다. */
+    private fun naviSource() = object : LocationSource {
+        override val name = "NaviHelper"
+        private var navi: NaviHelper? = null
+        private var cancel: (() -> Unit)? = null
+        private val poll = object : Runnable {
+            override fun run() { runCatching { navi?.getCurrentLocationInfo() }; main.postDelayed(this, 2_000) }
+        }
+        override fun start(onPoint: (Point2D) -> Unit, onFailed: (String) -> Unit): Boolean {
+            val n = NaviHelper(context)
+            navi = n
+            val seen = watchdog(15_000, onFailed).also { cancel = it }
+            n.addListener(object : NaviHelperEventListener {
+                // 응답이 binder 스레드로 오므로 다른 신호처럼 메인 스레드에서 넘긴다
+                override fun onCurrentLocationInfo(info: CurrentLocationInfo) {
+                    main.post { seen(); onPoint(Point2D(info.longitude, info.latitude)) }
+                }
+            })
+            n.initialize({ main.post(poll) }, { e -> onFailed(e.message ?: "initialize failed") })
+            return true
+        }
+        override fun stop() {
+            cancel?.invoke(); main.removeCallbacks(poll)
+            runCatching { navi?.release() }; navi = null
+        }
+    }
+
+    /** 마지막 대체: 안드로이드 기본 위치 (위치 권한 필요). */
+    private fun osSource() = object : LocationSource {
+        override val name = "LocationManager"
+        private val lm = context.getSystemService(LocationManager::class.java)
+        private var cb: LocationListener? = null
+        override fun start(onPoint: (Point2D) -> Unit, onFailed: (String) -> Unit): Boolean {
+            if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return false
+            val provider = listOf(LocationManager.FUSED_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+                .firstOrNull { it in lm.allProviders && lm.isProviderEnabled(it) } ?: return false
+            val c = LocationListener { onPoint(Point2D(it.longitude, it.latitude)) }
+            lm.requestLocationUpdates(provider, 1_000L, 0f, c, Looper.getMainLooper())
+            cb = c
+            return true
+        }
+        override fun stop() { cb?.let { lm.removeUpdates(it) }; cb = null }
     }
 
     override fun stopListening() {
         runCatching { vehicle?.release() }
-        runCatching { location?.release() }
+        runCatching { location?.stop() }
         runCatching { car?.disconnect() }
         vehicle = null; location = null; car = null; listener = null
     }
