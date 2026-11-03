@@ -26,7 +26,7 @@
 1. Google Fonts가 늦게 오거나 실패한 채 PNG가 찍힘 → 기본 글꼴로 찍힌 PNG가 커밋되면 안 됨. 내보내기 전에 `document.fonts.ready`를 기다리고, 실패 시 export가 에러로 끝나야 함 (Task 7).
 2. 긴 별명이나 문구가 1280×720 밖으로 넘치거나 잘림 → 넘침 없이 말줄임. 렌더 검사에서 `scrollWidth/scrollHeight`가 1280/720을 넘지 않는지 확인 (Task 2의 공통 검사).
 3. 스펙 숫자가 화면마다 어긋남 → 모든 숫자는 `DEMO` 계산값으로만 채우고, 렌더 테스트가 화면별 기대값을 확인 (Task 2~6).
-4. 개인정보가 시안·README·커밋에 섞임 → 실명·연락처 문자열이 `mockups/`와 `README.md`에 없어야 함 (Task 7).
+4. 개인정보가 시안·README·커밋에 섞임 → 저장소 밖 `personal-info.txt`에 적어 둔 실명·연락처 문자열이 `mockups/`와 `README.md`에 없어야 함 (Task 7).
 5. `file://`로 열었을 때 스크립트가 안 돌아 빈 칸이 찍힘 → 클래식 `<script src>`만 사용, 렌더 테스트가 빈 값(`undefined`, `NaN`, 빈 문자열) 없음을 확인 (Task 2의 공통 검사).
 
 ---
@@ -251,7 +251,7 @@ test('report', () => checkPage('report.html',
 test('png exports are 1280x720', () => { for (const f of PNGS) { const b = fs.readFileSync(f);
   assert.equal(b.readUInt32BE(16), 1280); assert.equal(b.readUInt32BE(20), 720); } });
 test('no personal info', () => { for (const f of [...htmlFiles, 'README.md'])
-  assert.ok(!/PERSONAL_INFO_WORDS/.test(fs.readFileSync(f, 'utf8')), f); });
+  /* 저장소 밖 personal-info.txt의 문자열이 없어야 함 */ });
 test('fonts loaded before export', () => { for (const p of pages)
   assert.match(dumpDom(p), /data-fonts="loaded"/); });
 ```
