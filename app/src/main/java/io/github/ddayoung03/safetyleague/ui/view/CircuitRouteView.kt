@@ -117,7 +117,7 @@ class CircuitRouteView @JvmOverloads constructor(
         val startPt = toScreen(routePoints.first())
         val endPt = toScreen(routePoints.last())
 
-        eventPaint.color = Color.parseColor("#2ECC71") // 출발 녹색
+        eventPaint.color = Color.parseColor("#F2F1EC") // 출발: 트랙 화이트
         canvas.drawCircle(startPt.first, startPt.second, 9f, eventPaint)
         canvas.drawCircle(startPt.first, startPt.second, 9f, eventBorderPaint)
 
@@ -135,8 +135,8 @@ class CircuitRouteView @JvmOverloads constructor(
 
                 val markerColor = when (ev.kind) {
                     "lane" -> Color.parseColor("#FFC52E") // 깜빡이 누락: 노랑
-                    "brake" -> Color.parseColor("#C8102E") // 급제동: 레이스 레드
-                    "accel" -> Color.parseColor("#3498DB") // 급가속: 블루
+                    "brake" -> Color.parseColor("#F2F1EC") // 급제동: 흰색 (아쉬운 날 화면에 빨강 금지)
+                    "accel" -> Color.parseColor("#9BA1A8") // 급가속: 회색
                     else -> Color.WHITE
                 }
 

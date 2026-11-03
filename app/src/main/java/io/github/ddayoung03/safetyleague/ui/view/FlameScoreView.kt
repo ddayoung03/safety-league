@@ -46,17 +46,20 @@ class FlameScoreView @JvmOverloads constructor(
     private var animator: ValueAnimator? = null
     private var glowPulse = 0f
 
-    init {
-        startFlameAnimation()
-    }
+
+    private var lastFrameMs = 0L
 
     fun startFlameAnimation() {
+        if (animator?.isRunning == true) return
         animator?.cancel()
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 1000L
             repeatCount = ValueAnimator.INFINITE
             interpolator = LinearInterpolator()
             addUpdateListener {
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastFrameMs < 33) return@addUpdateListener // 30fps 상한
+                lastFrameMs = now
                 glowPulse = it.animatedValue as Float
                 updateParticles()
                 invalidate()
@@ -148,6 +151,12 @@ class FlameScoreView @JvmOverloads constructor(
             flamePaint.alpha = p.alpha
             canvas.drawCircle(p.x, p.y, p.radius, flamePaint)
         }
+    }
+
+    // 화면에 보일 때만 돈다 (다른 화면으로 가거나 앱이 가려지면 멈춤)
+    override fun onVisibilityAggregated(isVisible: Boolean) {
+        super.onVisibilityAggregated(isVisible)
+        if (isVisible) startFlameAnimation() else stopFlameAnimation()
     }
 
     override fun onDetachedFromWindow() {

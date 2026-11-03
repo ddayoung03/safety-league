@@ -39,12 +39,12 @@ class PositionChartView @JvmOverloads constructor(
     }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 24f
+        textSize = 24f * resources.displayMetrics.scaledDensity
         color = Color.parseColor("#9BA1A8")
     }
 
     private val highlightTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 26f
+        textSize = 26f * resources.displayMetrics.scaledDensity
         color = Color.parseColor("#FFC52E")
         textAlign = Paint.Align.CENTER
     }
@@ -61,14 +61,17 @@ class PositionChartView @JvmOverloads constructor(
 
     // 11.03 ~ 11.09 요일별 데이터
     private val days = listOf("월", "화", "수", "목", "금", "토", "일")
-    private val ranks = listOf(131, 130, 130, 128, 125, 126, 125)
-    private val promotionLine = 119
-    private val minRank = 119
-    private val maxRank = 134
+    /** 요일별 순위(월~일)와 승급 라인. MainActivity가 DemoData에서 채운다. */
+    var ranks: List<Int> = emptyList()
+        set(v) { field = v; invalidate() }
+    var promotionLine: Int = 119
+        set(v) { field = v; invalidate() }
+    private val minRank get() = promotionLine
+    private val maxRank get() = (ranks.maxOrNull() ?: promotionLine) + 3
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (width == 0 || height == 0) return
+        if (width == 0 || height == 0 || ranks.size != 7) return
 
         val paddingLeft = 80f
         val paddingRight = 40f

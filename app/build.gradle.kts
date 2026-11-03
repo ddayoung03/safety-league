@@ -5,6 +5,7 @@ plugins {
 android {
     namespace = "io.github.ddayoung03.safetyleague"
     compileSdk = 34
+    useLibrary("android.car")
 
     defaultConfig {
         applicationId = "io.github.ddayoung03.safetyleague"

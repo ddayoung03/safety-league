@@ -70,6 +70,10 @@ class TripCollector(
     private var maneuverSignalled = false
     private var maneuverPeakDeg = 0f
 
+    /** 이번 트립에서 지금까지 달린 거리 (주행 중 화면용) */
+    val currentTripKm: Double
+        get() = if (isTracking && startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
+
     private val rawEvents = mutableListOf<Pair<Long, String>>()
     val route = mutableListOf<Point2D>()
 

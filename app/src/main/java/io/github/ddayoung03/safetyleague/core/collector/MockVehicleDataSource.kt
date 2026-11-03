@@ -18,6 +18,9 @@ class MockVehicleDataSource(
     private var listener: VehicleSignalListener? = null
     private var simulationJob: Job? = null
 
+    /** 각본 주행이 진행 중인지 */
+    val isRunning: Boolean get() = simulationJob?.isActive == true
+
     override fun startListening(listener: VehicleSignalListener) {
         this.listener = listener
     }

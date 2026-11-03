@@ -22,8 +22,9 @@
 
         <FrameLayout
             android:id="@+id/btn_back"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:contentDescription="결과로 돌아가기"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
             android:background="@color/cell"
             android:clickable="true"
             android:focusable="true">
@@ -41,8 +42,7 @@
             android:layout_marginStart="20dp"
             android:text="레이스 리플레이"
             android:textColor="@color/white"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="32sp" />
 
         <TextView
             android:id="@+id/tv_replay_meta"
@@ -51,7 +51,7 @@
             android:layout_marginStart="20dp"
             android:text="6:08 ~ 6:42 · 22.1km"
             android:textColor="@color/grey"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
 
         <View
             android:layout_width="0dp"
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:text="다른 날의 예시"
             android:textColor="@color/grey"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
     </LinearLayout>
 
     <!-- 왼쪽 대형 서킷 뷰 -->
@@ -90,7 +90,7 @@
             android:layout_marginBottom="12dp"
             android:text="주행 사건 기록 (시간순)"
             android:textColor="@color/grey"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -122,8 +122,7 @@
             android:layout_height="wrap_content"
             android:text="다음 주행 작전"
             android:textColor="@color/asphalt"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textSize="24sp" />
 
         <TextView
             android:layout_width="wrap_content"

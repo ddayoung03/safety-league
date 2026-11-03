@@ -30,18 +30,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tv_report_title"
             android:text="11월 2주차 리포트"
             android:textColor="@color/white"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="32sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:id="@+id/tv_report_range"
             android:text="11.03 ~ 11.09 · 주행 6일"
             android:textColor="@color/grey"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
     </LinearLayout>
 
     <!-- 왼쪽 주간 평균 점수 및 막대 그래프 -->
@@ -58,7 +59,7 @@
             android:layout_height="wrap_content"
             android:text="이번 주 평균 점수"
             android:textColor="@color/grey"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -69,10 +70,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/tv_week_avg"
                 android:text="88.8"
                 android:textColor="@color/white"
                 android:textSize="100sp"
-                android:textStyle="bold|italic" />
+                android:fontFamily="@font/saira_condensed"
+                android:textStyle="italic" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -81,18 +84,19 @@
                 android:background="@color/yellow"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="6dp"
+                android:id="@+id/tv_week_change"
                 android:text="지난주보다 +3.1"
                 android:textColor="@color/asphalt"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="24sp" />
         </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tv_last_week"
             android:text="지난주 85.7점"
             android:textColor="@color/grey"
-            android:textSize="20sp" />
+            android:textSize="24sp" />
 
         <View
             android:layout_width="0dp"
@@ -129,18 +133,19 @@
                 android:layout_weight="1"
                 android:text="순위 변동 · 골드 리그"
                 android:textColor="@color/grey"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/tv_rank_move"
                 android:text="P131 → P125 ▲6"
                 android:textColor="@color/yellow"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textSize="24sp" />
         </LinearLayout>
 
         <io.github.ddayoung03.safetyleague.ui.view.PositionChartView
+            android:id="@+id/position_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
@@ -163,16 +168,16 @@
             android:layout_height="wrap_content"
             android:text="다음 주 작전"
             android:textColor="@color/yellow"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textSize="24sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:id="@+id/tv_next_plan"
             android:text="깜빡이 누락만 줄이면 승급 라인까지 6계단, 평균 +0.9점이면 돼요"
             android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
     </LinearLayout>
 
 </FrameLayout>

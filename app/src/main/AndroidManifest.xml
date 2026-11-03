@@ -21,11 +21,16 @@
     <uses-permission android:name="android.car.permission.CAR_INFO" />
 
     <!-- Pleos Connect Vehicle SDK Permissions -->
+    <!-- 이름은 Vehicle SDK 2.3.2 클래스 안의 권한 문자열과 대조함 -->
     <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
-    <uses-permission android:name="pleos.car.permission.CAR_LIGHT" />
+    <uses-permission android:name="pleos.car.permission.CAR_LIGHTS" />
     <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
+    <!-- 경고등(Telltales)에 필요. 서드파티 앱에 허용되는지는 에뮬레이터에서 확인 (거부되면 시연 모드 상태창에 표시) -->
+    <uses-permission android:name="pleos.car.permission.PRIVATE_CAR_SAFETY" />
+    <uses-permission android:name="pleos.car.permission.CAR_SEATS" />
     <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
     <uses-permission android:name="pleos.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="pleos.car.permission.CAR_INFO" />
 
     <!-- Location Permissions (FusedLocation & Android Location) -->
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
@@ -33,6 +38,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:name=".SafetyLeagueApp"
@@ -42,19 +50,20 @@
         android:theme="@style/Theme.SafetyLeague"
         android:supportsRtl="true">
 
-        <meta-data
-            android:name="android.car.application"
-            android:resource="@xml/automotive_app_desc" />
-
         <service
             android:name=".service.TripTrackingService"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="location|dataSync" />
 
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.SafetyLeague">
+            <!-- 주행 중에는 코드가 주행 중 화면만 보여 준다 (CarUxRestrictionsManager) -->
+            <meta-data
+                android:name="distractionOptimized"
+                android:value="true" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

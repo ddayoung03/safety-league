@@ -37,17 +37,20 @@ class RainScoreView @JvmOverloads constructor(
     private val maxDrops = 50
     private var animator: ValueAnimator? = null
 
-    init {
-        startRainAnimation()
-    }
+
+    private var lastFrameMs = 0L
 
     fun startRainAnimation() {
+        if (animator?.isRunning == true) return
         animator?.cancel()
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 1000L
             repeatCount = ValueAnimator.INFINITE
             interpolator = LinearInterpolator()
             addUpdateListener {
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastFrameMs < 33) return@addUpdateListener // 30fps 상한
+                lastFrameMs = now
                 updateDrops()
                 invalidate()
             }
@@ -99,6 +102,12 @@ class RainScoreView @JvmOverloads constructor(
             val endY = d.y + d.length
             canvas.drawLine(d.x, d.y, endX, endY, rainPaint)
         }
+    }
+
+    // 화면에 보일 때만 돈다 (다른 화면으로 가거나 앱이 가려지면 멈춤)
+    override fun onVisibilityAggregated(isVisible: Boolean) {
+        super.onVisibilityAggregated(isVisible)
+        if (isVisible) startRainAnimation() else stopRainAnimation()
     }
 
     override fun onDetachedFromWindow() {

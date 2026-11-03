@@ -14,6 +14,22 @@ object DemoData {
     /** 시연용 아이오닉 5 리그 평균 전비(km/kWh). 가상값. */
     const val leagueAvgEfficiency = 5.8
 
+    /** 아쉬운 날(별도 시나리오) 순위표: 나를 제친 해운대드라이버가 목표 */
+    val lowBoard = listOf(
+        DriverRank(124, "깜빡이장인", 89.1),
+        DriverRank(125, "해운대드라이버", 88.7),
+        DriverRank(126, "나", 88.3),
+        DriverRank(127, "조용한퇴근", 88.2)
+    )
+    const val lowDayScore = 64
+    const val lowDayStreakBefore = 13
+    const val lowDayRankBefore = 125
+
+    /** 리그 화면 안전운전 효용 (시연용 가상값) */
+    const val savedWon = "₩8,400"
+    const val brakesCut = "3,120회"
+    const val brakesCaption = "이번 주, 12% 감소"
+
 
     val league = League(
         total = 397,

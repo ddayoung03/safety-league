@@ -7,5 +7,26 @@
         <item name="android:windowBackground">@color/asphalt</item>
         <item name="android:statusBarColor">@color/asphalt_deep</item>
         <item name="android:navigationBarColor">@color/asphalt_deep</item>
+        <!-- 시안 글꼴: 한글 Black Han Sans, 숫자는 NumberText 스타일의 Saira Condensed -->
+        <item name="android:fontFamily">@font/black_han_sans</item>
+        <item name="fontFamily">@font/black_han_sans</item>
+    </style>
+
+    <!-- 숫자(점수·순위·km): Saira Condensed 800, 기울임 -->
+    <style name="NumberText">
+        <item name="android:fontFamily">@font/saira_condensed</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <!-- 시연 모드 바 버튼: Android Automotive 기준 76dp·24sp 이상 -->
+    <style name="DemoButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">76dp</item>
+        <item name="android:minHeight">76dp</item>
+        <item name="android:minWidth">76dp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
     </style>
 </resources>

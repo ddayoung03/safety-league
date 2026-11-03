@@ -1,117 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/asphalt_deep"
-    android:orientation="vertical">
+    android:background="@color/asphalt">
 
-    <!-- 상단 시연용 화면 전환 바 -->
-    <HorizontalScrollView
+    <FrameLayout
+        android:id="@+id/screen_container"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:background="#151719"
-        android:scrollbars="none">
+        android:layout_height="match_parent" />
+
+    <!-- 시연 모드 전용 바. 평소에는 숨김 (왼쪽 위 모서리를 길게 누르면 열림) -->
+    <HorizontalScrollView
+        android:id="@+id/demo_bar"
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:background="@color/cell"
+        android:scrollbars="none"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="24dp">
+            android:paddingStart="88dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="세이프티 리그"
-                android:textColor="@color/yellow"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/tab_result_win"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="결과 카드 (이긴 날)"
-                android:textColor="@color/yellow"
-                android:textSize="17sp" />
-
-            <Button
-                android:id="@+id/tab_result_low"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="결과 카드 (아쉬운 날)"
-                android:textColor="@color/grey"
-                android:textSize="17sp" />
-
-            <Button
-                android:id="@+id/tab_replay"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="레이스 리플레이"
-                android:textColor="@color/grey"
-                android:textSize="17sp" />
-
-            <Button
-                android:id="@+id/tab_league"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="리그 순위"
-                android:textColor="@color/grey"
-                android:textSize="17sp" />
-
-            <Button
-                android:id="@+id/tab_report"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="주간 리포트"
-                android:textColor="@color/grey"
-                android:textSize="17sp" />
-
-            <Button
-                android:id="@+id/tab_driving"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="주행 중 화면"
-                android:textColor="@color/grey"
-                android:textSize="17sp" />
-
-            <View
-                android:layout_width="24dp"
-                android:layout_height="match_parent" />
-
-            <!-- 시연용 시뮬레이터 실행 버튼 -->
-            <Button
-                android:id="@+id/btn_sim_win"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:backgroundTint="@color/red"
-                android:text="▶ 이긴날 시연"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
-
-            <Button
-                android:id="@+id/btn_sim_low"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/cell"
-                android:text="▶ 아쉬운날 시연"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
+            <Button android:id="@+id/tab_result_win" style="@style/DemoButton" android:text="결과(이긴 날)" />
+            <Button android:id="@+id/tab_result_low" style="@style/DemoButton" android:text="결과(아쉬운 날)" />
+            <Button android:id="@+id/tab_replay" style="@style/DemoButton" android:text="리플레이" />
+            <Button android:id="@+id/tab_league" style="@style/DemoButton" android:text="리그" />
+            <Button android:id="@+id/tab_report" style="@style/DemoButton" android:text="리포트" />
+            <Button android:id="@+id/tab_driving" style="@style/DemoButton" android:text="주행 중" />
+            <Button android:id="@+id/btn_sim_win" style="@style/DemoButton" android:text="이긴 날 시연" />
+            <Button android:id="@+id/btn_sim_low" style="@style/DemoButton" android:text="아쉬운 날 시연" />
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- 메인 화면 뷰 컨테이너 (1280x720 비율 렌더링) -->
-    <FrameLayout
-        android:id="@+id/screen_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!-- 시연 모드 열고 닫기: 보이지 않는 76dp 모서리 -->
+    <View
+        android:id="@+id/demo_hotspot"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:layout_gravity="top|start"
+        android:background="@android:color/transparent"
+        android:contentDescription="시연 모드"
+        android:importantForAccessibility="no" />
 
-</LinearLayout>
+    <!-- 차량 SDK 연결 문제 표시 (시연 모드에서만) -->
+    <TextView
+        android:id="@+id/tv_sdk_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="@color/cell"
+        android:padding="12dp"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:visibility="gone" />
+</FrameLayout>

@@ -42,8 +42,7 @@
             android:layout_height="wrap_content"
             android:text="아이오닉 5 리그 · 오늘의 레이스 종료"
             android:textColor="@color/yellow"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textSize="28sp" />
 
         <!-- 큰 점수 및 불타는 모션 컨테이너 -->
         <FrameLayout
@@ -71,7 +70,8 @@
                     android:text="92"
                     android:textColor="@color/white"
                     android:textSize="220sp"
-                    android:textStyle="bold|italic" />
+                    android:fontFamily="@font/saira_condensed"
+                    android:textStyle="italic" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -80,8 +80,7 @@
                     android:layout_marginStart="16dp"
                     android:text="점"
                     android:textColor="@color/grey"
-                    android:textSize="56sp"
-                    android:textStyle="bold" />
+                    android:textSize="56sp" />
             </LinearLayout>
         </FrameLayout>
 
@@ -101,8 +100,7 @@
                 android:paddingVertical="6dp"
                 android:text="▲3"
                 android:textColor="@color/white"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textSize="28sp" />
 
             <TextView
                 android:id="@+id/tv_to_promotion"
@@ -114,8 +112,7 @@
                 android:paddingVertical="6dp"
                 android:text="승급 라인까지 6계단"
                 android:textColor="@color/white"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textSize="28sp" />
         </LinearLayout>
 
         <View
@@ -139,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:text="연속 안전 주행"
                     android:textColor="@color/grey"
-                    android:textSize="22sp" />
+                    android:textSize="24sp" />
 
                 <TextView
                     android:id="@+id/tv_streak"
@@ -148,7 +145,8 @@
                     android:text="13일"
                     android:textColor="@color/white"
                     android:textSize="44sp"
-                    android:textStyle="bold|italic" />
+                    android:fontFamily="@font/saira_condensed"
+                    android:textStyle="italic" />
             </LinearLayout>
 
             <LinearLayout
@@ -162,7 +160,7 @@
                     android:layout_height="wrap_content"
                     android:text="주행 거리"
                     android:textColor="@color/grey"
-                    android:textSize="22sp" />
+                    android:textSize="24sp" />
 
                 <TextView
                     android:id="@+id/tv_km"
@@ -171,7 +169,8 @@
                     android:text="18.4km"
                     android:textColor="@color/white"
                     android:textSize="44sp"
-                    android:textStyle="bold|italic" />
+                    android:fontFamily="@font/saira_condensed"
+                    android:textStyle="italic" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -198,14 +197,14 @@
                 android:layout_weight="1"
                 android:text="11월 시즌 순위"
                 android:textColor="@color/grey"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="시즌 평균"
                 android:textColor="@color/grey"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
         </LinearLayout>
 
         <!-- 순위 줄 컨테이너 -->
@@ -224,7 +223,7 @@
         <FrameLayout
             android:id="@+id/btn_replay"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
+            android:layout_height="76dp"
             android:layout_gravity="end"
             android:background="@color/white"
             android:clickable="true"
@@ -243,8 +242,7 @@
                     android:layout_height="wrap_content"
                     android:text="리플레이 보기"
                     android:textColor="@color/asphalt"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textSize="24sp" />
 
                 <ImageView
                     android:layout_width="22dp"
