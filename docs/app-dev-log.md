@@ -240,3 +240,9 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 매니페스트: `pleos.car.permission.NAVI_ROUTE` 추가(lint가 `getCurrentLocationInfo`에 필요하다고 알려줌).
 - 에뮬레이터 확인: 기본은 `Location source: FusedLocation`(1초마다 위치). FusedLocation을 잠시 빼고 빌드하면 `Location source: NaviHelper`로 2초마다 `onCurrentLocationInfo` 수신 확인 후 원복.
 - 단위 테스트 38개 통과, `assembleDebug`·`lintDebug` 통과.
+
+## 2026-11-03 앱 아이콘 (B안 "승급 방패")
+- 시안 3종(체커기 차선 / 승급 방패 / 서킷 연석) 중 B안 확정: 아스팔트 회색 배경, 노란 방패, 승급 화살표 두 개, 체커 띠. 작은 크기에서도 형태가 가장 또렷함. C안은 금지 표지판처럼 보여 제외.
+- 적응형 아이콘: `mipmap-anydpi-v26/ic_launcher(_round).xml`, 전경 `drawable/ic_launcher_foreground.xml`(안전 영역 안에 들도록 0.85배), 배경색 `icon_background`. 매니페스트 기본 아이콘 교체(리뷰 #20 남은 항목).
+- 제출·스토어용: `docs/app-icon.svg`, `docs/app-icon-512.png`(512×512).
+- 에뮬레이터 앱 목록에서 표시 확인.

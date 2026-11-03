@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+<!-- 세이프티 리그 앱 아이콘 (B안 승급 방패). 앱 리소스 app/src/main/res/drawable/ic_launcher_foreground.xml 과 같은 도형. -->
+<rect width="108" height="108" fill="#24272C"/>
+<g transform="translate(54 54) scale(0.85) translate(-54 -54)">
+<path d="M54 22 L80 31 V54 C80 70 68 80 54 87 C40 80 28 70 28 54 V31 Z" fill="#FFC52E"/>
+<rect x="28" y="31" width="6.5" height="7" fill="#111111"/><rect x="34.5" y="31" width="6.5" height="7" fill="#F4F4F4"/><rect x="41" y="31" width="6.5" height="7" fill="#111111"/><rect x="47.5" y="31" width="6.5" height="7" fill="#F4F4F4"/><rect x="54" y="31" width="6.5" height="7" fill="#111111"/><rect x="60.5" y="31" width="6.5" height="7" fill="#F4F4F4"/><rect x="67" y="31" width="6.5" height="7" fill="#111111"/><rect x="73.5" y="31" width="6.5" height="7" fill="#F4F4F4"/>
+<path d="M38 58 L54 44 L70 58" stroke="#24272C" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38 70 L54 56 L70 70" stroke="#24272C" stroke-opacity=".55" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</g></svg>

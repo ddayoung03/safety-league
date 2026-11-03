@@ -16,4 +16,5 @@
     <color name="colorBackground">#24272C</color>
     <color name="colorSurface">#2E3238</color>
     <color name="colorOnSurface">#F2F1EC</color>
+    <color name="icon_background">#24272C</color>
 </resources>
