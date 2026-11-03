@@ -19,4 +19,6 @@
     <color name="icon_background">#24272C</color>
     <color name="asphalt_light">#30343B</color>
     <color name="asphalt_shadow">#1B1E22</color>
+    <color name="track_empty">#2B2F35</color>
+    <color name="track_qualifying">#5C5A4E</color>
 </resources>

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
+import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
@@ -457,18 +458,7 @@ class MainActivity : AppCompatActivity() {
         val streak = if (real) s!!.streakBeforeToday else DemoData.streakAt("2026-11-06")
         b.tvGoal.text = "70점 넘기면 연속 ${streak + 1}일째"
 
-        val cells = destKm?.let { kotlin.math.ceil(it).toInt() } ?: maxOf(10, doneKm.toInt() + 1)
-        b.layoutTrackBar.removeAllViews()
-        for (i in 0 until cells) {
-            b.layoutTrackBar.addView(View(this).apply {
-                layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
-                setBackgroundColor(if (i < doneKm.toInt()) color(R.color.yellow) else Color.parseColor("#2B2F35"))
-            })
-        }
-        if (destKm != null) b.layoutTrackBar.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(48), dp(36)).apply { setMargins(dp(4), 0, 0, 0) }
-            setBackgroundColor(color(R.color.white))
-        })
+        b.layoutTrackBar.state = DrivingTrackState.from(doneKm, destKm)
     }
 
     // ---------- 피트 보드: 가장 많이 나온 사건 하나만 ----------
