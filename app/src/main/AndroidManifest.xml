@@ -64,6 +64,12 @@
             android:foregroundServiceType="location|dataSync" />
 
         <activity
+            android:name=".ui.PermissionActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.SafetyLeague" />
+
+        <activity
             android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"

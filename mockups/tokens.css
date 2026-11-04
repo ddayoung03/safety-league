@@ -11,6 +11,7 @@
   --yellow: #FFC52E;
   --red: #D42232;
   --gold: #E3B24A;
+  --bronze: #D6A478;
   --line: rgba(255, 255, 255, .10);
   --glass: linear-gradient(180deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025));
 }

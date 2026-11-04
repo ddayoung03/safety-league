@@ -17,9 +17,10 @@ import kotlin.math.abs
  * 트립은 P가 아닌 기어에서 실제로 움직였을 때 시작한다 (P→R→P 주차는 트립 아님).
  */
 class TripCollector(
-    val date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+    var date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
     var streakDays: Int = 0,
     var leagueAvgEfficiency: Double = 0.0,
+    val onTripStarted: () -> Unit = {},
     val onTripCompleted: (CompletedTrip) -> Unit = {}
 ) : VehicleSignalListener {
 
@@ -39,6 +40,7 @@ class TripCollector(
     }
 
     private var gear = GearState.PARK
+    private var tripAvgEfficiency = leagueAvgEfficiency
     var isTracking = false
         private set
 
@@ -86,6 +88,8 @@ class TripCollector(
     val route = mutableListOf<Point2D>()
 
     private fun startTrip(t: Long) {
+        onTripStarted()
+        tripAvgEfficiency = leagueAvgEfficiency
         isTracking = true
         startTimeMs = t
         startOdometerKm = currentOdometerKm
@@ -208,7 +212,7 @@ class TripCollector(
         val detail = ScoreCalculator.calculate(
             TripStats(
                 km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, efficiency,
-                leagueAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
+                tripAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
             )
         )
         val eligible = LeagueCalculator.isEligibleTrip(km)

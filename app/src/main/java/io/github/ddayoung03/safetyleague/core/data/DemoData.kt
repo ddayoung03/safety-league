@@ -13,6 +13,8 @@ import io.github.ddayoung03.safetyleague.core.model.Trip
 object DemoData {
     /** 시연용 아이오닉 5 리그 평균 전비(km/kWh). 가상값. */
     const val leagueAvgEfficiency = 5.8
+    /** 시연용 내연기관 리그 평균 연비(km/L). 가상값. */
+    const val leagueAvgFuelEconomy = 12.0
 
     /** 아쉬운 날(별도 시나리오) 순위표: 나를 제친 해운대드라이버가 목표 */
     val lowBoard = listOf(

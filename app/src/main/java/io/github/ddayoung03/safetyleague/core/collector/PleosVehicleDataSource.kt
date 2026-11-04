@@ -150,7 +150,7 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
 
     private fun registerSpeed(car: Car, l: VehicleSignalListener) {
         val props = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-        props.registerCallback(object : CarPropertyManager.CarPropertyEventCallback {
+        val connected = props.registerCallback(object : CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(value: CarPropertyValue<*>) {
                 (value.value as? Float)?.let { l.onSpeedChanged(it, now()) }
             }
@@ -158,6 +158,7 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
                 problems += "Speed: property error $propId"
             }
         }, VehiclePropertyIds.PERF_VEHICLE_SPEED, CarPropertyManager.SENSOR_RATE_FAST)
+        if (!connected) problems += "Speed: 구독 실패 (CAR_SPEED 권한 확인)"
     }
 
     private fun startLocation(l: VehicleSignalListener) {

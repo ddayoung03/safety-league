@@ -224,4 +224,17 @@ class TripCollectorTest {
         assertNull(trips.firstOrNull())
         assertNotNull(c)
     }
+
+    @Test fun efficiencyBaselineChangesOnlyOnNextTrip() {
+        val c = collector()
+        c.depart(1_000)
+        c.onEfficiencyChanged(5.8, 2_000)
+        c.leagueAvgEfficiency = 12.0
+        c.park(60_000, 110.0)
+        assertEquals(10.0, trips.last().trip.detailScore!!.eco, 0.001)
+        c.depart(70_000, odometer = 110.0)
+        c.onEfficiencyChanged(12.0, 71_000)
+        c.park(120_000, 120.0)
+        assertEquals(10.0, trips.last().trip.detailScore!!.eco, 0.001)
+    }
 }

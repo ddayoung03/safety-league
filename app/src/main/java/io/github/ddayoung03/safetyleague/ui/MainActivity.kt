@@ -1,6 +1,5 @@
 package io.github.ddayoung03.safetyleague.ui
 
-import android.Manifest
 import android.animation.ObjectAnimator
 import android.car.Car
 import android.car.drivingstate.CarUxRestrictionsManager
@@ -19,7 +18,6 @@ import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -29,13 +27,23 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Button
+import android.widget.GridLayout
+import android.view.inputmethod.InputMethodManager
+import io.github.ddayoung03.safetyleague.core.model.VehicleCatalog
+import io.github.ddayoung03.safetyleague.core.model.VehicleProfile
+import io.github.ddayoung03.safetyleague.core.model.Powertrain
+import io.github.ddayoung03.safetyleague.core.collector.VehicleProfileReader
+import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
+import io.github.ddayoung03.safetyleague.databinding.ViewLeaguePlacementBinding
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
+import io.github.ddayoung03.safetyleague.core.calculator.SeasonRanking
+import io.github.ddayoung03.safetyleague.core.calculator.SeasonStanding
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
@@ -61,7 +69,7 @@ import kotlin.math.roundToInt
  */
 class MainActivity : AppCompatActivity() {
 
-    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING }
+    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: TripRepository
@@ -115,16 +123,24 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceDisconnected(name: ComponentName?) { service = null }
     }
 
-    private val permissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startTracking() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!intent.getBooleanExtra(PermissionActivity.EXTRA_ASKED, false) && missingPermissions(this).isNotEmpty()) {
+            startActivity(Intent(this, PermissionActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            finishAndRemoveTask()
+            return
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         repository = TripRepository.getInstance(this)
         setupDemoControls()
-        requestPermissionsThenTrack()
+        startTracking()
+        if (profileStore.load() == null) {
+            val detected = VehicleProfileReader.read(this)
+            if (detected != null) { profileStore.save(detected); show(Screen.PLACEMENT) }
+            else show(Screen.VEHICLE)
+            return
+        }
         if (!handleResultIntent(intent)) {
             val latest = repository.latestCompletedTrip.value
             if (latest != null) showResult(latest) else show(Screen.LEAGUE)
@@ -177,16 +193,6 @@ class MainActivity : AppCompatActivity() {
 
     // ---------- 권한과 서비스 ----------
 
-    private fun requestPermissionsThenTrack() {
-        val wanted = buildList {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            add("pleos.car.permission.FUSED_LOCATION")
-            if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
-        }.filter { ContextCompat.checkSelfPermission(this, it) != android.content.pm.PackageManager.PERMISSION_GRANTED }
-        if (wanted.isEmpty()) startTracking() else permissionRequest.launch(wanted.toTypedArray())
-    }
-
     private fun startTracking() {
         ContextCompat.startForegroundService(this, Intent(this, TripTrackingService::class.java))
     }
@@ -207,10 +213,11 @@ class MainActivity : AppCompatActivity() {
         if (on == restricted) return
         restricted = on
         binding.demoBar.visibility = if (!on && demoMode) View.VISIBLE else View.GONE
-        if (on) show(Screen.DRIVING)
+        if (on) { hideKeyboard(); show(Screen.DRIVING) }
         else if (screen == Screen.DRIVING) {
+            if (profileStore.load() == null) { show(Screen.VEHICLE); return }
             // 멈췄을 때는 트립이 끝났으면 결과, 아니면 리그로
-            repository.latestCompletedTrip.value?.takeIf { it == shownTrip || shownTrip == null }?.let { showResult(it) }
+            repository.latestCompletedTrip.value?.let { showResult(it) }
                 ?: show(Screen.LEAGUE)
         }
     }
@@ -221,6 +228,7 @@ class MainActivity : AppCompatActivity() {
         binding.demoHotspot.setOnLongClickListener {
             if (restricted) return@setOnLongClickListener true
             demoMode = !demoMode
+            if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.LEAGUE) }
             binding.demoBar.visibility = if (demoMode) View.VISIBLE else View.GONE
             updateSdkStatus()
             true
@@ -229,6 +237,7 @@ class MainActivity : AppCompatActivity() {
         binding.tabResultLow.setOnClickListener { demoResultWin = false; shownTrip = null; show(Screen.LOW) }
         binding.tabReplay.setOnClickListener { show(Screen.REPLAY) }
         binding.tabLeague.setOnClickListener { show(Screen.LEAGUE) }
+        binding.tabPlacement.setOnClickListener { show(Screen.PLACEMENT) }
         binding.tabReport.setOnClickListener { show(Screen.REPORT) }
         binding.tabDriving.setOnClickListener { show(Screen.DRIVING) }
         binding.btnWeather.setOnClickListener {
@@ -255,13 +264,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun onTripResult(trip: CompletedTrip) {
         if (restricted) return // 주차(P)하면 제한이 풀리면서 applyRestriction이 결과를 연다
-        if (demoResultWin != null) show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
+        if (service?.lastResultWasDemo == true) show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
         else showResult(trip)
     }
 
     // ---------- 화면 전환 ----------
 
     private fun showResult(trip: CompletedTrip) {
+        if (profileStore.load() == null) { show(Screen.VEHICLE); return }
         demoResultWin = null
         shownTrip = trip
         show(if (trip.trip.score >= 70.0) Screen.WIN else Screen.LOW)
@@ -273,7 +283,7 @@ class MainActivity : AppCompatActivity() {
         screen = target
         drivingBinding = null
         displayedWeather = null
-        if (target == Screen.DRIVING) binding.demoBar.visibility = View.GONE
+        binding.demoBar.visibility = if (target != Screen.DRIVING && demoMode) View.VISIBLE else View.GONE
         binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
         binding.screenContainer.removeAllViews()
@@ -283,6 +293,8 @@ class MainActivity : AppCompatActivity() {
             Screen.REPLAY -> showReplay()
             Screen.LEAGUE -> showLeague()
             Screen.REPORT -> showReport()
+            Screen.VEHICLE -> showVehicleSelection()
+            Screen.PLACEMENT -> showPlacement()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         applySkew(binding.screenContainer)
@@ -335,6 +347,107 @@ class MainActivity : AppCompatActivity() {
     private val today get() = LocalDate.now().toString()
     private val realTrip get() = shownTrip.takeIf { demoResultWin == null }
 
+    private fun hideKeyboard() {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(binding.root.windowToken, 0)
+        currentFocus?.clearFocus()
+    }
+
+    private fun selectVehicle(profile: VehicleProfile) {
+        if (restricted) return
+        profileStore.save(profile.copy(tier = myTier))
+        repository.assignUnassignedTrips(profile.leagueKey)
+        hideKeyboard()
+        demoResultWin = null
+        show(Screen.PLACEMENT)
+    }
+
+    private fun showVehicleSelection() {
+        val b = ViewVehicleSelectionBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
+        fun addChoice(label: String, action: () -> Unit) {
+            val button = Button(this).apply {
+                text = label; textSize = 26f; isAllCaps = false
+                setTextColor(color(R.color.white))
+                backgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.cell))
+                setOnClickListener { if (!restricted) action() }
+            }
+            b.vehicleGrid.addView(button, GridLayout.LayoutParams().apply {
+                width = dp(368); height = dp(96); setMargins(0, 0, dp(16), dp(12))
+            })
+        }
+        VehicleCatalog.vehicles.forEach { v ->
+            addChoice("${v.model} · ${if (v.powertrain == Powertrain.EV) "EV" else "내연기관"}") {
+                selectVehicle(VehicleProfile(v.model, v.powertrain))
+            }
+        }
+        addChoice("기타 차종") {
+            b.vehicleGrid.visibility = View.GONE
+            b.customForm.visibility = View.VISIBLE
+        }
+        b.btnVehicleList.setOnClickListener {
+            hideKeyboard(); b.customForm.visibility = View.GONE; b.vehicleGrid.visibility = View.VISIBLE
+        }
+        b.btnCustomConfirm.setOnClickListener {
+            if (restricted) return@setOnClickListener
+            val profile = VehicleCatalog.manual(b.vehicleName.text.toString(),
+                if (b.powerEv.isChecked) Powertrain.EV else Powertrain.ICE)
+            if (profile == null) b.nameError.text = "차종 이름을 1~20자로 입력해 주세요"
+            else selectVehicle(profile)
+        }
+    }
+
+    private fun showPlacement() {
+        val b = ViewLeaguePlacementBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
+        val profile = profileStore.load() ?: VehicleProfile("아이오닉 5", Powertrain.EV)
+        val now = LocalDate.now()
+        b.placementSeason.text = "${now.year}년 ${now.monthValue}월 시즌"
+        b.placementModel.text = "${profile.model} 리그"
+        b.placementTier.text = "${profile.tier} 단계에 배치되었습니다"
+        b.placementRecognition.visibility = if (profile.recognition == "auto") View.VISIBLE else View.GONE
+        b.btnChangeVehicle.setOnClickListener { show(Screen.VEHICLE) }
+        b.btnStart.setOnClickListener {
+            if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }
+            demoResultWin = null
+            repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
+        }
+    }
+
+    private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
+    private val myTier get() = profileStore.load()?.tier ?: "브론즈"
+    private val myModel get() = profileStore.load()?.model ?: "내 차종"
+    private fun leagueTrips() = repository.getAllTrips(profileStore.load()?.leagueKey)
+    private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = leagueTrips()) =
+        SeasonRanking.calculate(trips, LocalDate.now(), myTier)
+
+    private fun tripsBefore(trip: CompletedTrip) = leagueTrips().toMutableList().apply {
+        if (trip.isEligible) { val index = indexOfLast { it == trip.trip }; if (index >= 0) removeAt(index) }
+    }
+
+    private fun rankChange(trip: CompletedTrip): String {
+        val now = standing().rank ?: return "순위 대기"
+        val before = standing(tripsBefore(trip)).rank ?: return "첫 순위"
+        val diff = before - now
+        return when { diff > 0 -> "▲$diff"; diff < 0 -> "▼${-diff}"; else -> "변동 없음" }
+    }
+
+    private fun promotionText(s: SeasonStanding): String = when {
+        s.rank == null -> "첫 주행을 마치면 순위가 나와요"
+        s.stepsToPromotion == 0 -> "승급권에 진입했어요"
+        else -> "승급까지 ${s.stepsToPromotion}계단 · ${s.pointsToPromotion}점"
+    }
+
+    private fun realRows(container: LinearLayout, s: SeasonStanding, change: String = "") {
+        container.removeAllViews()
+        if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
+        for (r in s.neighbors) {
+            container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else ""))
+            val gap = LeagueCalculator.round1(r.avg - s.average!!)
+            if (r.rank == s.rank - 1 && gap > 0.0) container.addView(note("앞 순위까지 ${gap}점"))
+        }
+    }
+
     // ---------- 1. 결과 카드: 이긴 날 ----------
 
     private fun showResultWin() {
@@ -368,7 +481,19 @@ class MainActivity : AppCompatActivity() {
         b.tvRadioMessage.text = if (t == null) "멋진 레이스였어요!\n오늘 ${before - me}계단 올라섰어요" else "안전하게 완주했어요!\n다음 레이스도 함께해요"
         b.tvRankChange.text = "▲${before - me}"
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
-        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
+        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
+
+        if (t != null) {
+            b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
+            b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
+            b.tvRankChange.text = rankChange(t)
+            b.tvToPromotion.text = promotionText(standing()).substringBefore(" ·")
+            realRows(b.layoutTowerRows, standing(), rankChange(t))
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
+            b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
+            return
+        }
 
         val rows = DemoData.neighbors(day)
         val above = rows.firstOrNull { it.rank == me - 1 }
@@ -396,10 +521,15 @@ class MainActivity : AppCompatActivity() {
         b.kerbBottom.isMuted = true
         b.tvScore.text = (t?.trip?.score?.roundToInt() ?: DemoData.lowDayScore).toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.lowDayKm}km"
-        val streakBefore = if (t != null) service?.streakBeforeToday ?: 0 else DemoData.lowDayStreakBefore
+        val streakBefore = if (t != null) LeagueCalculator.streakAt(tripsBefore(t), today) else DemoData.lowDayStreakBefore
         b.tvStreakChange.text = "${streakBefore}일 → 0일"
-        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
+        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
+        if (t != null) {
+            b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
+            b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
+            b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(today)}일"
+        }
         if (t != null && !t.isEligible) {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
             b.tvScore.text = "–"
@@ -410,6 +540,8 @@ class MainActivity : AppCompatActivity() {
             b.tvPitGain.text = ""
             b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
             b.layoutTowerRows.removeAllViews()
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
             return
         }
 
@@ -418,6 +550,15 @@ class MainActivity : AppCompatActivity() {
         b.tvPitTip.text = pit.tip
         b.tvPitReason.text = pit.reason
         b.tvPitGain.text = pit.gain
+
+        if (t != null) {
+            realRows(b.layoutTowerRows, standing(), rankChange(t))
+            b.layoutTowerRows.addView(note(promotionText(standing())))
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
+            b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
+            return
+        }
 
         val rows = DemoData.lowBoard
         val me = rows.first { it.name == "나" }
@@ -483,6 +624,34 @@ class MainActivity : AppCompatActivity() {
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
+        b.tvTabModel.minHeight = dp(76)
+        b.tvTabModel.setOnClickListener { show(Screen.VEHICLE) }
+        if (!demoMode && demoResultWin == null) {
+            val now = LocalDate.now()
+            val s = standing()
+            repository.latestCompletedTrip.value?.let { latest ->
+                b.btnLeagueBack.visibility = View.VISIBLE
+                b.btnLeagueBack.setOnClickListener { showResult(latest) }
+            }
+            b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myTier 리그"
+            b.tvDaysLeft.text = "${now.lengthOfMonth() - now.dayOfMonth}일 남음"
+            b.tvTabModel.text = myModel
+            b.tvRankCaption.text = "내 순위 · $myTier 리그 397명 중"
+            b.tvBigRank.text = s.rank?.let { "P$it" } ?: "–"
+            b.tvToLine.text = promotionText(s)
+            if (s.rank == null) b.tvToLine.visibility = View.GONE
+            b.tvToLine.textSize = 24f
+            (b.tvSaved.parent.parent as View).visibility = View.GONE
+            for (i in 0 until b.tierBar.childCount) {
+                (b.tierBar.getChildAt(i) as TextView).apply {
+                    setBackgroundColor(color(if (text == myTier) R.color.yellow else R.color.cell))
+                    setTextColor(color(if (text == myTier) R.color.asphalt else R.color.grey))
+                }
+            }
+            realRows(b.layoutLeagueRows, s)
+            if (s.rank != null) b.layoutLeagueRows.addView(note("승급 P${s.promotionRank} · 강등 P${s.demotionRank}"))
+            return
+        }
         val day = "2026-11-09"
         val l = DemoData.league
         val me = DemoData.ranks.getValue(day)

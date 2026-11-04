@@ -88,7 +88,8 @@ data class CompletedTrip(
     val route: List<Point2D>,
     val startTime: String,
     val endTime: String,
-    val isEligible: Boolean
+    val isEligible: Boolean,
+    val leagueKey: String? = null
 )
 
 

@@ -11,6 +11,8 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -40,6 +42,13 @@ class TripTrackingService : Service() {
     private lateinit var pleos: PleosVehicleDataSource
     private val mock = MockVehicleDataSource()
 
+    // 차량 신호 구독은 몇 초씩 걸려서 메인 스레드에서 하면 부팅 직후 ANR이 난다.
+    private val signalThread = HandlerThread("vehicle-signals").apply { start() }
+    private val signals = Handler(signalThread.looper)
+    private var tripLeagueKey: String? = null
+    var lastResultWasDemo = false
+        private set
+
     /** 앱 화면이 앞에 있을 때 MainActivity가 등록한다. */
     var onResult: ((CompletedTrip) -> Unit)? = null
 
@@ -59,10 +68,17 @@ class TripTrackingService : Service() {
             date = LocalDate.now().toString(),
             streakDays = repository.getStreak(LocalDate.now().toString()),
             leagueAvgEfficiency = DemoData.leagueAvgEfficiency,
+            onTripStarted = {
+                val profile = io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this).load()
+                collector.date = LocalDate.now().toString()
+                tripLeagueKey = profile?.leagueKey
+                collector.leagueAvgEfficiency = profile?.averageEfficiency ?: DemoData.leagueAvgEfficiency
+                collector.streakDays = repository.getStreak(LocalDate.now().toString())
+            },
             onTripCompleted = ::onTripFinished
         )
         pleos = PleosVehicleDataSource(this)
-        pleos.startListening(collector)
+        signals.post { pleos.startListening(collector) }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -78,20 +94,23 @@ class TripTrackingService : Service() {
 
     /** 시연 모드 전용: 실제 신호를 잠시 끊고 각본대로 달린 뒤 다시 연결한다. */
     fun runDemo(win: Boolean) {
-        pleos.stopListening()
+        signals.post { pleos.stopListening() }
         mock.startListening(collector)
         if (win) mock.simulateWinDay(speedMultiplier = 15L) else mock.simulateLowDay(speedMultiplier = 15L)
     }
 
     private fun onTripFinished(trip: CompletedTrip) {
-        repository.saveTrip(trip)
+        val isDemo = mockRunning
+        lastResultWasDemo = isDemo
+        val completed = trip.copy(leagueKey = tripLeagueKey)
+        if (!isDemo) repository.saveTrip(completed)
         collector.streakDays = repository.getStreak(LocalDate.now().toString())
         if (mockRunning) {
             mock.stopListening()
-            pleos.startListening(collector)
+            signals.post { pleos.startListening(collector) }
         }
         val shown = onResult
-        if (shown != null) shown(trip) else showResultNotification()
+        if (shown != null) shown(completed) else if (!isDemo) showResultNotification()
     }
 
     private val mockRunning get() = mock.isRunning
@@ -118,7 +137,8 @@ class TripTrackingService : Service() {
     }
 
     override fun onDestroy() {
-        pleos.stopListening()
+        signals.post { pleos.stopListening() }
+        signalThread.quitSafely()
         mock.stopListening()
         super.onDestroy()
     }
