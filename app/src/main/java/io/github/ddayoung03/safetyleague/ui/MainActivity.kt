@@ -44,6 +44,7 @@ import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
 import io.github.ddayoung03.safetyleague.core.calculator.SeasonRanking
 import io.github.ddayoung03.safetyleague.core.calculator.SeasonStanding
+import io.github.ddayoung03.safetyleague.core.calculator.WeeklyReportCalculator
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
@@ -633,6 +634,8 @@ class MainActivity : AppCompatActivity() {
                 b.btnLeagueBack.visibility = View.VISIBLE
                 b.btnLeagueBack.setOnClickListener { showResult(latest) }
             }
+            b.btnLeagueReport.visibility = View.VISIBLE
+            b.btnLeagueReport.setOnClickListener { show(Screen.REPORT) }
             b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myTier 리그"
             b.tvDaysLeft.text = "${now.lengthOfMonth() - now.dayOfMonth}일 남음"
             b.tvTabModel.text = myModel
@@ -685,9 +688,9 @@ class MainActivity : AppCompatActivity() {
     private fun showReport() {
         val b = ViewReportBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
+        if (!demoMode && demoResultWin == null) { showRealReport(b); return }
         val from = LocalDate.parse("2026-11-03")
         val week = (0..6).map { from.plusDays(it.toLong()).toString() }
-        val names = listOf("월", "화", "수", "목", "금", "토", "일")
         val scores = week.map { d -> DemoData.trips.firstOrNull { it.date == d }?.score?.roundToInt() }
         val avg = DemoData.average(week.first(), week.last())
         val last = DemoData.average("2026-10-27", "2026-11-02")
@@ -705,9 +708,35 @@ class MainActivity : AppCompatActivity() {
         b.tvNextPlan.text = "깜빡이 누락만 줄이면 승급 라인까지 ${ranks.last() - line}계단, 평균 +${LeagueCalculator.round1(lineAvg - DemoData.seasonAverage(week.last()))}점이면 돼요"
         b.positionChart.promotionLine = line
         b.positionChart.ranks = ranks
+        scoreBars(b.layoutScoreBars, scores)
+    }
 
+    /** 실제 모드: 이번 주(월~일) 리그 트립으로 채운다. 트립이 없으면 빈 상태. */
+    private fun showRealReport(b: ViewReportBinding) {
+        val r = WeeklyReportCalculator.calculate(leagueTrips(), LocalDate.now(), myTier)
+        b.btnReportBack.visibility = View.VISIBLE
+        b.btnReportBack.setOnClickListener { show(Screen.LEAGUE) }
+        b.tvReportTitle.text = WeeklyReportCalculator.title(r.monday)
+        b.tvReportRange.text = "${WeeklyReportCalculator.range(r.monday, r.sunday)} · 주행 ${r.drivingDays}일" +
+            if (r.km > 0.0) " · ${r.km}km" else ""
+        b.tvWeekAvg.text = r.average?.let { String.format("%.1f", it) } ?: "–"
+        b.tvWeekChange.visibility = if (r.change == null) View.GONE else View.VISIBLE
+        r.change?.let { b.tvWeekChange.text = "지난주보다 ${if (it >= 0.0) "+" else ""}$it" }
+        b.tvLastWeek.text = r.lastWeekAverage?.let { "지난주 ${it}점" } ?: "지난주 기록 없음"
+        b.tvRankCaption.text = "순위 변동 · $myTier 리그"
+        val move = WeeklyReportCalculator.rankMove(r.dailyRanks)
+        b.tvRankMove.text = move ?: "순위 대기"
+        b.positionChart.promotionLine = r.standing.promotionRank
+        b.positionChart.ranks = r.dailyRanks
+        b.positionChart.visibility = if (move == null) View.INVISIBLE else View.VISIBLE
+        b.tvNextPlan.text = WeeklyReportCalculator.nextPlan(r)
+        scoreBars(b.layoutScoreBars, r.dailyScores)
+    }
+
+    private fun scoreBars(container: LinearLayout, scores: List<Int?>) {
+        val names = listOf("월", "화", "수", "목", "금", "토", "일")
         val best = scores.filterNotNull().maxOrNull()
-        b.layoutScoreBars.removeAllViews()
+        container.removeAllViews()
         names.forEachIndexed { i, day ->
             val s = scores[i]
             val col = LinearLayout(this).apply {
@@ -723,7 +752,7 @@ class MainActivity : AppCompatActivity() {
                 setBackgroundColor(when { s == null -> color(R.color.bar_rest); s == best -> color(R.color.yellow); else -> color(R.color.bar_normal) })
             })
             col.addView(text(day, R.color.grey).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
-            b.layoutScoreBars.addView(col)
+            container.addView(col)
         }
     }
 
