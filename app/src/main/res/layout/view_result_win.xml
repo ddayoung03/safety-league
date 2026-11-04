@@ -32,7 +32,7 @@
         android:layout_width="720dp"
         android:layout_height="432dp"
         android:layout_gravity="start|top"
-        android:layout_marginStart="-30dp"
+        android:layout_marginStart="-70dp"
         android:layout_marginTop="110dp" />
 
     <!-- 왼쪽: 시안 좌표 그대로 (top 52 제목, top 96 점수 340, top 430 순위 띠, bottom 56 통계) -->
