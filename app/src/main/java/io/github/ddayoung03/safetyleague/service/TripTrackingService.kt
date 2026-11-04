@@ -40,6 +40,8 @@ class TripTrackingService : Service() {
     private lateinit var pleos: PleosVehicleDataSource
     private val mock = MockVehicleDataSource()
     private var tripLeagueKey: String? = null
+    var lastResultWasDemo = false
+        private set
 
     /** 앱 화면이 앞에 있을 때 MainActivity가 등록한다. */
     var onResult: ((CompletedTrip) -> Unit)? = null
@@ -92,6 +94,7 @@ class TripTrackingService : Service() {
 
     private fun onTripFinished(trip: CompletedTrip) {
         val isDemo = mockRunning
+        lastResultWasDemo = isDemo
         val completed = trip.copy(leagueKey = tripLeagueKey)
         if (!isDemo) repository.saveTrip(completed)
         collector.streakDays = repository.getStreak(LocalDate.now().toString())

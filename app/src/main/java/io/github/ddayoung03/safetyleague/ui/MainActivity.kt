@@ -29,6 +29,15 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Button
+import android.widget.GridLayout
+import android.view.inputmethod.InputMethodManager
+import io.github.ddayoung03.safetyleague.core.model.VehicleCatalog
+import io.github.ddayoung03.safetyleague.core.model.VehicleProfile
+import io.github.ddayoung03.safetyleague.core.model.Powertrain
+import io.github.ddayoung03.safetyleague.core.collector.VehicleProfileReader
+import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
+import io.github.ddayoung03.safetyleague.databinding.ViewLeaguePlacementBinding
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -63,7 +72,7 @@ import kotlin.math.roundToInt
  */
 class MainActivity : AppCompatActivity() {
 
-    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING }
+    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: TripRepository
@@ -127,6 +136,12 @@ class MainActivity : AppCompatActivity() {
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         requestPermissionsThenTrack()
+        if (profileStore.load() == null) {
+            val detected = VehicleProfileReader.read(this)
+            if (detected != null) { profileStore.save(detected); show(Screen.PLACEMENT) }
+            else show(Screen.VEHICLE)
+            return
+        }
         if (!handleResultIntent(intent)) {
             val latest = repository.latestCompletedTrip.value
             if (latest != null) showResult(latest) else show(Screen.LEAGUE)
@@ -209,10 +224,11 @@ class MainActivity : AppCompatActivity() {
         if (on == restricted) return
         restricted = on
         binding.demoBar.visibility = if (!on && demoMode) View.VISIBLE else View.GONE
-        if (on) show(Screen.DRIVING)
+        if (on) { hideKeyboard(); show(Screen.DRIVING) }
         else if (screen == Screen.DRIVING) {
+            if (profileStore.load() == null) { show(Screen.VEHICLE); return }
             // 멈췄을 때는 트립이 끝났으면 결과, 아니면 리그로
-            repository.latestCompletedTrip.value?.takeIf { it == shownTrip || shownTrip == null }?.let { showResult(it) }
+            repository.latestCompletedTrip.value?.let { showResult(it) }
                 ?: show(Screen.LEAGUE)
         }
     }
@@ -223,7 +239,7 @@ class MainActivity : AppCompatActivity() {
         binding.demoHotspot.setOnLongClickListener {
             if (restricted) return@setOnLongClickListener true
             demoMode = !demoMode
-            if (!demoMode) { demoResultWin = null; show(Screen.LEAGUE) }
+            if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.LEAGUE) }
             binding.demoBar.visibility = if (demoMode) View.VISIBLE else View.GONE
             updateSdkStatus()
             true
@@ -232,6 +248,7 @@ class MainActivity : AppCompatActivity() {
         binding.tabResultLow.setOnClickListener { demoResultWin = false; shownTrip = null; show(Screen.LOW) }
         binding.tabReplay.setOnClickListener { show(Screen.REPLAY) }
         binding.tabLeague.setOnClickListener { show(Screen.LEAGUE) }
+        binding.tabPlacement.setOnClickListener { show(Screen.PLACEMENT) }
         binding.tabReport.setOnClickListener { show(Screen.REPORT) }
         binding.tabDriving.setOnClickListener { show(Screen.DRIVING) }
         binding.btnWeather.setOnClickListener {
@@ -258,7 +275,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onTripResult(trip: CompletedTrip) {
         if (restricted) return // 주차(P)하면 제한이 풀리면서 applyRestriction이 결과를 연다
-        if (demoResultWin != null) show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
+        if (service?.lastResultWasDemo == true) show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
         else showResult(trip)
     }
 
@@ -276,7 +293,7 @@ class MainActivity : AppCompatActivity() {
         screen = target
         drivingBinding = null
         displayedWeather = null
-        if (target == Screen.DRIVING) binding.demoBar.visibility = View.GONE
+        binding.demoBar.visibility = if (target != Screen.DRIVING && demoMode) View.VISIBLE else View.GONE
         binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
         binding.screenContainer.removeAllViews()
@@ -286,6 +303,8 @@ class MainActivity : AppCompatActivity() {
             Screen.REPLAY -> showReplay()
             Screen.LEAGUE -> showLeague()
             Screen.REPORT -> showReport()
+            Screen.VEHICLE -> showVehicleSelection()
+            Screen.PLACEMENT -> showPlacement()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         applySkew(binding.screenContainer)
@@ -337,6 +356,72 @@ class MainActivity : AppCompatActivity() {
 
     private val today get() = LocalDate.now().toString()
     private val realTrip get() = shownTrip.takeIf { demoResultWin == null }
+
+    private fun hideKeyboard() {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(binding.root.windowToken, 0)
+        currentFocus?.clearFocus()
+    }
+
+    private fun selectVehicle(profile: VehicleProfile) {
+        if (restricted) return
+        profileStore.save(profile.copy(tier = myTier))
+        hideKeyboard()
+        demoResultWin = null
+        show(Screen.PLACEMENT)
+    }
+
+    private fun showVehicleSelection() {
+        val b = ViewVehicleSelectionBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
+        fun addChoice(label: String, action: () -> Unit) {
+            val button = Button(this).apply {
+                text = label; textSize = 26f; isAllCaps = false
+                setTextColor(color(R.color.white))
+                backgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.cell))
+                setOnClickListener { if (!restricted) action() }
+            }
+            b.vehicleGrid.addView(button, GridLayout.LayoutParams().apply {
+                width = dp(368); height = dp(96); setMargins(0, 0, dp(16), dp(12))
+            })
+        }
+        VehicleCatalog.vehicles.forEach { v ->
+            addChoice("${v.model} · ${if (v.powertrain == Powertrain.EV) "EV" else "내연기관"}") {
+                selectVehicle(VehicleProfile(v.model, v.powertrain))
+            }
+        }
+        addChoice("기타 차종") {
+            b.vehicleGrid.visibility = View.GONE
+            b.customForm.visibility = View.VISIBLE
+        }
+        b.btnVehicleList.setOnClickListener {
+            hideKeyboard(); b.customForm.visibility = View.GONE; b.vehicleGrid.visibility = View.VISIBLE
+        }
+        b.btnCustomConfirm.setOnClickListener {
+            if (restricted) return@setOnClickListener
+            val profile = VehicleCatalog.manual(b.vehicleName.text.toString(),
+                if (b.powerEv.isChecked) Powertrain.EV else Powertrain.ICE)
+            if (profile == null) b.nameError.text = "차종 이름을 1~20자로 입력해 주세요"
+            else selectVehicle(profile)
+        }
+    }
+
+    private fun showPlacement() {
+        val b = ViewLeaguePlacementBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
+        val profile = profileStore.load() ?: VehicleProfile("아이오닉 5", Powertrain.EV)
+        val now = LocalDate.now()
+        b.placementSeason.text = "${now.year}년 ${now.monthValue}월 시즌"
+        b.placementModel.text = "${profile.model} 리그"
+        b.placementTier.text = "${profile.tier} 단계에 배치되었습니다"
+        b.placementRecognition.visibility = if (profile.recognition == "auto") View.VISIBLE else View.GONE
+        b.btnChangeVehicle.setOnClickListener { show(Screen.VEHICLE) }
+        b.btnStart.setOnClickListener {
+            if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }
+            demoResultWin = null
+            repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
+        }
+    }
 
     private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
     private val myTier get() = profileStore.load()?.tier ?: "브론즈"
@@ -541,6 +626,8 @@ class MainActivity : AppCompatActivity() {
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
+        b.tvTabModel.minHeight = dp(76)
+        b.tvTabModel.setOnClickListener { show(Screen.VEHICLE) }
         if (!demoMode && demoResultWin == null) {
             val now = LocalDate.now()
             val s = standing()

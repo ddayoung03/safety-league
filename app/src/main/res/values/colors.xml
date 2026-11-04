@@ -9,6 +9,7 @@
     <color name="yellow">#FFC52E</color>
     <color name="red">#D42232</color>
     <color name="gold">#E3B24A</color>
+    <color name="bronze">#D6A478</color>
 
     <!-- Standard Aliases -->
     <color name="colorPrimary">#FFC52E</color>
