@@ -1,4 +1,4 @@
-﻿package io.github.ddayoung03.safetyleague.weather
+package io.github.ddayoung03.safetyleague.weather
 
 import org.junit.Assert.*
 import org.junit.Test
@@ -44,6 +44,11 @@ class WeatherStateTest {
         assertFalse(gate.allow(1001))
         assertFalse(gate.allow(60999))
         assertTrue(gate.allow(61000))
+    }
+    @Test fun sunTransitionsAnimateButParkedSunDoesNotLoop() {
+        assertTrue(shouldAnimateWeather(true, true, false, true, Weather.SUN))
+        assertFalse(shouldAnimateWeather(true, true, true, false, Weather.SUN))
+        assertFalse(shouldAnimateWeather(false, true, false, true, Weather.SUN))
     }
     @Test fun parkedAnimationNeedsVisibleResumedView() {
         assertTrue(shouldAnimateWeather(true, true, true, false))

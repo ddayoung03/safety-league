@@ -22,8 +22,8 @@ fun isAmbientMotionAllowed(speedMps: Float?, gear: MotionGear): Boolean =
     if (speedMps != null && speedMps.isFinite()) speedMps == 0f
     else gear == MotionGear.PARK || gear == MotionGear.NEUTRAL
 
-fun shouldAnimateWeather(visible: Boolean, resumed: Boolean, still: Boolean, transitioning: Boolean) =
-    visible && resumed && (still || transitioning)
+fun shouldAnimateWeather(visible: Boolean, resumed: Boolean, still: Boolean, transitioning: Boolean, weather: Weather = Weather.RAIN) =
+    visible && resumed && ((still && weather != Weather.SUN) || transitioning)
 
 /** Shared across driving-view recreation so kilometre changes cannot reset the limit. */
 class WeatherTransitionGate {

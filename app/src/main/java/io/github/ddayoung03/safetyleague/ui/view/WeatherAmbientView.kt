@@ -56,9 +56,9 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
         schedule()
     }
 
-    private fun canAnimate() = weather != Weather.SUN && shouldAnimateWeather(
+    private fun canAnimate() = shouldAnimateWeather(
         isShown && isAttachedToWindow, owner?.lifecycle?.currentState == Lifecycle.State.RESUMED,
-        still, transitionStart != null)
+        still, transitionStart != null, weather)
 
     private fun schedule() {
         removeCallbacks(frame)
