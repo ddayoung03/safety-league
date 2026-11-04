@@ -368,7 +368,7 @@ class MainActivity : AppCompatActivity() {
         b.tvRadioMessage.text = if (t == null) "멋진 레이스였어요!\n오늘 ${before - me}계단 올라섰어요" else "안전하게 완주했어요!\n다음 레이스도 함께해요"
         b.tvRankChange.text = "▲${before - me}"
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
-        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
+        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
 
         val rows = DemoData.neighbors(day)
         val above = rows.firstOrNull { it.rank == me - 1 }
@@ -398,7 +398,7 @@ class MainActivity : AppCompatActivity() {
         b.tvKm.text = "${t?.trip?.km ?: DemoData.lowDayKm}km"
         val streakBefore = if (t != null) service?.streakBeforeToday ?: 0 else DemoData.lowDayStreakBefore
         b.tvStreakChange.text = "${streakBefore}일 → 0일"
-        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
+        t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
         if (t != null && !t.isEligible) {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음

@@ -84,14 +84,15 @@ class TripTrackingService : Service() {
     }
 
     private fun onTripFinished(trip: CompletedTrip) {
-        repository.saveTrip(trip)
+        val isDemo = mockRunning
+        if (!isDemo) repository.saveTrip(trip)
         collector.streakDays = repository.getStreak(LocalDate.now().toString())
         if (mockRunning) {
             mock.stopListening()
             pleos.startListening(collector)
         }
         val shown = onResult
-        if (shown != null) shown(trip) else showResultNotification()
+        if (shown != null) shown(trip) else if (!isDemo) showResultNotification()
     }
 
     private val mockRunning get() = mock.isRunning

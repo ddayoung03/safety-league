@@ -2,7 +2,6 @@ package io.github.ddayoung03.safetyleague.core.repository
 
 import android.content.Context
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
-import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.Point2D
@@ -37,8 +36,8 @@ class TripRepository private constructor(private val file: File) {
         persist()
     }
 
-    /** 점수 집계에 쓰는 트립: 시연용 시즌 데이터 + 실제로 달린 유효 트립 */
-    fun getAllTrips(): List<Trip> = DemoData.trips + realTrips.filter { it.isEligible }.map { it.trip }
+    /** 점수 집계에는 실제 유효 트립만 사용한다. */
+    fun getAllTrips(): List<Trip> = realTrips.filter { it.isEligible && it.trip.km >= 3.0 }.map { it.trip }
 
     fun getStreak(untilDate: String): Int = LeagueCalculator.streakAt(getAllTrips(), untilDate)
 
