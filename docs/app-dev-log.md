@@ -304,3 +304,11 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 각 항목 testDebugUnitTest assembleDebug -q 통과(당시 기록: 55개 테스트). 결과·리포트·리플레이 PNG 3장은 captures/review-batch2/에 저장.
 - 남은 것: 검토 9~11번(주행·리그 캡처, v2 작업 기록, 캐릭터 등장 연출). core·mockups 변경 없음, 기존 untracked 로그와 .impeccable 커밋 제외.
 - 복원 근거: 6b1c028의 손상된 추가 부분과 2a7aa93·14f8926·c4569c4·53448fd 커밋 메시지 및 변경 내용. 원문을 확정할 수 없는 문구는 재구성하지 않음.
+
+### 2026-11-04 — design v2 수정 3묶음
+- 1번: 손상된 2묶음 기록 UTF-8 복원(e1f18d7). 2번: 데모 탭과 DesignCanvas를 세로 배치하여 탭이 화면을 덮지 않도록 수정(e56b011). 각각 testDebugUnitTest assembleDebug -q 통과.
+- 원 지시 1번 484bd8c: Pretendard·Saira 및 색 토큰. 2번 bf39b86: 유리 패널·금속 숫자·캐릭터 공통 렌더링. 3번 56a20e3: 이긴 날 캐릭터와 팀 라디오. 4번 e12565f: 아쉬운 날 피트 크루와 라디오.
+- 원 지시 5번 96078d0: 리그 금속 순위·반투명 패널. 6번 84cf149: 리플레이 얼굴·연석. 7번 2a4a15f: 주간 리포트와 리그 제목. 8번 6e78c5c: 주행 위계·숫자 잘림 방지. 10번 4d9b9d3: 지원 여부 확인 후 날씨 배경과 움직임 정책 적용. 이후 검토 수정은 위 1·2묶음 참조.
+- 사용 신호: CarPropertyManager의 WINDSHIELD_WIPERS_STATE, ENV_OUTSIDE_TEMPERATURE, HEADLIGHTS_STATE, PERF_VEHICLE_SPEED, GEAR_SELECTION. Pleos 대체 경로는 checkWiperStateCapabilities / checkLowBeamLightStateCapabilities로 읽기 가능 여부 확인 후 구독.
+- 에뮬레이터 확인: WINDSHIELD_WIPERS_STATE·HEADLIGHTS_STATE는 unsupported or permission denied(Logcat, captures/review-batch3/signals.log). ENV_OUTSIDE_TEMPERATURE는 기존 캡처의 25.0 수신 확인. 속도·기어는 이전 실검증에서 지원 확인. Pleos 와이퍼·하향등은 capability 콜백 경로는 있으나 실제 값 변경 지원은 미검증(오류가 없다는 이유로 지원으로 간주하지 않음).
+- 날씨 신호를 읽지 못하면 기본/시연 값을 사용하고 오류는 Logcat에만 기록. 실제 우천·강설·야간 신호 변화는 실차에서 추가 확인 필요.
