@@ -28,7 +28,7 @@ class FlameScoreView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    var scoreBounds: RectF? = null
+    var protectedBounds: List<RectF> = emptyList()
         set(value) { field = value; invalidate() }
 
     private val flamePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -170,10 +170,11 @@ class FlameScoreView @JvmOverloads constructor(
 
         // 2. 불꽃 파티클 렌더링
         for (p in particles) {
-            // Skip whole particles so the protected rectangle has no visibly cut circles.
-            val protected = scoreBounds
-            if (protected != null && p.x + p.radius > protected.left && p.x - p.radius < protected.right &&
-                p.y + p.radius > protected.top && p.y - p.radius < protected.bottom) continue
+            // Skip whole particles around text, chips, speech panels and controls.
+            if (protectedBounds.any { protected ->
+                p.x + p.radius > protected.left && p.x - p.radius < protected.right &&
+                    p.y + p.radius > protected.top && p.y - p.radius < protected.bottom
+            }) continue
             flamePaint.color = p.color
             flamePaint.alpha = p.alpha
             canvas.drawCircle(p.x, p.y, p.radius, flamePaint)

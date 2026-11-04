@@ -305,12 +305,22 @@ class MainActivity : AppCompatActivity() {
         val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this, streak = true)
         b.routeBg.isBackgroundMode = true
-        b.tvScore.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            val rect = android.graphics.Rect()
-            b.tvScore.getDrawingRect(rect)
-            b.root.offsetDescendantRectToMyCoords(b.tvScore, rect)
-            rect.offset(-b.flameScoreView.left, -b.flameScoreView.top)
-            b.flameScoreView.scoreBounds = android.graphics.RectF(rect)
+        b.root.viewTreeObserver.addOnGlobalLayoutListener {
+            val bounds = mutableListOf<android.graphics.RectF>()
+            fun protect(view: View) {
+                if (view.visibility != View.VISIBLE) return
+                if (view is TextView || view.isClickable || view.background != null && view !== b.root) {
+                    val rect = android.graphics.Rect()
+                    view.getDrawingRect(rect)
+                    b.root.offsetDescendantRectToMyCoords(view, rect)
+                    rect.offset(-b.flameScoreView.left, -b.flameScoreView.top)
+                    rect.inset(-dp(8), -dp(8))
+                    bounds.add(android.graphics.RectF(rect))
+                }
+                if (view is ViewGroup) for (i in 0 until view.childCount) protect(view.getChildAt(i))
+            }
+            protect(b.root)
+            b.flameScoreView.protectedBounds = bounds
         }
         val day = "2026-11-07"
         val t = realTrip
