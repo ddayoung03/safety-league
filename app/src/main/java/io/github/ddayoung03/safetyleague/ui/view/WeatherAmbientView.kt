@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withSave
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.LinearGradient
@@ -114,7 +116,7 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
         paint.alpha = ((if (weather == Weather.NIGHT) 120 else 35) * fade).toInt()
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
         paint.shader = null
-        val saved = canvas.save()
+        canvas.withSave {
         // Match actual XML title, recording label and bottom track, including taller AAOS windows.
         canvas.clipOutRect(50 * d, 40 * d, 650 * d, 120 * d)
         canvas.clipOutRect(50 * d, 150 * d, 1120 * d, 350 * d)
@@ -142,6 +144,6 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
                 canvas.drawPath(moon, paint)
             }
         }
-        canvas.restoreToCount(saved)
+        }
     }
 }

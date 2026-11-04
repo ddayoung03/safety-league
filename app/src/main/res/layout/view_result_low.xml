@@ -86,7 +86,7 @@
             android:src="@drawable/crew_pit_board" android:scaleType="fitCenter" android:importantForAccessibility="no" />
         <TextView android:id="@+id/tv_pit_word" android:layout_width="169dp" android:layout_height="77dp"
             android:layout_marginStart="26dp" android:layout_marginTop="210dp" android:gravity="center"
-            android:text="깜빡이!" android:fontFamily="@font/pretendard_black" android:textSize="34sp" android:textColor="@color/asphalt_deep" />
+            android:text="@string/pit_signal" android:fontFamily="@font/pretendard_black" android:textSize="34sp" android:textColor="@color/asphalt_deep" />
     </FrameLayout>
 
     <!-- 피트 보드: 다음에 고칠 것 하나 -->
@@ -105,7 +105,7 @@
         <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
             <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView android:layout_width="48dp" android:layout_height="48dp" android:layout_marginEnd="10dp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="피트 보드 · 다음 주행 작전" android:textColor="@color/asphalt" android:textSize="24sp" />
+                android:text="@string/pit_title" android:textColor="@color/asphalt" android:textSize="24sp" />
         </LinearLayout>
 
         <TextView

@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withClip
+
 import android.graphics.*
 import android.graphics.drawable.Drawable
 
@@ -29,10 +31,9 @@ class SkewDrawable(color: Int, private val outline: Int? = null, private val den
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = 3 * density
             paint.pathEffect = DashPathEffect(floatArrayOf(10 * density, 8 * density), 0f)
-            canvas.save()
-            canvas.clipPath(path)
-            canvas.drawPath(path, paint)
-            canvas.restore()
+            canvas.withClip(path) {
+                drawPath(path, paint)
+            }
             paint.pathEffect = null
             paint.color = fill
             paint.shader = shader

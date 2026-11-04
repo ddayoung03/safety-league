@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnWeather.setOnClickListener {
             if (restricted) return@setOnClickListener
             demoWeather = Weather.entries[(demoWeather.ordinal + 1) % Weather.entries.size]
-            binding.btnWeather.text = "날씨: ${demoWeather.label}"
+            binding.btnWeather.text = getString(R.string.weather_button, demoWeather.label)
         }
         binding.btnSimWin.setOnClickListener { runDemo(true) }
         binding.btnSimLow.setOnClickListener { runDemo(false) }
@@ -578,7 +578,7 @@ class MainActivity : AppCompatActivity() {
         val changed = displayedWeather != null && displayedWeather != weather
         val transition = changed && weatherGate.allow(android.os.SystemClock.uptimeMillis())
         displayedWeather = weather
-        b.tvWeatherStatus.text = "주행 기록 중 · ${weather.label}"
+        b.tvWeatherStatus.text = getString(R.string.weather_recording, weather.label)
         b.weatherAmbient.setState(weather, isAmbientMotionAllowed(weatherSignals.speedMps, weatherSignals.gear), transition)
     }
 

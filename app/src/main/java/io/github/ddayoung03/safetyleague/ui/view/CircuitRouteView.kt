@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withTranslation
+
 import android.content.Context
 import io.github.ddayoung03.safetyleague.R
 import android.graphics.Canvas
@@ -65,7 +67,7 @@ class CircuitRouteView @JvmOverloads constructor(
     }
 
     private val eventIcons = listOf("lane", "brake", "accel").associateWith {
-        context.getDrawable(replayEventIcon(it))!!
+        androidx.appcompat.content.res.AppCompatResources.getDrawable(context, replayEventIcon(it))!!
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -100,10 +102,9 @@ class CircuitRouteView @JvmOverloads constructor(
         // Shadow below the road, never above event labels.
         roadPaint.strokeWidth = if (isBackgroundMode) 36f * (scale / 6f).coerceAtLeast(1f) else 44f
         roadPaint.color = context.getColor(R.color.shadow)
-        canvas.save()
-        canvas.translate(0f, 8 * resources.displayMetrics.density)
-        canvas.drawPath(path, roadPaint)
-        canvas.restore()
+        canvas.withTranslation(0f, 8 * resources.displayMetrics.density) {
+            drawPath(path, roadPaint)
+        }
         // 1. 도로 아스팔트 베이스
         if (isBackgroundMode) {
             roadPaint.strokeWidth = 36f * (scale / 6f).coerceAtLeast(1f)

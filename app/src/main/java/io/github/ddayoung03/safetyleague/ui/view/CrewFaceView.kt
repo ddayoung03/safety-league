@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withClip
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Path
@@ -20,9 +22,8 @@ class CrewFaceView @JvmOverloads constructor(context: Context, attrs: AttributeS
         clip.addCircle(w / 2f, h / 2f, minOf(w, h) / 2f, Path.Direction.CW)
     }
     override fun draw(canvas: Canvas) {
-        val save = canvas.save()
-        canvas.clipPath(clip)
-        super.draw(canvas)
-        canvas.restoreToCount(save)
+        canvas.withClip(clip) {
+            super.draw(canvas)
+        }
     }
 }

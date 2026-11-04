@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withTranslation
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -28,8 +30,7 @@ class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: Attrib
         val step = cell + gap
         paint.color = line
         canvas.drawRect(0f, 0f, skew + 3 * step - gap, 3 * d, paint)
-        canvas.save()
-        canvas.translate(skew, 36 * d)
+        canvas.withTranslation(skew, 36 * d) {
         canvas.skew(-.249328f, 0f)
         for (i in 0 until state.cells) {
             paint.color = if (i < state.filled) yellow else empty
@@ -38,8 +39,7 @@ class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: Attrib
         }
         paint.alpha = 255
         if (state.hasFinish) {
-            canvas.save()
-            canvas.translate(state.cells * step, 0f)
+            canvas.withTranslation(state.cells * step, 0f) {
             canvas.clipRect(0f, 0f, 60 * d, h)
             // CSS 22px repeating-conic tile contains four 11px squares.
             val tile = 11 * d
@@ -47,9 +47,9 @@ class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: Attrib
                 paint.color = if ((x + y) % 2 == 0) grey else empty
                 canvas.drawRect(x * tile, y * tile, (x + 1) * tile, (y + 1) * tile, paint)
             }
-            canvas.restore()
+            }
         }
-        canvas.restore()
+        }
         val end = if (state.filled == 0) skew else skew + state.filled * step - gap
         val left = (end - 40 * d).coerceIn(0f, (width - 64 * d).coerceAtLeast(0f)).toInt()
         car.setBounds(left, (4 * d).toInt(), left + (64 * d).toInt(), (34 * d).toInt())

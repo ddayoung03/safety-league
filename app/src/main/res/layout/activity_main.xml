@@ -31,7 +31,7 @@
             <Button android:id="@+id/tab_league" style="@style/DemoButton" android:text="리그" />
             <Button android:id="@+id/tab_report" style="@style/DemoButton" android:text="리포트" />
             <Button android:id="@+id/tab_driving" style="@style/DemoButton" android:text="주행 중" />
-            <Button android:id="@+id/btn_weather" style="@style/DemoButton" android:text="날씨: 맑음" />
+            <Button android:id="@+id/btn_weather" style="@style/DemoButton" android:text="@string/weather_button_sun" />
             <Button android:id="@+id/btn_sim_win" style="@style/DemoButton" android:text="이긴 날 시연" />
             <Button android:id="@+id/btn_sim_low" style="@style/DemoButton" android:text="아쉬운 날 시연" />
         </LinearLayout>

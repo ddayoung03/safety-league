@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.core.graphics.withTranslation
+
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -15,8 +17,7 @@ class CheckerFlagView @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onDraw(canvas: Canvas) {
         val d = resources.displayMetrics.density
         val tile = 40 * d
-        canvas.save()
-        canvas.translate(width - 60 * d, 0f)
+        canvas.withTranslation(width - 60 * d, 0f) {
         canvas.skew(-0.249328f, 0f)
         canvas.translate(height * 0.249328f / 2, 0f)
         canvas.clipRect(0f, 0f, 150 * d, height.toFloat())
@@ -24,6 +25,6 @@ class CheckerFlagView @JvmOverloads constructor(context: Context, attrs: Attribu
             paint.color = if ((x + y) % 2 == 0) white else asphalt
             canvas.drawRect(x * tile, y * tile, (x + 1) * tile, (y + 1) * tile, paint)
         }
-        canvas.restore()
+        }
     }
 }

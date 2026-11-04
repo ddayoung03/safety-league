@@ -193,9 +193,9 @@
         android:layout_marginStart="64dp" android:layout_marginTop="458dp" android:orientation="vertical"
         android:background="@drawable/radio_panel" android:elevation="6dp" android:padding="18dp">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="팀 라디오 · 레이스 엔지니어" android:textSize="24sp" android:textColor="@color/yellow" />
+            android:text="@string/radio_title" android:textSize="24sp" android:textColor="@color/yellow" />
         <TextView android:id="@+id/tv_radio_message" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" android:text="멋진 레이스였어요!" android:textSize="26sp" android:textColor="@color/white" />
+            android:layout_marginTop="4dp" android:text="@string/radio_praise" android:textSize="26sp" android:textColor="@color/white" />
     </LinearLayout>
     <!-- 오른쪽 순위 타워 -->
     <LinearLayout
