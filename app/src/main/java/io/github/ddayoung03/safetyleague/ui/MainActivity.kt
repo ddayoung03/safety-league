@@ -199,6 +199,7 @@ class MainActivity : AppCompatActivity() {
             add(Manifest.permission.ACCESS_FINE_LOCATION)
             add(Manifest.permission.ACCESS_COARSE_LOCATION)
             add("pleos.car.permission.FUSED_LOCATION")
+            add(Car.PERMISSION_SPEED)
             if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
         }.filter { ContextCompat.checkSelfPermission(this, it) != android.content.pm.PackageManager.PERMISSION_GRANTED }
         if (wanted.isEmpty()) startTracking() else permissionRequest.launch(wanted.toTypedArray())
@@ -454,7 +455,8 @@ class MainActivity : AppCompatActivity() {
         if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
         for (r in s.neighbors) {
             container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else ""))
-            if (r.rank == s.rank - 1) container.addView(note("앞 순위까지 ${LeagueCalculator.round1(r.avg - s.average!!)}점"))
+            val gap = LeagueCalculator.round1(r.avg - s.average!!)
+            if (r.rank == s.rank - 1 && gap > 0.0) container.addView(note("앞 순위까지 ${gap}점"))
         }
     }
 
@@ -497,7 +499,7 @@ class MainActivity : AppCompatActivity() {
             b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
             b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
             b.tvRankChange.text = rankChange(t)
-            b.tvToPromotion.text = promotionText(standing())
+            b.tvToPromotion.text = promotionText(standing()).substringBefore(" ·")
             realRows(b.layoutTowerRows, standing(), rankChange(t))
             b.btnLeague.visibility = View.VISIBLE
             b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
@@ -649,6 +651,7 @@ class MainActivity : AppCompatActivity() {
             b.tvRankCaption.text = "내 순위 · $myTier 리그 397명 중"
             b.tvBigRank.text = s.rank?.let { "P$it" } ?: "–"
             b.tvToLine.text = promotionText(s)
+            if (s.rank == null) b.tvToLine.visibility = View.GONE
             b.tvToLine.textSize = 24f
             (b.tvSaved.parent.parent as View).visibility = View.GONE
             for (i in 0 until b.tierBar.childCount) {

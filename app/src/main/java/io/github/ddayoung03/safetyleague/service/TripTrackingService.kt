@@ -76,6 +76,8 @@ class TripTrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // 권한을 받기 전에 서비스가 먼저 떠서 속도 구독이 실패했으면 다시 연결한다.
+        pleos.retrySpeed()
         // 위치 권한이 있을 때만 location 타입으로 (없이 location 타입이면 API 34에서 SecurityException)
         val canLocate = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
