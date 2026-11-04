@@ -48,12 +48,12 @@ class PositionChartView @JvmOverloads constructor(
         color = Color.parseColor("#9BA1A8")
     }
     private val rankPaint = Paint(textPaint).apply { typeface = Typeface.create(numberFont, Typeface.ITALIC) }
-    private val dayFont: Typeface? = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.black_han_sans)
+    private val dayFont: Typeface? = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.pretendard_bold)
 
     private val highlightTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 26f * resources.displayMetrics.scaledDensity
         color = Color.parseColor("#FFC52E")
-        if (!isInEditMode) typeface = ResourcesCompat.getFont(context, R.font.black_han_sans)
+        if (!isInEditMode) typeface = ResourcesCompat.getFont(context, R.font.pretendard_bold)
         textAlign = Paint.Align.CENTER
     }
 
@@ -83,7 +83,7 @@ class PositionChartView @JvmOverloads constructor(
 
         val paddingLeft = 80f
         val paddingRight = 40f
-        val paddingTop = 40f
+        val paddingTop = -highlightTextPaint.fontMetrics.ascent + 20f
         val paddingBottom = 60f
 
         val chartW = width - paddingLeft - paddingRight
@@ -105,7 +105,7 @@ class PositionChartView @JvmOverloads constructor(
                 // 승급 라인 (노란 점선)
                 canvas.drawLine(paddingLeft, gy, width - paddingRight, gy, promoPaint)
                 highlightTextPaint.textAlign = Paint.Align.RIGHT
-                canvas.drawText("승급 라인 P$promotionLine", width - paddingRight, gy - 16f, highlightTextPaint)
+                canvas.drawText("승급 라인", width - paddingRight, gy - 16f, highlightTextPaint)
             } else {
                 canvas.drawLine(paddingLeft, gy, width - paddingRight, gy, gridPaint)
                 rankPaint.textAlign = Paint.Align.RIGHT

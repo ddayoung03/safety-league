@@ -1,12 +1,22 @@
 package io.github.ddayoung03.safetyleague.ui
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.car.Car
 import android.car.drivingstate.CarUxRestrictionsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.drawable.ColorDrawable
+import android.view.ViewGroup
+import android.widget.ImageView
+import io.github.ddayoung03.safetyleague.ui.view.replayEventIcon
+import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
+import io.github.ddayoung03.safetyleague.ui.view.canAnimateCrew
+import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
+import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
+import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
@@ -39,6 +49,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewReportBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewResultLowBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewResultWinBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
+import io.github.ddayoung03.safetyleague.weather.*
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -66,13 +77,29 @@ class MainActivity : AppCompatActivity() {
     /** 결과 카드와 리플레이가 보여 줄 실제 트립 (없으면 시연 데이터) */
     private var shownTrip: CompletedTrip? = null
     private var drivingKmShown = -1
+    private var drivingBinding: ViewDrivingBinding? = null
+    private var weatherSignals = WeatherSignals()
+    private val weatherGate = WeatherTransitionGate()
+    private var displayedWeather: Weather? = null
+    private var demoWeather = Weather.SUN
+    private var crewAnimator: ObjectAnimator? = null
+    private val weatherSource by lazy {
+        VehicleWeatherSource(this) { signals ->
+            runOnUiThread {
+                weatherSignals = signals
+                if (!crewMotionAllowed()) stopCrewEntrance()
+                updateWeather()
+            }
+        }
+    }
 
     private val handler = Handler(Looper.getMainLooper())
     private val drivingTick = object : Runnable {
         override fun run() {
             if (screen == Screen.DRIVING) {
                 val km = service?.currentTripKm?.toInt() ?: 0
-                if (km != drivingKmShown) showDriving() // 1km 단위로만 다시 그린다
+                if (km != drivingKmShown) updateDrivingProgress() // keep weather phase and transition gate
+                updateWeather()
                 handler.postDelayed(this, 5_000)
             }
         }
@@ -119,9 +146,25 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         bindService(Intent(this, TripTrackingService::class.java), connection, Context.BIND_AUTO_CREATE)
         connectUxRestrictions()
+        weatherSource.start()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (screen == Screen.DRIVING) {
+            handler.removeCallbacks(drivingTick)
+            handler.postDelayed(drivingTick, 5_000)
+        }
+    }
+
+    override fun onPause() {
+        stopCrewEntrance()
+        handler.removeCallbacks(drivingTick)
+        super.onPause()
     }
 
     override fun onStop() {
+        weatherSource.stop()
         service?.onResult = null
         runCatching { unbindService(connection) }
         service = null
@@ -157,7 +200,7 @@ class MainActivity : AppCompatActivity() {
                 applyRestriction(m.currentCarUxRestrictions?.isRequiresDistractionOptimization == true)
                 m.registerListener { r -> runOnUiThread { applyRestriction(r.isRequiresDistractionOptimization) } }
             }
-        }.onFailure { binding.tvSdkStatus.text = "주행 제한 정보 연결 실패: ${it.message}" }
+        }.onFailure { android.util.Log.w("VehicleSignals", "Driving restriction connection failed", it) }
     }
 
     private fun applyRestriction(on: Boolean) {
@@ -188,6 +231,11 @@ class MainActivity : AppCompatActivity() {
         binding.tabLeague.setOnClickListener { show(Screen.LEAGUE) }
         binding.tabReport.setOnClickListener { show(Screen.REPORT) }
         binding.tabDriving.setOnClickListener { show(Screen.DRIVING) }
+        binding.btnWeather.setOnClickListener {
+            if (restricted) return@setOnClickListener
+            demoWeather = Weather.entries[(demoWeather.ordinal + 1) % Weather.entries.size]
+            binding.btnWeather.text = getString(R.string.weather_button, demoWeather.label)
+        }
         binding.btnSimWin.setOnClickListener { runDemo(true) }
         binding.btnSimLow.setOnClickListener { runDemo(false) }
     }
@@ -200,9 +248,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateSdkStatus() {
-        val problems = service?.sdkProblems.orEmpty()
-        binding.tvSdkStatus.visibility = if (demoMode && problems.isNotEmpty()) View.VISIBLE else View.GONE
-        binding.tvSdkStatus.text = "차량 신호 연결 문제\n" + problems.joinToString("\n")
+        val problems = service?.sdkProblems.orEmpty() + weatherSource.problems
+        binding.tvSdkStatus.visibility = View.GONE
+        if (problems.isNotEmpty()) android.util.Log.w("VehicleSignals", problems.joinToString("\n"))
     }
 
     private fun onTripResult(trip: CompletedTrip) {
@@ -221,7 +269,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun show(target: Screen) {
         if (restricted && target != Screen.DRIVING) return
+        stopCrewEntrance()
         screen = target
+        drivingBinding = null
+        displayedWeather = null
+        if (target == Screen.DRIVING) binding.demoBar.visibility = View.GONE
+        binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
         binding.screenContainer.removeAllViews()
         when (target) {
@@ -232,6 +285,51 @@ class MainActivity : AppCompatActivity() {
             Screen.REPORT -> showReport()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
+        applySkew(binding.screenContainer)
+        if (target == Screen.WIN || target == Screen.LOW) {
+            binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
+                crew.post {
+                    if (crew.isShown && crewMotionAllowed()) {
+                        crewAnimator = ObjectAnimator.ofFloat(crew, View.TRANSLATION_Y, dp(12).toFloat(), 0f).apply {
+                            duration = 280
+                            // Eight position changes in 280ms keep visual motion below 30fps.
+                            interpolator = android.animation.TimeInterpolator { fraction -> (fraction * 8).toInt() / 8f }
+                            start()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun crewMotionAllowed() = canAnimateCrew(weatherSignals.gear, weatherSignals.speedMps,
+        lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted)
+
+    private fun stopCrewEntrance() {
+        crewAnimator?.let { animation ->
+            animation.cancel()
+            (animation.target as? View)?.translationY = 0f
+        }
+        crewAnimator = null
+    }
+
+    private fun applySkew(view: View) {
+        (view.background as? ColorDrawable)?.let { original ->
+            val shade = original.color
+            if (view.tag == "skew") {
+                val gradient = when (shade) {
+                    color(R.color.yellow) -> intArrayOf(color(R.color.yellow_light), shade, color(R.color.yellow_dark))
+                    color(R.color.white) -> intArrayOf(color(R.color.metal_top), color(R.color.white_bottom))
+                    color(R.color.cell) -> intArrayOf(color(R.color.glass_top), color(R.color.glass_bottom))
+                    else -> null
+                }
+                view.background = SkewDrawable(shade, density = resources.displayMetrics.density, gradientColors = gradient)
+            } else if (shade == color(R.color.cell)) {
+                view.background = GlassDrawable(this)
+                view.elevation = dp(3).toFloat()
+            }
+        }
+        if (view is ViewGroup) for (i in 0 until view.childCount) applySkew(view.getChildAt(i))
     }
 
     private val today get() = LocalDate.now().toString()
@@ -241,6 +339,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultWin() {
         val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this, streak = true)
+        b.routeBg.isBackgroundMode = true
+        b.root.viewTreeObserver.addOnGlobalLayoutListener {
+            val bounds = mutableListOf<android.graphics.RectF>()
+            fun protect(view: View) {
+                if (view.visibility != View.VISIBLE) return
+                if (view is TextView || view.isClickable || view.background != null && view !== b.root) {
+                    val rect = android.graphics.Rect()
+                    view.getDrawingRect(rect)
+                    b.root.offsetDescendantRectToMyCoords(view, rect)
+                    rect.offset(-b.flameScoreView.left, -b.flameScoreView.top)
+                    rect.inset(-dp(8), -dp(8))
+                    bounds.add(android.graphics.RectF(rect))
+                }
+                if (view is ViewGroup) for (i in 0 until view.childCount) protect(view.getChildAt(i))
+            }
+            protect(b.root)
+            b.flameScoreView.protectedBounds = bounds
+        }
         val day = "2026-11-07"
         val t = realTrip
         val me = DemoData.ranks.getValue(day)
@@ -248,6 +365,7 @@ class MainActivity : AppCompatActivity() {
         b.tvScore.text = (t?.trip?.score ?: DemoData.trips.first { it.date == day }.score).roundToInt().toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
         b.tvStreak.text = "${if (t != null) repository.getStreak(today) else DemoData.streakAt(day)}일"
+        b.tvRadioMessage.text = if (t == null) "멋진 레이스였어요!\n오늘 ${before - me}계단 올라섰어요" else "안전하게 완주했어요!\n다음 레이스도 함께해요"
         b.tvRankChange.text = "▲${before - me}"
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route).ifEmpty { DemoData.route } }
@@ -270,6 +388,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResultLow() {
         val b = ViewResultLowBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this, streak = true)
+        b.tvScore.dull = true
+        b.routeBg.isBackgroundMode = true
         val t = realTrip
         b.kerbTop.isMuted = true
         b.kerbBottom.isMuted = true
@@ -283,6 +404,7 @@ class MainActivity : AppCompatActivity() {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
             b.tvScore.text = "–"
             b.tvStreakChange.text = "${streakBefore}일 그대로"
+            b.tvPitWord.text = "다음에!"
             b.tvPitTip.text = "3km 이상 달리면 기록돼요"
             b.tvPitReason.text = "이번 주행 ${t.trip.km}km"
             b.tvPitGain.text = ""
@@ -292,6 +414,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pit = pitBoard(t?.events ?: DemoData.lowDayEvents, t?.trip?.detailScore, demo = t == null)
+        b.tvPitWord.text = when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
         b.tvPitTip.text = pit.tip
         b.tvPitReason.text = pit.reason
         b.tvPitGain.text = pit.gain
@@ -314,6 +437,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showReplay() {
         val b = ViewReplayBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val t = realTrip
         val events: List<ReplayEvent> = t?.events ?: DemoData.lowDayEvents
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
@@ -338,6 +462,13 @@ class MainActivity : AppCompatActivity() {
                     .apply { setMargins(0, dp(4), 0, dp(4)) }
             }
             item.addView(text(e.at, R.color.grey, 26f, number = true).apply { minWidth = dp(90) })
+            item.addView(ImageView(this).apply {
+                setImageResource(replayEventIcon(e.kind))
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                layoutParams = LinearLayout.LayoutParams(dp(36), dp(36)).apply {
+                    marginEnd = dp(12)
+                }
+            })
             item.addView(text(names[e.kind] ?: e.kind, if (e.kind == "lane") R.color.yellow else R.color.white))
             b.layoutEventList.addView(item)
         }
@@ -351,6 +482,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val day = "2026-11-09"
         val l = DemoData.league
         val me = DemoData.ranks.getValue(day)
@@ -383,6 +515,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showReport() {
         val b = ViewReportBinding.inflate(layoutInflater, binding.screenContainer, true)
+        b.root.background = AsphaltDrawable(this)
         val from = LocalDate.parse("2026-11-03")
         val week = (0..6).map { from.plusDays(it.toLong()).toString() }
         val names = listOf("월", "화", "수", "목", "금", "토", "일")
@@ -418,7 +551,7 @@ class MainActivity : AppCompatActivity() {
             col.addView(View(this).apply {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     if (s == null) dp(4) else dp(((s - 60) / 40f * 150).roundToInt().coerceIn(16, 150)))
-                setBackgroundColor(when { s == null -> Color.parseColor("#3A3E45"); s == best -> color(R.color.yellow); else -> Color.parseColor("#4A4F57") })
+                setBackgroundColor(when { s == null -> color(R.color.bar_rest); s == best -> color(R.color.yellow); else -> color(R.color.bar_normal) })
             })
             col.addView(text(day, R.color.grey).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
             b.layoutScoreBars.addView(col)
@@ -430,27 +563,36 @@ class MainActivity : AppCompatActivity() {
     private fun showDriving() {
         binding.screenContainer.removeAllViews()
         val b = ViewDrivingBinding.inflate(layoutInflater, binding.screenContainer, true)
+        drivingBinding = b
+        b.root.background = AsphaltDrawable(this, subdued = true)
+        updateDrivingProgress()
+        updateWeather()
+    }
+
+    private fun updateWeather() {
+        val b = drivingBinding ?: return
+        // System night appearance is a fallback when lighting data is absent; no invented sunset time.
+        val night = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val weather = if (demoMode && !restricted) demoWeather else inferWeather(weatherSignals, night)
+        val changed = displayedWeather != null && displayedWeather != weather
+        val transition = changed && weatherGate.allow(android.os.SystemClock.uptimeMillis())
+        displayedWeather = weather
+        b.tvWeatherStatus.text = getString(R.string.weather_recording, weather.label)
+        b.weatherAmbient.setState(weather, isAmbientMotionAllowed(weatherSignals.speedMps, weatherSignals.gear), transition)
+    }
+
+    private fun updateDrivingProgress() {
+        val b = drivingBinding ?: return
         val s = service
         val real = s?.isTracking == true && demoResultWin == null
         val doneKm = if (real) s!!.currentTripKm else 11.2
         val destKm: Double? = if (real) null else DemoData.trips.first { it.date == "2026-11-07" }.km // 내비 목적지가 없으면 null
         drivingKmShown = doneKm.toInt()
         b.tvProgress.text = if (destKm != null) "${LeagueCalculator.round1(doneKm)} / ${destKm}km · 해운대까지" else "${LeagueCalculator.round1(doneKm)}km 기록됨"
-        val streak = if (real) s!!.streakBeforeToday else DemoData.streakAt("2026-11-06")
-        b.tvGoal.text = "70점 넘기면 연속 ${streak + 1}일째"
+        b.tvGoal.text = "안전하게, 다음 한 칸까지"
 
-        val cells = destKm?.let { kotlin.math.ceil(it).toInt() } ?: maxOf(10, doneKm.toInt() + 1)
-        b.layoutTrackBar.removeAllViews()
-        for (i in 0 until cells) {
-            b.layoutTrackBar.addView(View(this).apply {
-                layoutParams = LinearLayout.LayoutParams(0, dp(44), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
-                setBackgroundColor(if (i < doneKm.toInt()) color(R.color.yellow) else Color.parseColor("#2B2F35"))
-            })
-        }
-        if (destKm != null) b.layoutTrackBar.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(48), dp(36)).apply { setMargins(dp(4), 0, 0, 0) }
-            setBackgroundColor(color(R.color.white))
-        })
+        b.layoutTrackBar.state = DrivingTrackState.from(doneKm, destKm)
     }
 
     // ---------- 피트 보드: 가장 많이 나온 사건 하나만 ----------
@@ -518,7 +660,11 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(if (isMe) size.meH else size.h))
                 .apply { if (isMe) setMargins(-dp(size.meOut), dp(size.meTop), 0, dp(size.meBottom)) else setMargins(0, 0, 0, dp(6)) }
             setPadding(dp(20), 0, dp(20), 0)
-            setBackgroundResource(if (isMe) size.meBg else R.color.cell)
+            background = SkewDrawable(color(if (isMe) size.meBg else R.color.cell), density = resources.displayMetrics.density,
+                gradientColors = (if (isMe && size.meBg == R.color.yellow) intArrayOf(R.color.yellow_light, R.color.yellow, R.color.yellow_dark)
+                else if (isMe) intArrayOf(R.color.metal_top, R.color.white_bottom)
+                else intArrayOf(R.color.glass_top, R.color.glass_bottom)).map(::color).toIntArray())
+            elevation = dp(if (isMe) 8 else 3).toFloat()
         }
         val fg = when {
             isMe -> R.color.asphalt
@@ -537,7 +683,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundResource(if (tag == "추월") R.color.red else R.color.yellow)
         })
         row.addView(text(String.format("%.1f", r.avg), fg, size.s, number = true).apply { setPadding(dp(16), 0, paddingEnd, 0) })
-        if (target) row.setBackgroundResource(R.drawable.shape_target_row)
+        if (target) row.background = SkewDrawable(color(R.color.cell), color(R.color.yellow), resources.displayMetrics.density)
         return row
     }
 }

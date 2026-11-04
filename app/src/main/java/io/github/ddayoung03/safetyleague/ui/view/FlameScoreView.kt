@@ -1,7 +1,14 @@
 package io.github.ddayoung03.safetyleague.ui.view
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.RectF
+import androidx.core.graphics.ColorUtils
+import io.github.ddayoung03.safetyleague.R
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -20,6 +27,9 @@ class FlameScoreView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
+    var protectedBounds: List<RectF> = emptyList()
+        set(value) { field = value; invalidate() }
 
     private val flamePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -47,9 +57,22 @@ class FlameScoreView @JvmOverloads constructor(
     private var glowPulse = 0f
 
 
+    private var owner: LifecycleOwner? = null
+    private val observer = object : DefaultLifecycleObserver {
+        override fun onResume(owner: LifecycleOwner) { if (isShown) startFlameAnimation() }
+        override fun onPause(owner: LifecycleOwner) { stopFlameAnimation() }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        owner = findViewTreeLifecycleOwner()
+        owner?.lifecycle?.addObserver(observer)
+    }
+
     private var lastFrameMs = 0L
 
     fun startFlameAnimation() {
+        if (!isShown || owner?.lifecycle?.currentState != Lifecycle.State.RESUMED) return
         if (animator?.isRunning == true) return
         animator?.cancel()
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -58,7 +81,7 @@ class FlameScoreView @JvmOverloads constructor(
             interpolator = LinearInterpolator()
             addUpdateListener {
                 val now = android.os.SystemClock.uptimeMillis()
-                if (now - lastFrameMs < 33) return@addUpdateListener // 30fps 상한
+                if (now - lastFrameMs < 34) return@addUpdateListener // 30fps 상한
                 lastFrameMs = now
                 glowPulse = it.animatedValue as Float
                 updateParticles()
@@ -86,9 +109,9 @@ class FlameScoreView @JvmOverloads constructor(
             val py = spawnY + Random.nextFloat() * (height * 0.1f)
             val pLife = 30f + Random.nextFloat() * 40f
             val pColor = when (Random.nextInt(3)) {
-                0 -> Color.argb(220, 255, 197, 46) // 차선 노랑 (#FFC52E)
-                1 -> Color.argb(200, 200, 16, 46)  // 레이스 레드 (#C8102E)
-                else -> Color.argb(240, 255, 120, 0) // 주황 화염
+                0 -> ColorUtils.setAlphaComponent(context.getColor(R.color.yellow), 220) // 차선 노랑 (#FFC52E)
+                1 -> ColorUtils.setAlphaComponent(context.getColor(R.color.red), 200)  // 레이스 레드 (#C8102E)
+                else -> ColorUtils.setAlphaComponent(context.getColor(R.color.flame_orange), 240) // 주황 화염
             }
 
             particles.add(
@@ -136,8 +159,8 @@ class FlameScoreView @JvmOverloads constructor(
         glowPaint.shader = RadialGradient(
             cx, cy, glowRadius,
             intArrayOf(
-                Color.argb(70, 255, 160, 20),
-                Color.argb(30, 200, 16, 46),
+                ColorUtils.setAlphaComponent(context.getColor(R.color.flame_glow), 70),
+                ColorUtils.setAlphaComponent(context.getColor(R.color.red), 30),
                 Color.TRANSPARENT
             ),
             floatArrayOf(0f, 0.6f, 1f),
@@ -147,6 +170,11 @@ class FlameScoreView @JvmOverloads constructor(
 
         // 2. 불꽃 파티클 렌더링
         for (p in particles) {
+            // Skip whole particles around text, chips, speech panels and controls.
+            if (protectedBounds.any { protected ->
+                p.x + p.radius > protected.left && p.x - p.radius < protected.right &&
+                    p.y + p.radius > protected.top && p.y - p.radius < protected.bottom
+            }) continue
             flamePaint.color = p.color
             flamePaint.alpha = p.alpha
             canvas.drawCircle(p.x, p.y, p.radius, flamePaint)
@@ -160,6 +188,8 @@ class FlameScoreView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        owner?.lifecycle?.removeObserver(observer)
+        owner = null
         stopFlameAnimation()
         super.onDetachedFromWindow()
     }

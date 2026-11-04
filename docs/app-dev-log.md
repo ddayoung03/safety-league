@@ -259,3 +259,71 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 에뮬레이터에서 6개 화면 캡처로 확인. 남은 것: 레이싱 개성 요소(체커 띠, 기울어진 행, 주행 중 실루엣·차 아이콘·결승 체커), 이긴 날 불꽃이 점수를 덮는 문제.
 - 같은 날 추가: 기울임 숫자 잘림("88.8"의 마지막 8, "92"의 2, 순위 표 "89.7"의 7). Saira는 똑바른 글꼴이고 기울임은 Android가 비틀어 그리는 가짜 기울임이라 오른쪽 끝이 글자 칸 밖으로 나온다. TextView는 패딩 안쪽으로 잘라 그리므로 여백만으로는 안 됨 → 글자 크기 20%만큼 오른쪽 여백 + 같은 반경의 거의 투명한 그림자(TextView가 그림자 반경만큼 그리는 범위를 넓힘). XML에서 그림자 색을 완전 투명(#00000000)으로 주면 무시되므로 #01000000. 코드의 `text(number = true)`도 같은 처리. 여백 때문에 생긴 줄바꿈(리그 P125, 아쉬운 날 연속 기록 안내)과 "점" 간격도 맞춤.
 - 같은 날: 재시작 후 에뮬레이터가 부팅 직후 반복 종료 → Windows 오류 기록상 NVIDIA OpenGL 드라이버 TDR(nvoglv64.dll). `-gpu swiftshader_indirect`(소프트웨어 그리기)로 띄우면 안정적. 해결: NVIDIA 드라이버 577.05(2025-08) → 617.42(2026-09-30) 업데이트 후 `pleos.md`대로 GPU host·cold boot로 부팅 50초, 6개 화면 렌더링·불꽃 화면 3분 띄워도 종료 없음. 소프트웨어 그리기는 더 쓰지 않는다.
+## 2026-11-03 Codex polish — 1. 기울어진 배경
+- 공용 `SkewDrawable`: -14° 평행사변형 배경, 글자·터치 영역은 수평 유지. 순위 행, 리플레이 버튼, 리그 탭·티어·승급 알약, 리포트·리플레이 작전 띠 적용.
+- 목표 행의 노란 점선을 같은 경로에 유지. 기존 색 토큰 사용, core 변경 없음.
+- 검증: `testDebugUnitTest assembleDebug` 성공. 화면 비교는 5개 항목 적용 후 함께 진행.
+
+## 2026-11-03 Codex polish — 2. 체커기 띠
+- 이긴 날 오른쪽에 폭 150dp, 오른쪽 90dp 넘침, 중심 기준 -14° 기울임, 40dp 체커, alpha 0.85 적용. 화면 가장자리에서 잘리며 다른 화면에는 표시하지 않음.
+- 검증: `testDebugUnitTest assembleDebug` 성공. Pleos_Connect cold boot 부팅 확인.
+
+## 2026-11-03 Codex polish — 3. 아스팔트 배경
+- 결과 2장·리플레이·리그·리포트에 타원형 방사 조명과 240×240 고정 노이즈 타일 반복 적용. 타일은 최초 한 번 생성하고 재사용하며 프레임마다 생성하지 않음.
+- 주행 중은 기존 바탕 위 조명·노이즈 강도를 0.5로 낮춤. 조명 색상은 colors.xml 토큰 추가.
+- 검증: `testDebugUnitTest assembleDebug` 성공. 다음 항목의 미구현 테스트가 먼저 포함되어 실패한 실행은 분리 후 재검증.
+
+## 2026-11-03 Codex polish — 4. 주행 중 화면
+- 시안 SVG를 VectorDrawable로 옮겨 480×176dp, 오른쪽 70dp·위 318dp, alpha 0.18 실루엣 적용. 자동차도 64×30dp 벡터로 구현.
+- 정수 km 상태에 따라 채워지는 -14° 트랙, 목적지가 있을 때만 60dp 결승 칸(22dp 체커 타일), 앞 3칸에 맞춘 밑줄. 자동차는 마지막 채운 칸 끝으로 즉시 이동하며 animator 없음.
+- 실제 목적지 미연동 상태는 기존대로 결승 칸 없이 늘어남. UI 상태 계산만 ui/view에 분리, core 변경 없음.
+- 검증: DrivingTrackStateTest 3개(1km 경계·목적지 없음·도착 초과), 미구현 실패 확인 후 구현. `testDebugUnitTest assembleDebug` 성공.
+
+## 2026-11-03 Codex polish — 5. 점수 영역 불꽃 제외
+- 실제 점수 TextView의 배치 영역을 불꽃 좌표로 변환해 영역에 닿는 입자 전체를 제외. 숫자 뒤의 은은한 조명과 주변 불꽃 모션은 유지.
+- 불꽃·비 효과가 Lifecycle onPause에서 멈추고 onResume 및 실제 표시 여부에 따라 재개. 프레임 간격 34ms로 30fps 이내 유지. 불꽃 색상은 colors.xml 토큰으로 이동.
+- 검증: `testDebugUnitTest assembleDebug` 성공, APK를 Pleos_Connect에 설치·실행. 최종 화면 비교 진행 중.
+
+### 최종 검증 및 검토
+- `testDebugUnitTest assembleDebug lintDebug` 성공. 단위 테스트 42개, 실패 0. `core/` 변경 없음.
+- 독립 코드 검토에서 긴 주행(약 185km 이후)의 고정 간격으로 칸 너비가 음수가 되는 경우 발견. 185/500/1000km 회귀 테스트 실패 재현 후 칸 수에 따라 간격을 줄여 해결.
+- Pleos_Connect GPU host·cold boot, 최종 APK 설치·실행. 6개 화면 캡처와 시안 나란히 비교, 점수·순위·문구 잘림 없음. 아쉬운 날은 회색 연석·빨강 없음. 주행 실루엣은 글자와 분리됨.
+- 캡처·비교 자료: 로컬 `captures/polish/` (원본 6장, `*-compare.png`, `comparison-sheet.png`; git 제외). Pleos의 더 긴 세로 영역을 사용하는 기존 배치 차이는 유지.
+- 불꽃은 숫자 영역에 닿는 원 전체를 숨겨 반원으로 잘리는 경계도 방지. 일시정지·재개는 Lifecycle 연결을 코드 검토로 확인; 별도 계측 테스트는 하지 않음.
+- main 병합·push 없음. 기존 미추적 `.impeccable/` 보존. 후속 검토: Claude의 브랜치 검토.
+
+### 2026-11-04 design v2 수정 1묶음 · 아침 확인용 요약
+- 7번: 미완료 날씨 테스트 구현(d89db22); 맑음 전환 1회 허용·정차 중 맑음 반복 차단.
+- 1·2번: 차량 신호 오류는 Logcat만(5a9919f), 불꽃 제외 영역을 글자·칩·말풍선·버튼 전체로 확대(f28f8ab).
+- 3·4번: 이긴 날 캐릭터를 시안 상단 346dp로 고정(081e773), 아쉬운 날 그림을 제목 아래로 내리고 보드 글자 정렬(f796f13).
+- 검증: 각 항목 testDebugUnitTest assembleDebug -q 통과(54개 테스트 실패 0); captures/review-batch1/ 결과 2장 1회 확인. 남은 5·6·8~11번 미착수, core·mockups 변경 없음.
+
+### 2026-11-04 — design v2 수정 2묶음
+- 5번(2a7aa93): 리포트 요일·라벨은 Pretendard, 숫자는 Saira 기울임 적용, 승급 라벨 위치 조정. 6번(14f8926): 리플레이 경로와 목록에 사건 아이콘 VectorDrawable 3종 적용.
+- 8번(c4569c4): 정차 판정에 < 0.3m/s 임계값 적용, 경계값 단위 테스트 추가. 추가 수정(53448fd): 이긴 날 경로 시작점을 40dp 옮겨 팀 라디오 패널과 분리.
+- 각 항목 testDebugUnitTest assembleDebug -q 통과(당시 기록: 55개 테스트). 결과·리포트·리플레이 PNG 3장은 captures/review-batch2/에 저장.
+- 남은 것: 검토 9~11번(주행·리그 캡처, v2 작업 기록, 캐릭터 등장 연출). core·mockups 변경 없음, 기존 untracked 로그와 .impeccable 커밋 제외.
+- 복원 근거: 6b1c028의 손상된 추가 부분과 2a7aa93·14f8926·c4569c4·53448fd 커밋 메시지 및 변경 내용. 원문을 확정할 수 없는 문구는 재구성하지 않음.
+
+### 2026-11-04 — design v2 수정 3묶음
+- 1번: 손상된 2묶음 기록 UTF-8 복원(e1f18d7). 2번: 데모 탭과 DesignCanvas를 세로 배치하여 탭이 화면을 덮지 않도록 수정(e56b011). 각각 testDebugUnitTest assembleDebug -q 통과.
+- 원 지시 1번 484bd8c: Pretendard·Saira 및 색 토큰. 2번 bf39b86: 유리 패널·금속 숫자·캐릭터 공통 렌더링. 3번 56a20e3: 이긴 날 캐릭터와 팀 라디오. 4번 e12565f: 아쉬운 날 피트 크루와 라디오.
+- 원 지시 5번 96078d0: 리그 금속 순위·반투명 패널. 6번 84cf149: 리플레이 얼굴·연석. 7번 2a4a15f: 주간 리포트와 리그 제목. 8번 6e78c5c: 주행 위계·숫자 잘림 방지. 10번 4d9b9d3: 지원 여부 확인 후 날씨 배경과 움직임 정책 적용. 이후 검토 수정은 위 1·2묶음 참조.
+- 사용 신호: CarPropertyManager의 WINDSHIELD_WIPERS_STATE, ENV_OUTSIDE_TEMPERATURE, HEADLIGHTS_STATE, PERF_VEHICLE_SPEED, GEAR_SELECTION. Pleos 대체 경로는 checkWiperStateCapabilities / checkLowBeamLightStateCapabilities로 읽기 가능 여부 확인 후 구독.
+- 에뮬레이터 확인: WINDSHIELD_WIPERS_STATE·HEADLIGHTS_STATE는 unsupported or permission denied(Logcat, captures/review-batch3/signals.log). ENV_OUTSIDE_TEMPERATURE는 기존 캡처의 25.0 수신 확인. 속도·기어는 이전 실검증에서 지원 확인. Pleos 와이퍼·하향등은 capability 콜백 경로는 있으나 실제 값 변경 지원은 미검증(오류가 없다는 이유로 지원으로 간주하지 않음).
+- 날씨 신호를 읽지 못하면 기본/시연 값을 사용하고 오류는 Logcat에만 기록. 실제 우천·강설·야간 신호 변화는 실차에서 추가 확인 필요.
+- 4번(원 지시 9번): 결과 카드 캐릭터에 12dp → 0dp, 280ms 1회 ObjectAnimator 추가. 아쉬운 날 피트보드 글자도 함께 이동. P단·정차·RESUMED·UX 제한 없음일 때만 시작하며, 화면 전환·onPause·주행 신호 수신 시 취소하고 원위치로 복원. 반복·onResume 재시작 없음.
+- 등장 허용 조건 단위 테스트는 구현 전 실패, 구현 후 testDebugUnitTest assembleDebug -q 통과(step2-red.log / step2-build.log). SDK XML 도구 버전 경고는 환경 변경 금지에 따라 유지.
+- 5번: Pleos_Connect 기존 GPU host 설정으로 콜드 부팅 후 APK 설치. captures/review-batch3/에 5-driving·5b-driving-rain·5c-driving-snow·5d-driving-night·4-league.png 저장, comparison.png에서 같은 이름의 mockups/png 5장과 비교. 화면 전환 직전 프레임이 찍힌 초회 캡처는 폐기하고 UI 날씨 문구 확인 후 다시 저장.
+- 비교 결과: 제목·차량 실루엣·트랙·리그 순위의 큰 겹침/잘림 없음. 실제 앱 영역 1682×1210과 시안 1280×720의 비율 차이로 세로 여백이 더 큼. 야간 달 모양·금속/패널 광택의 작은 차이는 최소 diff 원칙에 따라 유지. 주행 화면의 점수 유도 문구는 기존 안전 안내 문구를 유지(주행 중 점수 금지).
+- 날씨 4종은 정차한 에뮬레이터에서 시연 값으로 촬영했으며, 실차 우천·야간 신호 수신 증거는 아님. 움직임은 코드와 WeatherStateTest 14개로 확인: 속도 절댓값 0.3m/s 이상은 정지 그림, 미만은 정차로 판정; 비·눈·밤은 정차 시 34ms 간격, 맑음은 반복 없음. 주행 중 날씨 변경은 1초·분당 1회만 허용. onPause·비표시·detach에서는 프레임 예약 취소. 4종 전체의 주행/정차/전환/비활성 조합 테스트 추가.
+- 5번 검증: testDebugUnitTest assembleDebug -q 통과(총 57개, 실패/오류 0; step3-build.log). 시안과 core 변경 없음.
+
+### 2026-11-04 — design v2 마지막 묶음 · 확인용 요약
+- 한 일: 미추적 CODEMAP 원본 커밋(8c65e99), 캐릭터 등장 30fps 제한 2줄 별도 커밋(fe48229), 초승달 수정 별도 커밋(dfd4fe3), 브랜치 변경 코드의 lint 수정(d3823c7).
+- 달: 1280×720 기준 (1100,100), 반지름 34 원에서 (1116,88), 반지름 30 원을 Path.Op.DIFFERENCE로 제외. 경로는 View 생성 때 한 번 만들고 재사용하며 기존 white 색과 약 .55 불투명도, fade를 적용. 가로 기준 s = width / 1280f를 양 축에 동일 적용해 세로 늘어짐 수정(997a4d6). 맑음의 해는 유지. testDebugUnitTest assembleDebug -q 1회 통과, 테스트 57개 실패/오류 0(build-moon-scale.log).
+- 검증: testDebugUnitTest assembleDebug lintDebug -q 최초 실행과 lint 수정 후 실행 모두 종료 코드 0. 안쪽 Canvas 경고 제거 후 바깥쪽 동일 경고가 추가 검출되어 수정 후 같은 명령을 한 번 더 실행함(총 3회). 최종 단위 테스트 57개, 실패/오류/건너뜀 0. 등장 연출 관련 테스트 실패나 추가 수정 없음. 로그: captures/design-v2-final/build.log, build-first.log, build-lint-first.log.
+- lint: main 대비 변경 줄의 경고 0건. 기존 경고 200건. 문자열은 리소스로 옮겼으며 표시 문구는 유지. 차량 실루엣은 벡터 기본 크기만 축소하고 화면의 480×176dp 배치 크기는 유지.
+- 화면 확인: 진단 screencap에는 권한 창 없이 결과 화면이 표시됨. 재설치 직후 첫 시도에서 UI 트리가 null이라 demo hotspot missing 발생, 이후 정상 트리에서 핫스폿 확인. 기존 좌표도 핫스폿 범위 안이므로 화면 준비 지연이 원인으로 추정됨. capture_night.py만 실제 핫스폿 좌표 사용 및 시작 대기 3초로 수정해 두 번째 시도 성공. captures/design-v2-final/night.png에서 야간 초승달의 세로 늘어짐 없이 원형 곡률 유지 확인. 진단 이미지와 스크립트도 같은 폴더에 보관.
+- 남은 것: 실제 차량 날씨 신호 검증, 사용자 확인 후 담당자의 main 병합 검토. 밤 화면 촬영 및 초승달 모양 확인 완료. 이번 작업에서 main 커밋·병합·push, core·시안·시스템 설정 변경, .impeccable 커밋은 하지 않음.
+- 사용자가 결정할 것: 주행 화면 목표 문구 — 앱 「안전하게, 다음 한 칸까지」, 시안 「70점 넘기면 연속 13일째」. 문구는 변경하지 않았으며 주행 중 점수 표시 금지 원칙을 함께 검토할 것.

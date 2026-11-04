@@ -4,11 +4,10 @@
     android:layout_height="match_parent"
     android:background="@color/asphalt">
 
-    <!-- 시안 1280×720dp 캔버스를 창 크기에 맞춰 키움 -->
-    <io.github.ddayoung03.safetyleague.ui.view.DesignCanvas
-        android:id="@+id/screen_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <!-- 시연 모드 전용 바. 평소에는 숨김 (왼쪽 위 모서리를 길게 누르면 열림) -->
     <HorizontalScrollView
@@ -32,10 +31,19 @@
             <Button android:id="@+id/tab_league" style="@style/DemoButton" android:text="리그" />
             <Button android:id="@+id/tab_report" style="@style/DemoButton" android:text="리포트" />
             <Button android:id="@+id/tab_driving" style="@style/DemoButton" android:text="주행 중" />
+            <Button android:id="@+id/btn_weather" style="@style/DemoButton" android:text="@string/weather_button_sun" />
             <Button android:id="@+id/btn_sim_win" style="@style/DemoButton" android:text="이긴 날 시연" />
             <Button android:id="@+id/btn_sim_low" style="@style/DemoButton" android:text="아쉬운 날 시연" />
         </LinearLayout>
     </HorizontalScrollView>
+
+    <!-- 탭이 표시되면 남은 공간에 시안 전체를 맞춘다. -->
+    <io.github.ddayoung03.safetyleague.ui.view.DesignCanvas
+        android:id="@+id/screen_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    </LinearLayout>
 
     <!-- 시연 모드 열고 닫기: 보이지 않는 76dp 모서리 -->
     <View

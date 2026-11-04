@@ -130,16 +130,19 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="40dp"
         android:layout_marginHorizontal="64dp"
-        android:background="@color/yellow"
+        android:tag="skew"
+        android:background="@drawable/pit_panel"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="28dp"
-        android:paddingVertical="18dp">
+        android:paddingVertical="10dp">
+        <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView
+            android:layout_width="64dp" android:layout_height="64dp" android:layout_marginEnd="18dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.75"
+            android:alpha="1"
             android:text="다음 주행 작전"
             android:textColor="@color/asphalt"
             android:textSize="24sp" />
