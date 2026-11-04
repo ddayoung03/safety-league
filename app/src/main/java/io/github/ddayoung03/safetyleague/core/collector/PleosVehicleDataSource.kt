@@ -39,6 +39,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import io.github.ddayoung03.safetyleague.core.model.Point2D
+import io.github.ddayoung03.safetyleague.core.repository.LocationConsentStore
 
 /**
  * 실제 차량 신호: Pleos Vehicle SDK(기어·브레이크·조향·방향지시등·주행거리·벨트·경고등·도어·전비/연비),
@@ -161,8 +162,27 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         if (!connected) problems += "Speed: 구독 실패 (CAR_SPEED 권한 확인)"
     }
 
+    /** 위치 동의가 바뀌었으면 위치 수집을 켜거나 끈다. 서비스가 onStartCommand마다 부른다. */
+    fun syncLocation() {
+        val l = listener ?: return
+        val wanted = LocationPolicy.sourceOrder(LocationConsentStore(context).load()).isNotEmpty()
+        // 켜진 출처가 없으면(권한을 막 받았거나 모두 실패) 처음부터 다시 시도한다
+        if (wanted && location?.activeName == null) { runCatching { location?.stop() }; location = null; startLocation(l) }
+        else if (!wanted && location != null) { runCatching { location?.stop() }; location = null }
+    }
+
     private fun startLocation(l: VehicleSignalListener) {
-        val chain = LocationFallback(listOf(fusedSource(), naviSource(), osSource()), problems) { p ->
+        // 동의하지 않았으면 위치 출처를 하나도 켜지 않는다 (점수·리그는 위치 없이 동작)
+        val order = LocationPolicy.sourceOrder(LocationConsentStore(context).load())
+        if (order.isEmpty()) { Log.i(tag, "Location: 경로 기록 동의 안 함"); return }
+        val sources = order.map {
+            when (it) {
+                LocationProvider.FUSED -> fusedSource()
+                LocationProvider.NAVI -> naviSource()
+                LocationProvider.OS -> osSource()
+            }
+        }
+        val chain = LocationFallback(sources, problems) { p ->
             if (p.x != 0.0 || p.y != 0.0) l.onLocationChanged(p, now())
         }
         location = chain

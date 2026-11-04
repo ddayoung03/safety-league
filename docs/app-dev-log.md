@@ -338,3 +338,31 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 해결 2: 콜드 부팅 직후 TripTrackingService ANR. 차량 신호 구독을 HandlerThread로 옮김. 콜드 부팅 직후 새 설치 1회에서 ANR 0회.
 - Virtual Console을 스크립트로 쓰려면 `POST /browser/session?client=...`를 1초마다 보내야 함(없으면 emulator_inactive 503). 주행 스크립트: captures/league-real-score/drive2.sh(저장소 밖).
 - 사용자가 결정할 것: main 병합. 다음 작업 범위(지역·친구 탭, 주간 리포트 실데이터, 시즌 종료 티어 이동, 위치 동의 화면).
+
+### 위치 동의 화면 · 확인용 요약 (작업 환경 시계 2026-11-04, 바로 위 항목 다음에 한 작업)
+- 한 일(Claude): 차종 선택·배치 뒤 「시작하기」에서 위치 동의 화면을 연다. 안내 문구: 경로는 리플레이에서 내 화면에만 보이고 리그에는 점수와 순위만 올라가며 경로는 공유하지 않음, 기록하지 않아도 점수·리그는 그대로. 동의는 SharedPreferences(`location_consent`)에 저장해 재시작 후 유지. 차종 화면(리그의 차종 탭)에 「경로 기록 설정」 버튼을 두어 나중에 바꿀 수 있음.
+- 새 파일: `core/collector/LocationConsent.kt`(순수 함수 `LocationPolicy`), `core/repository/LocationConsentStore.kt`, `ui/LocationConsentScreen.kt`, `res/layout/view_location_consent.xml`, `res/values/strings_location_consent.xml`(strings.xml 충돌을 피하려고 분리), 테스트 `LocationPolicyTest`.
+- 고친 파일: `MainActivity.kt`(화면 enum 1개, show 분기 1줄, 배치 「시작하기」·onCreate에 동의 확인 각 1줄, 차종 화면 버튼 1줄, 동의 처리 함수), `PermissionActivity.kt`(위치 권한은 동의한 뒤에만 요청, 별도 작업 창으로 여는 `askInOwnTask`), `PleosVehicleDataSource.kt`(동의 안 하면 위치 출처를 켜지 않음, `syncLocation`), `TripTrackingService.kt`(onStartCommand마다 `syncLocation`, 동의 안 하면 location 서비스 타입 안 씀).
+- 위치 순서: 기존 `LocationFallback`(FusedLocation → NaviHelper → LocationManager, 실패 시 다음)을 그대로 재사용. 순서와 동의 판단은 `LocationPolicy.sourceOrder`로 순수 함수화.
+- 권한 창: 동의하면 위치 권한이 없을 때 기존과 같이 MainActivity를 닫고 별도 작업 창의 PermissionActivity로 묻고, 끝나면 MainActivity를 새로 연다(「해결 1」 방식 그대로). 거부하면 권한 창 없이 리그(또는 마지막 결과)로.
+- 가정(스펙이 모호해 가장 단순한 쪽을 고름):
+  - 첫 실행 권한 창에서 위치 권한(FINE/COARSE/Pleos FUSED_LOCATION)을 뺐다. 동의 전에 위치 권한을 묻지 않기 위해서. CAR_SPEED·알림은 그대로 첫 실행에 묻는다.
+  - 이미 설치되어 동의 기록이 없는 사용자는 다음 실행 때 동의 화면을 한 번 본다. 그 전까지 경로는 기록하지 않는다(위치 권한이 이미 있어도).
+  - 동의했지만 OS 위치 권한을 거부하면 동의는 GRANTED로 남고 경로는 비어 있음. 기존처럼 다음 실행 때 권한 창을 다시 띄움.
+  - 「경로 기록 설정」은 동의 여부를 정한 뒤에만 차종 화면 격자의 빈 칸(11개 다음 12번째)에 보인다. 리그 화면은 지역·친구 탭 작업과 겹치지 않게 손대지 않음.
+  - 동의를 끄면 다음 트립부터 경로를 받지 않는다. 이미 저장된 트립의 경로는 지우지 않는다.
+  - 시연 모드에서는 동의 화면을 띄우지 않으며, 각본 주행·92점/64점·골드 리그 397명 중 P125 값은 손대지 않음.
+- 검증:
+  - 전체 빌드: 실패. `./gradlew testDebugUnitTest` → `Plugin [id: 'com.android.application', version: '9.0.1'] was not found` (dl.google.com, nexus-playground.pleos.ai 연결 불가, Maven Central 429). 로그: captures/location-consent/build-first.log. 그래서 assembleDebug·전체 단위 테스트·lint는 이 환경에서 못 돌림.
+  - 순수 함수 테스트: kotlinc 2.2.0 + JUnit 4.13.2로 `LocationConsent.kt`, `LocationFallback.kt`, `Models.kt`와 `LocationPolicyTest`, `LocationFallbackTest`만 따로 컴파일해 실행 → `OK (8 tests)`(새 5개, 기존 3개). 로그: captures/location-consent/pure-tests.log.
+  - 바뀐 Android 파일은 SDK 없이 kotlinc로 돌려 문법 오류 0건, 새 기호(LocationPolicy·LocationConsentStore·syncLocation·askInOwnTask·inflateLocationConsent)는 모두 해석됨을 확인. Android·SDK·R·뷰 바인딩 미해석 오류는 이 환경 한계라 실제 컴파일 확인은 사용자 PC에서 필요.
+- 사용자 PC에서 확인할 것:
+  1. `.\gradlew.bat testDebugUnitTest assembleDebug lintDebug -q` 통과(테스트 수 70 → 75 예상).
+  2. 새로 설치: 첫 권한 창에 위치 권한이 없고(속도·알림만) → 차종 선택 → 배치 → 「시작하기」 → 위치 동의 화면이 나오는지, 안내 문구 확인.
+  3. 「경로 기록하기」: 별도 작업 창 권한 창에서 위치 권한 요청 → 허용 후 리그로. 주행 1회 뒤 리플레이에 실제 경로가 그려지는지, Logcat `Location source: FusedLocation`(또는 대체 출처).
+  4. 3번 직후 주행 중 Pleos 홈 화면이 「주행 중에는 사용할 수 없습니다」로 앱을 가리지 않는지(해결 1 재발 여부).
+  5. 「기록하지 않기」: 권한 창 없이 리그로. 주행 1회 → 점수·순위 정상, 리플레이 경로 비어 있음, Logcat `Location: 경로 기록 동의 안 함`.
+  6. 앱을 종료·재시작해도 동의 화면이 다시 안 나오는지(동의 유지).
+  7. 리그 → 차종 탭 → 「경로 기록 설정」 → 현재 상태 문구 표시 → 바꾸기가 다음 트립부터 반영되는지.
+  8. 주행 중(기어 D·속도)에는 동의 화면이 안 뜨고, 동의 화면을 보던 중 주행이 시작되면 주행 중 화면으로 바뀌는지.
+  9. 시연 모드: 92점·64점·골드 리그 397명 중 P125 화면과 각본 주행이 그대로인지.
