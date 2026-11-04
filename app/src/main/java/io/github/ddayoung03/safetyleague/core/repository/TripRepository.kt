@@ -37,7 +37,9 @@ class TripRepository private constructor(private val file: File) {
     }
 
     /** 점수 집계에는 실제 유효 트립만 사용한다. */
-    fun getAllTrips(): List<Trip> = realTrips.filter { it.isEligible && it.trip.km >= 3.0 }.map { it.trip }
+    fun getAllTrips(leagueKey: String? = null): List<Trip> = realTrips.filter {
+        it.isEligible && it.trip.km >= 3.0 && (leagueKey == null || it.leagueKey == leagueKey)
+    }.map { it.trip }
 
     fun getStreak(untilDate: String): Int = LeagueCalculator.streakAt(getAllTrips(), untilDate)
 
@@ -63,6 +65,7 @@ class TripRepository private constructor(private val file: File) {
         put("events", JSONArray(c.events.map { JSONObject().put("at", it.at).put("kind", it.kind).put("t", it.t) }))
         put("route", JSONArray(c.route.map { JSONArray(listOf(it.x, it.y)) }))
         put("start", c.startTime); put("end", c.endTime); put("eligible", c.isEligible)
+        c.leagueKey?.let { put("leagueKey", it) }
     }
 
     private fun fromJson(o: JSONObject): CompletedTrip {
@@ -73,7 +76,8 @@ class TripRepository private constructor(private val file: File) {
             .map { Point2D(it.getDouble(0), it.getDouble(1)) }
         return CompletedTrip(
             Trip(o.getString("date"), o.getDouble("score"), o.getDouble("km"), d),
-            ev, route, o.getString("start"), o.getString("end"), o.getBoolean("eligible")
+            ev, route, o.getString("start"), o.getString("end"), o.getBoolean("eligible"),
+            if (o.has("leagueKey")) o.getString("leagueKey") else null
         )
     }
 

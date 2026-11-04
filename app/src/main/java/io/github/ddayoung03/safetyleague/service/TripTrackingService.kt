@@ -39,6 +39,7 @@ class TripTrackingService : Service() {
     private lateinit var collector: TripCollector
     private lateinit var pleos: PleosVehicleDataSource
     private val mock = MockVehicleDataSource()
+    private var tripLeagueKey: String? = null
 
     /** 앱 화면이 앞에 있을 때 MainActivity가 등록한다. */
     var onResult: ((CompletedTrip) -> Unit)? = null
@@ -59,6 +60,12 @@ class TripTrackingService : Service() {
             date = LocalDate.now().toString(),
             streakDays = repository.getStreak(LocalDate.now().toString()),
             leagueAvgEfficiency = DemoData.leagueAvgEfficiency,
+            onTripStarted = {
+                val profile = io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this).load()
+                tripLeagueKey = profile?.leagueKey
+                collector.leagueAvgEfficiency = profile?.averageEfficiency ?: DemoData.leagueAvgEfficiency
+                collector.streakDays = repository.getStreak(LocalDate.now().toString())
+            },
             onTripCompleted = ::onTripFinished
         )
         pleos = PleosVehicleDataSource(this)
@@ -85,14 +92,15 @@ class TripTrackingService : Service() {
 
     private fun onTripFinished(trip: CompletedTrip) {
         val isDemo = mockRunning
-        if (!isDemo) repository.saveTrip(trip)
+        val completed = trip.copy(leagueKey = tripLeagueKey)
+        if (!isDemo) repository.saveTrip(completed)
         collector.streakDays = repository.getStreak(LocalDate.now().toString())
         if (mockRunning) {
             mock.stopListening()
             pleos.startListening(collector)
         }
         val shown = onResult
-        if (shown != null) shown(trip) else if (!isDemo) showResultNotification()
+        if (shown != null) shown(completed) else if (!isDemo) showResultNotification()
     }
 
     private val mockRunning get() = mock.isRunning

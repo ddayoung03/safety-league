@@ -338,12 +338,14 @@ class MainActivity : AppCompatActivity() {
     private val today get() = LocalDate.now().toString()
     private val realTrip get() = shownTrip.takeIf { demoResultWin == null }
 
-    private val myTier get() = "브론즈"
-    private val myModel get() = "내 차종"
-    private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = repository.getAllTrips()) =
+    private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
+    private val myTier get() = profileStore.load()?.tier ?: "브론즈"
+    private val myModel get() = profileStore.load()?.model ?: "내 차종"
+    private fun leagueTrips() = repository.getAllTrips(profileStore.load()?.leagueKey)
+    private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = leagueTrips()) =
         SeasonRanking.calculate(trips, LocalDate.now(), myTier)
 
-    private fun tripsBefore(trip: CompletedTrip) = repository.getAllTrips().toMutableList().apply {
+    private fun tripsBefore(trip: CompletedTrip) = leagueTrips().toMutableList().apply {
         if (trip.isEligible) { val index = indexOfLast { it == trip.trip }; if (index >= 0) removeAt(index) }
     }
 
