@@ -291,3 +291,9 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 캡처·비교 자료: 로컬 `captures/polish/` (원본 6장, `*-compare.png`, `comparison-sheet.png`; git 제외). Pleos의 더 긴 세로 영역을 사용하는 기존 배치 차이는 유지.
 - 불꽃은 숫자 영역에 닿는 원 전체를 숨겨 반원으로 잘리는 경계도 방지. 일시정지·재개는 Lifecycle 연결을 코드 검토로 확인; 별도 계측 테스트는 하지 않음.
 - main 병합·push 없음. 기존 미추적 `.impeccable/` 보존. 후속 검토: Claude의 브랜치 검토.
+
+### 2026-11-04 design v2 수정 1묶음 · 아침 확인용 요약
+- 7번: 미완료 날씨 테스트 구현(d89db22); 맑음 전환 1회 허용·정차 중 맑음 반복 차단.
+- 1·2번: 차량 신호 오류는 Logcat만(5a9919f), 불꽃 제외 영역을 글자·칩·말풍선·버튼 전체로 확대(f28f8ab).
+- 3·4번: 이긴 날 캐릭터를 시안 상단 346dp로 고정(081e773), 아쉬운 날 그림을 제목 아래로 내리고 보드 글자 정렬(f796f13).
+- 검증: 각 항목 testDebugUnitTest assembleDebug -q 통과(54개 테스트 실패 0); captures/review-batch1/ 결과 2장 1회 확인. 남은 5·6·8~11번 미착수, core·mockups 변경 없음.
