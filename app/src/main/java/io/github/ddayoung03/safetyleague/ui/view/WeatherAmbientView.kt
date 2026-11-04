@@ -140,7 +140,8 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
             if (weather == Weather.SUN) {
                 canvas.drawCircle(width * .88f, -10 * d, 70 * d, paint)
             } else {
-                canvas.scale(width / 1280f, height / 720f)
+                val s = width / 1280f
+                canvas.scale(s, s)
                 canvas.drawPath(moon, paint)
             }
         }
