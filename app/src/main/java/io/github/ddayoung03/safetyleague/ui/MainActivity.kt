@@ -292,6 +292,8 @@ class MainActivity : AppCompatActivity() {
                     if (crew.isShown && crewMotionAllowed()) {
                         crewAnimator = ObjectAnimator.ofFloat(crew, View.TRANSLATION_Y, dp(12).toFloat(), 0f).apply {
                             duration = 280
+                            // Eight position changes in 280ms keep visual motion below 30fps.
+                            interpolator = android.animation.TimeInterpolator { fraction -> (fraction * 8).toInt() / 8f }
                             start()
                         }
                     }
