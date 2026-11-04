@@ -36,6 +36,8 @@ import androidx.core.content.res.ResourcesCompat
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
+import io.github.ddayoung03.safetyleague.core.calculator.SeasonRanking
+import io.github.ddayoung03.safetyleague.core.calculator.SeasonStanding
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
@@ -221,6 +223,7 @@ class MainActivity : AppCompatActivity() {
         binding.demoHotspot.setOnLongClickListener {
             if (restricted) return@setOnLongClickListener true
             demoMode = !demoMode
+            if (!demoMode) { demoResultWin = null; show(Screen.LEAGUE) }
             binding.demoBar.visibility = if (demoMode) View.VISIBLE else View.GONE
             updateSdkStatus()
             true
@@ -335,6 +338,37 @@ class MainActivity : AppCompatActivity() {
     private val today get() = LocalDate.now().toString()
     private val realTrip get() = shownTrip.takeIf { demoResultWin == null }
 
+    private val myTier get() = "브론즈"
+    private val myModel get() = "내 차종"
+    private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = repository.getAllTrips()) =
+        SeasonRanking.calculate(trips, LocalDate.now(), myTier)
+
+    private fun tripsBefore(trip: CompletedTrip) = repository.getAllTrips().toMutableList().apply {
+        if (trip.isEligible) { val index = indexOfLast { it == trip.trip }; if (index >= 0) removeAt(index) }
+    }
+
+    private fun rankChange(trip: CompletedTrip): String {
+        val now = standing().rank ?: return "순위 대기"
+        val before = standing(tripsBefore(trip)).rank ?: return "첫 순위"
+        val diff = before - now
+        return when { diff > 0 -> "▲$diff"; diff < 0 -> "▼${-diff}"; else -> "변동 없음" }
+    }
+
+    private fun promotionText(s: SeasonStanding): String = when {
+        s.rank == null -> "첫 주행을 마치면 순위가 나와요"
+        s.stepsToPromotion == 0 -> "승급권에 진입했어요"
+        else -> "승급까지 ${s.stepsToPromotion}계단 · ${s.pointsToPromotion}점"
+    }
+
+    private fun realRows(container: LinearLayout, s: SeasonStanding, change: String = "") {
+        container.removeAllViews()
+        if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
+        for (r in s.neighbors) {
+            container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else ""))
+            if (r.rank == s.rank - 1) container.addView(note("앞 순위까지 ${LeagueCalculator.round1(r.avg - s.average!!)}점"))
+        }
+    }
+
     // ---------- 1. 결과 카드: 이긴 날 ----------
 
     private fun showResultWin() {
@@ -370,6 +404,16 @@ class MainActivity : AppCompatActivity() {
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
 
+        if (t != null) {
+            b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
+            b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
+            b.tvRankChange.text = rankChange(t)
+            b.tvToPromotion.text = promotionText(standing())
+            realRows(b.layoutTowerRows, standing(), rankChange(t))
+            b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
+            return
+        }
+
         val rows = DemoData.neighbors(day)
         val above = rows.firstOrNull { it.rank == me - 1 }
         val myAvg = rows.first { it.name == "나" }.avg
@@ -396,10 +440,15 @@ class MainActivity : AppCompatActivity() {
         b.kerbBottom.isMuted = true
         b.tvScore.text = (t?.trip?.score?.roundToInt() ?: DemoData.lowDayScore).toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.lowDayKm}km"
-        val streakBefore = if (t != null) service?.streakBeforeToday ?: 0 else DemoData.lowDayStreakBefore
+        val streakBefore = if (t != null) LeagueCalculator.streakAt(tripsBefore(t), today) else DemoData.lowDayStreakBefore
         b.tvStreakChange.text = "${streakBefore}일 → 0일"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
+        if (t != null) {
+            b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
+            b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
+            b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(today)}일"
+        }
         if (t != null && !t.isEligible) {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
             b.tvScore.text = "–"
@@ -418,6 +467,13 @@ class MainActivity : AppCompatActivity() {
         b.tvPitTip.text = pit.tip
         b.tvPitReason.text = pit.reason
         b.tvPitGain.text = pit.gain
+
+        if (t != null) {
+            realRows(b.layoutTowerRows, standing(), rankChange(t))
+            b.layoutTowerRows.addView(note(promotionText(standing())))
+            b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
+            return
+        }
 
         val rows = DemoData.lowBoard
         val me = rows.first { it.name == "나" }
@@ -483,6 +539,27 @@ class MainActivity : AppCompatActivity() {
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
+        if (!demoMode && demoResultWin == null) {
+            val now = LocalDate.now()
+            val s = standing()
+            b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myTier 리그"
+            b.tvDaysLeft.text = "${now.lengthOfMonth() - now.dayOfMonth}일 남음"
+            b.tvTabModel.text = myModel
+            b.tvRankCaption.text = "내 순위 · $myTier 리그 397명 중"
+            b.tvBigRank.text = s.rank?.let { "P$it" } ?: "–"
+            b.tvToLine.text = promotionText(s)
+            b.tvToLine.textSize = 24f
+            (b.tvSaved.parent.parent as View).visibility = View.GONE
+            for (i in 0 until b.tierBar.childCount) {
+                (b.tierBar.getChildAt(i) as TextView).apply {
+                    setBackgroundColor(color(if (text == myTier) R.color.yellow else R.color.cell))
+                    setTextColor(color(if (text == myTier) R.color.asphalt else R.color.grey))
+                }
+            }
+            realRows(b.layoutLeagueRows, s)
+            if (s.rank != null) b.layoutLeagueRows.addView(note("승급 P${s.promotionRank} · 강등 P${s.demotionRank}"))
+            return
+        }
         val day = "2026-11-09"
         val l = DemoData.league
         val me = DemoData.ranks.getValue(day)
