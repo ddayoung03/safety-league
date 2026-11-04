@@ -190,7 +190,7 @@ class MainActivity : AppCompatActivity() {
                 applyRestriction(m.currentCarUxRestrictions?.isRequiresDistractionOptimization == true)
                 m.registerListener { r -> runOnUiThread { applyRestriction(r.isRequiresDistractionOptimization) } }
             }
-        }.onFailure { binding.tvSdkStatus.text = "주행 제한 정보 연결 실패: ${it.message}" }
+        }.onFailure { android.util.Log.w("VehicleSignals", "Driving restriction connection failed", it) }
     }
 
     private fun applyRestriction(on: Boolean) {
@@ -239,8 +239,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateSdkStatus() {
         val problems = service?.sdkProblems.orEmpty() + weatherSource.problems
-        binding.tvSdkStatus.visibility = if (demoMode && problems.isNotEmpty()) View.VISIBLE else View.GONE
-        binding.tvSdkStatus.text = "차량 신호 연결 문제\n" + problems.joinToString("\n")
+        binding.tvSdkStatus.visibility = View.GONE
+        if (problems.isNotEmpty()) android.util.Log.w("VehicleSignals", problems.joinToString("\n"))
     }
 
     private fun onTripResult(trip: CompletedTrip) {
