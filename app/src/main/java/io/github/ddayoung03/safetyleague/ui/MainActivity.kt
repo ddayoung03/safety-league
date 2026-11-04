@@ -1,6 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.car.Car
 import android.car.drivingstate.CarUxRestrictionsManager
 import android.content.ComponentName
@@ -12,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import io.github.ddayoung03.safetyleague.ui.view.replayEventIcon
 import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
+import io.github.ddayoung03.safetyleague.ui.view.canAnimateCrew
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
@@ -80,9 +82,14 @@ class MainActivity : AppCompatActivity() {
     private val weatherGate = WeatherTransitionGate()
     private var displayedWeather: Weather? = null
     private var demoWeather = Weather.SUN
+    private var crewAnimator: ObjectAnimator? = null
     private val weatherSource by lazy {
         VehicleWeatherSource(this) { signals ->
-            runOnUiThread { weatherSignals = signals; updateWeather() }
+            runOnUiThread {
+                weatherSignals = signals
+                if (!crewMotionAllowed()) stopCrewEntrance()
+                updateWeather()
+            }
         }
     }
 
@@ -151,6 +158,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        stopCrewEntrance()
         handler.removeCallbacks(drivingTick)
         super.onPause()
     }
@@ -261,6 +269,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun show(target: Screen) {
         if (restricted && target != Screen.DRIVING) return
+        stopCrewEntrance()
         screen = target
         drivingBinding = null
         displayedWeather = null
@@ -277,6 +286,29 @@ class MainActivity : AppCompatActivity() {
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         applySkew(binding.screenContainer)
+        if (target == Screen.WIN || target == Screen.LOW) {
+            binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
+                crew.post {
+                    if (crew.isShown && crewMotionAllowed()) {
+                        crewAnimator = ObjectAnimator.ofFloat(crew, View.TRANSLATION_Y, dp(12).toFloat(), 0f).apply {
+                            duration = 280
+                            start()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun crewMotionAllowed() = canAnimateCrew(weatherSignals.gear, weatherSignals.speedMps,
+        lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted)
+
+    private fun stopCrewEntrance() {
+        crewAnimator?.let { animation ->
+            animation.cancel()
+            (animation.target as? View)?.translationY = 0f
+        }
+        crewAnimator = null
     }
 
     private fun applySkew(view: View) {
