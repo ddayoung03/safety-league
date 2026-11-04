@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Shader
 import android.os.SystemClock
 import android.util.AttributeSet
@@ -20,6 +21,10 @@ import kotlin.random.Random
 /** Fixed seeded drawing while moving; only parking or a bounded transition schedules frames. */
 class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val moon = Path().apply {
+        addCircle(1100f, 100f, 34f, Path.Direction.CW)
+        op(Path().apply { addCircle(1116f, 88f, 30f, Path.Direction.CW) }, Path.Op.DIFFERENCE)
+    }
     private val random = Random(42)
     private val dots = List(140) { floatArrayOf(random.nextFloat(), random.nextFloat(), random.nextFloat()) }
     private var weather = Weather.SUN
@@ -129,9 +134,13 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
         }
         if (weather == Weather.NIGHT || weather == Weather.SUN) {
             paint.color = context.getColor(if (weather == Weather.SUN) R.color.yellow else R.color.white)
-            paint.alpha = ((if (weather == Weather.SUN) 25 else 90) * fade).toInt()
-            canvas.drawCircle(width * .88f, if (weather == Weather.SUN) -10 * d else 100 * d,
-                (if (weather == Weather.SUN) 70 else 28) * d, paint)
+            paint.alpha = ((if (weather == Weather.SUN) 25 else 140) * fade).toInt()
+            if (weather == Weather.SUN) {
+                canvas.drawCircle(width * .88f, -10 * d, 70 * d, paint)
+            } else {
+                canvas.scale(width / 1280f, height / 720f)
+                canvas.drawPath(moon, paint)
+            }
         }
         canvas.restoreToCount(saved)
     }
