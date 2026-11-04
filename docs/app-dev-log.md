@@ -321,9 +321,9 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 
 ### 2026-11-04 — design v2 마지막 묶음 · 확인용 요약
 - 한 일: 미추적 CODEMAP 원본 커밋(8c65e99), 캐릭터 등장 30fps 제한 2줄 별도 커밋(fe48229), 초승달 수정 별도 커밋(dfd4fe3), 브랜치 변경 코드의 lint 수정(d3823c7).
-- 달: 1280×720 기준 (1100,100), 반지름 34 원에서 (1116,88), 반지름 30 원을 Path.Op.DIFFERENCE로 제외. 경로는 View 생성 때 한 번 만들고 재사용하며 기존 white 색과 약 .55 불투명도, fade를 적용. 맑음의 해는 유지.
+- 달: 1280×720 기준 (1100,100), 반지름 34 원에서 (1116,88), 반지름 30 원을 Path.Op.DIFFERENCE로 제외. 경로는 View 생성 때 한 번 만들고 재사용하며 기존 white 색과 약 .55 불투명도, fade를 적용. 가로 기준 s = width / 1280f를 양 축에 동일 적용해 세로 늘어짐 수정(997a4d6). 맑음의 해는 유지. testDebugUnitTest assembleDebug -q 1회 통과, 테스트 57개 실패/오류 0(build-moon-scale.log).
 - 검증: testDebugUnitTest assembleDebug lintDebug -q 최초 실행과 lint 수정 후 실행 모두 종료 코드 0. 안쪽 Canvas 경고 제거 후 바깥쪽 동일 경고가 추가 검출되어 수정 후 같은 명령을 한 번 더 실행함(총 3회). 최종 단위 테스트 57개, 실패/오류/건너뜀 0. 등장 연출 관련 테스트 실패나 추가 수정 없음. 로그: captures/design-v2-final/build.log, build-first.log, build-lint-first.log.
 - lint: main 대비 변경 줄의 경고 0건. 기존 경고 200건. 문자열은 리소스로 옮겼으며 표시 문구는 유지. 차량 실루엣은 벡터 기본 크기만 축소하고 화면의 480×176dp 배치 크기는 유지.
-- 화면 확인 시도: 기존 GPU host 설정과 cold boot로 Pleos_Connect 실행, APK 설치 및 MainActivity 실행 성공. captures/review-batch3/capture.py의 함수를 재사용한 밤 전용 스크립트에서 demo bar missing 오류가 발생하여 지시대로 중단. night.png는 생성되지 않았고 실제 초승달 모양은 화면 미검증. 실행 로그와 스크립트는 captures/design-v2-final/에 보관.
-- 남은 것: 밤 화면 1장 촬영 및 초승달 모양 확인, 실제 차량 날씨 신호 검증, 사용자 확인 후 담당자의 main 병합 검토. 이번 작업에서 main 커밋·병합·push, core·시안·시스템 설정 변경, .impeccable 커밋은 하지 않음.
+- 화면 확인: 진단 screencap에는 권한 창 없이 결과 화면이 표시됨. 재설치 직후 첫 시도에서 UI 트리가 null이라 demo hotspot missing 발생, 이후 정상 트리에서 핫스폿 확인. 기존 좌표도 핫스폿 범위 안이므로 화면 준비 지연이 원인으로 추정됨. capture_night.py만 실제 핫스폿 좌표 사용 및 시작 대기 3초로 수정해 두 번째 시도 성공. captures/design-v2-final/night.png에서 야간 초승달의 세로 늘어짐 없이 원형 곡률 유지 확인. 진단 이미지와 스크립트도 같은 폴더에 보관.
+- 남은 것: 실제 차량 날씨 신호 검증, 사용자 확인 후 담당자의 main 병합 검토. 밤 화면 촬영 및 초승달 모양 확인 완료. 이번 작업에서 main 커밋·병합·push, core·시안·시스템 설정 변경, .impeccable 커밋은 하지 않음.
 - 사용자가 결정할 것: 주행 화면 목표 문구 — 앱 「안전하게, 다음 한 칸까지」, 시안 「70점 넘기면 연속 13일째」. 문구는 변경하지 않았으며 주행 중 점수 표시 금지 원칙을 함께 검토할 것.
