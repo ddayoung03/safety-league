@@ -85,7 +85,7 @@
   car.style.left = (spans[on - 1].getBoundingClientRect().right - wrap.left - 40) + 'px';
   document.querySelector('.qlabel').style.width = (spans[QUALIFY - 1].getBoundingClientRect().right - wrap.left) + 'px';
 
-  const vals = { done: DONE, dest: DEST + 'km · 해운대까지', goal: '70점 넘기면 연속 ' + (DEMO.streakAt('2026-11-06') + 1) + '일째' };
+  const vals = { done: DONE, dest: DEST + 'km · 해운대까지', goal: '안전하게, 다음 한 칸까지' };
   for (const el of document.querySelectorAll('[data-bind]')) el.textContent = vals[el.dataset.bind];
 
   // 날씨: ?w=sun|rain|snow|night. 앱에서는 와이퍼 작동=비, 외기 0℃ 이하+와이퍼=눈, 전조등·해진 뒤=밤, 그 밖=맑음.

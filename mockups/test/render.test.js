@@ -33,8 +33,8 @@ test('league', () => checkPage('league.html',
 test('driving', () => {
   const dump = checkPage('driving.html',
     ['주행 기록 중', '오늘의 레이스 진행 중', '결과는 주차하면 공개돼요', '3km부터 기록 인정',
-     '11.2', '18.4km', '해운대', '70점 넘기면 연속 13일째']);
-  const text = dump.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '').replace('70점 넘기면', '');
+     '11.2', '18.4km', '해운대', '안전하게, 다음 한 칸까지']);
+  const text = dump.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '');
   assert.ok(!/P\d{2,3}|점수|감점|순위|\d+점/.test(text), '주행 중 화면에 점수·순위 표시');
   assert.ok(!/@keyframes|animation:/.test(dump), '주행 중 화면에 애니메이션');
 });
