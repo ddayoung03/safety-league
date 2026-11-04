@@ -53,7 +53,6 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
     private var location: LocationFallback? = null
     private val main = Handler(Looper.getMainLooper())
     private var listener: VehicleSignalListener? = null
-    private var speedConnected = false
     private val seats = listOf(SeatValue.ROW_1_LEFT, SeatValue.ROW_1_RIGHT, SeatValue.ROW_2_LEFT, SeatValue.ROW_2_CENTER, SeatValue.ROW_2_RIGHT)
     private val occupied = mutableMapOf<Int, Boolean>()
     private val buckled = mutableMapOf<Int, Boolean>()
@@ -149,22 +148,9 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         l.onSeatBeltChanged(seated.associateWith { buckled[it] ?: false }, now())
     }
 
-    /** CAR_SPEED 권한을 나중에 받았을 때 속도 구독만 다시 시도한다. */
-    fun retrySpeed() {
-        val c = car ?: return
-        val l = listener ?: return
-        if (speedConnected) return
-        try {
-            registerSpeed(c, l)
-            if (speedConnected) problems.removeAll { it.startsWith("Speed") }
-        } catch (e: Exception) {
-            Log.i(tag, "Speed retry failed: ${e.javaClass.simpleName}")
-        }
-    }
-
     private fun registerSpeed(car: Car, l: VehicleSignalListener) {
         val props = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-        speedConnected = props.registerCallback(object : CarPropertyManager.CarPropertyEventCallback {
+        val connected = props.registerCallback(object : CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(value: CarPropertyValue<*>) {
                 (value.value as? Float)?.let { l.onSpeedChanged(it, now()) }
             }
@@ -172,6 +158,7 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
                 problems += "Speed: property error $propId"
             }
         }, VehiclePropertyIds.PERF_VEHICLE_SPEED, CarPropertyManager.SENSOR_RATE_FAST)
+        if (!connected) problems += "Speed: 구독 실패 (CAR_SPEED 권한 확인)"
     }
 
     private fun startLocation(l: VehicleSignalListener) {
@@ -257,7 +244,7 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         runCatching { vehicle?.release() }
         runCatching { location?.stop() }
         runCatching { car?.disconnect() }
-        vehicle = null; location = null; car = null; listener = null; speedConnected = false
+        vehicle = null; location = null; car = null; listener = null
     }
 
     private fun VehicleGear.toGearState() = when (this) {

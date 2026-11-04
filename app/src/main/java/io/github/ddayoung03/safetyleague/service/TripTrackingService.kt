@@ -11,6 +11,8 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -39,6 +41,10 @@ class TripTrackingService : Service() {
     private lateinit var collector: TripCollector
     private lateinit var pleos: PleosVehicleDataSource
     private val mock = MockVehicleDataSource()
+
+    // 차량 신호 구독은 몇 초씩 걸려서 메인 스레드에서 하면 부팅 직후 ANR이 난다.
+    private val signalThread = HandlerThread("vehicle-signals").apply { start() }
+    private val signals = Handler(signalThread.looper)
     private var tripLeagueKey: String? = null
     var lastResultWasDemo = false
         private set
@@ -72,12 +78,10 @@ class TripTrackingService : Service() {
             onTripCompleted = ::onTripFinished
         )
         pleos = PleosVehicleDataSource(this)
-        pleos.startListening(collector)
+        signals.post { pleos.startListening(collector) }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 권한을 받기 전에 서비스가 먼저 떠서 속도 구독이 실패했으면 다시 연결한다.
-        pleos.retrySpeed()
         // 위치 권한이 있을 때만 location 타입으로 (없이 location 타입이면 API 34에서 SecurityException)
         val canLocate = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
@@ -90,7 +94,7 @@ class TripTrackingService : Service() {
 
     /** 시연 모드 전용: 실제 신호를 잠시 끊고 각본대로 달린 뒤 다시 연결한다. */
     fun runDemo(win: Boolean) {
-        pleos.stopListening()
+        signals.post { pleos.stopListening() }
         mock.startListening(collector)
         if (win) mock.simulateWinDay(speedMultiplier = 15L) else mock.simulateLowDay(speedMultiplier = 15L)
     }
@@ -103,7 +107,7 @@ class TripTrackingService : Service() {
         collector.streakDays = repository.getStreak(LocalDate.now().toString())
         if (mockRunning) {
             mock.stopListening()
-            pleos.startListening(collector)
+            signals.post { pleos.startListening(collector) }
         }
         val shown = onResult
         if (shown != null) shown(completed) else if (!isDemo) showResultNotification()
@@ -133,7 +137,8 @@ class TripTrackingService : Service() {
     }
 
     override fun onDestroy() {
-        pleos.stopListening()
+        signals.post { pleos.stopListening() }
+        signalThread.quitSafely()
         mock.stopListening()
         super.onDestroy()
     }

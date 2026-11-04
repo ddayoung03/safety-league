@@ -1,6 +1,5 @@
 package io.github.ddayoung03.safetyleague.ui
 
-import android.Manifest
 import android.animation.ObjectAnimator
 import android.car.Car
 import android.car.drivingstate.CarUxRestrictionsManager
@@ -19,7 +18,6 @@ import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import android.graphics.Color
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -38,7 +36,6 @@ import io.github.ddayoung03.safetyleague.core.model.Powertrain
 import io.github.ddayoung03.safetyleague.core.collector.VehicleProfileReader
 import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewLeaguePlacementBinding
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -126,16 +123,18 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceDisconnected(name: ComponentName?) { service = null }
     }
 
-    private val permissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startTracking() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!intent.getBooleanExtra(PermissionActivity.EXTRA_ASKED, false) && missingPermissions(this).isNotEmpty()) {
+            startActivity(Intent(this, PermissionActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            finishAndRemoveTask()
+            return
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         repository = TripRepository.getInstance(this)
         setupDemoControls()
-        requestPermissionsThenTrack()
+        startTracking()
         if (profileStore.load() == null) {
             val detected = VehicleProfileReader.read(this)
             if (detected != null) { profileStore.save(detected); show(Screen.PLACEMENT) }
@@ -193,17 +192,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ---------- 권한과 서비스 ----------
-
-    private fun requestPermissionsThenTrack() {
-        val wanted = buildList {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            add("pleos.car.permission.FUSED_LOCATION")
-            add(Car.PERMISSION_SPEED)
-            if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
-        }.filter { ContextCompat.checkSelfPermission(this, it) != android.content.pm.PackageManager.PERMISSION_GRANTED }
-        if (wanted.isEmpty()) startTracking() else permissionRequest.launch(wanted.toTypedArray())
-    }
 
     private fun startTracking() {
         ContextCompat.startForegroundService(this, Intent(this, TripTrackingService::class.java))
