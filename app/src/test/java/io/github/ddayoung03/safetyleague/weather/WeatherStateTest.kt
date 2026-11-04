@@ -67,4 +67,13 @@ class WeatherStateTest {
         assertFalse(shouldAnimateWeather(true, true, false, false))
         assertTrue(shouldAnimateWeather(true, true, false, true))
     }
+    @Test fun allWeatherStopsWhileDrivingExceptBoundedTransition() {
+        for (weather in Weather.entries) {
+            assertFalse(shouldAnimateWeather(true, true, false, false, weather))
+            assertTrue(shouldAnimateWeather(true, true, false, true, weather))
+            assertEquals(weather != Weather.SUN, shouldAnimateWeather(true, true, true, false, weather))
+            assertFalse(shouldAnimateWeather(true, false, true, true, weather))
+            assertFalse(shouldAnimateWeather(false, true, true, true, weather))
+        }
+    }
 }

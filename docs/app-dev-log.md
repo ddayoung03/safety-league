@@ -314,3 +314,7 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 날씨 신호를 읽지 못하면 기본/시연 값을 사용하고 오류는 Logcat에만 기록. 실제 우천·강설·야간 신호 변화는 실차에서 추가 확인 필요.
 - 4번(원 지시 9번): 결과 카드 캐릭터에 12dp → 0dp, 280ms 1회 ObjectAnimator 추가. 아쉬운 날 피트보드 글자도 함께 이동. P단·정차·RESUMED·UX 제한 없음일 때만 시작하며, 화면 전환·onPause·주행 신호 수신 시 취소하고 원위치로 복원. 반복·onResume 재시작 없음.
 - 등장 허용 조건 단위 테스트는 구현 전 실패, 구현 후 testDebugUnitTest assembleDebug -q 통과(step2-red.log / step2-build.log). SDK XML 도구 버전 경고는 환경 변경 금지에 따라 유지.
+- 5번: Pleos_Connect 기존 GPU host 설정으로 콜드 부팅 후 APK 설치. captures/review-batch3/에 5-driving·5b-driving-rain·5c-driving-snow·5d-driving-night·4-league.png 저장, comparison.png에서 같은 이름의 mockups/png 5장과 비교. 화면 전환 직전 프레임이 찍힌 초회 캡처는 폐기하고 UI 날씨 문구 확인 후 다시 저장.
+- 비교 결과: 제목·차량 실루엣·트랙·리그 순위의 큰 겹침/잘림 없음. 실제 앱 영역 1682×1210과 시안 1280×720의 비율 차이로 세로 여백이 더 큼. 야간 달 모양·금속/패널 광택의 작은 차이는 최소 diff 원칙에 따라 유지. 주행 화면의 점수 유도 문구는 기존 안전 안내 문구를 유지(주행 중 점수 금지).
+- 날씨 4종은 정차한 에뮬레이터에서 시연 값으로 촬영했으며, 실차 우천·야간 신호 수신 증거는 아님. 움직임은 코드와 WeatherStateTest 14개로 확인: 속도 절댓값 0.3m/s 이상은 정지 그림, 미만은 정차로 판정; 비·눈·밤은 정차 시 34ms 간격, 맑음은 반복 없음. 주행 중 날씨 변경은 1초·분당 1회만 허용. onPause·비표시·detach에서는 프레임 예약 취소. 4종 전체의 주행/정차/전환/비활성 조합 테스트 추가.
+- 5번 검증: testDebugUnitTest assembleDebug -q 통과(총 57개, 실패/오류 0; step3-build.log). 시안과 core 변경 없음.
