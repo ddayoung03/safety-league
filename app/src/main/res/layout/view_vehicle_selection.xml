@@ -16,7 +16,7 @@
         android:orientation="vertical" android:visibility="gone">
         <EditText android:id="@+id/vehicle_name" android:layout_width="match_parent"
             android:layout_height="76dp" android:hint="차종 이름 (20자까지)" android:maxLength="20"
-            android:inputType="textCapCharacters" android:singleLine="true" android:imeOptions="actionDone"
+            android:inputType="textCapCharacters" android:singleLine="true" android:imeOptions="actionDone|flagNoExtractUi|flagNoFullscreen"
             android:textSize="28sp" android:textColor="@color/white" android:textColorHint="@color/grey"
             android:paddingHorizontal="20dp" android:background="@color/cell" />
         <RadioGroup android:id="@+id/powertrain_group" android:layout_width="match_parent"

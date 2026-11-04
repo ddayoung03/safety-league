@@ -64,6 +64,7 @@ class TripTrackingService : Service() {
             leagueAvgEfficiency = DemoData.leagueAvgEfficiency,
             onTripStarted = {
                 val profile = io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this).load()
+                collector.date = LocalDate.now().toString()
                 tripLeagueKey = profile?.leagueKey
                 collector.leagueAvgEfficiency = profile?.averageEfficiency ?: DemoData.leagueAvgEfficiency
                 collector.streakDays = repository.getStreak(LocalDate.now().toString())

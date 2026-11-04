@@ -192,40 +192,69 @@
             android:clipToPadding="false"
             android:orientation="vertical" />
 
-        <FrameLayout
-            android:id="@+id/btn_replay"
-            android:tag="skew"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="76dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="24dp"
-            android:background="@color/white"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingHorizontal="40dp">
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal">
 
-            <LinearLayout
+            <FrameLayout
+                android:id="@+id/btn_league"
+                android:tag="skew"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_height="76dp"
+                android:layout_marginEnd="16dp"
+                android:background="@color/cell"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="32dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="리플레이 보기"
-                    android:textColor="@color/asphalt"
-                    android:textSize="24sp" />
+                    android:layout_gravity="center"
+                    android:text="리그 순위"
+                    android:textColor="@color/white"
+                    android:textSize="26sp" />
+            </FrameLayout>
 
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="16dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_play" />
-            </LinearLayout>
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/btn_replay"
+                android:tag="skew"
+                android:layout_width="wrap_content"
+                android:layout_height="76dp"
+                android:background="@color/white"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="40dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="리플레이 보기"
+                        android:textColor="@color/asphalt"
+                        android:textSize="24sp" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_play" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
 
         <View
             android:layout_width="0dp"

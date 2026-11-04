@@ -282,6 +282,7 @@ class MainActivity : AppCompatActivity() {
     // ---------- 화면 전환 ----------
 
     private fun showResult(trip: CompletedTrip) {
+        if (profileStore.load() == null) { show(Screen.VEHICLE); return }
         demoResultWin = null
         shownTrip = trip
         show(if (trip.trip.score >= 70.0) Screen.WIN else Screen.LOW)
@@ -366,6 +367,7 @@ class MainActivity : AppCompatActivity() {
     private fun selectVehicle(profile: VehicleProfile) {
         if (restricted) return
         profileStore.save(profile.copy(tier = myTier))
+        repository.assignUnassignedTrips(profile.leagueKey)
         hideKeyboard()
         demoResultWin = null
         show(Screen.PLACEMENT)
@@ -497,6 +499,8 @@ class MainActivity : AppCompatActivity() {
             b.tvRankChange.text = rankChange(t)
             b.tvToPromotion.text = promotionText(standing())
             realRows(b.layoutTowerRows, standing(), rankChange(t))
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
             b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
             return
         }
@@ -546,6 +550,8 @@ class MainActivity : AppCompatActivity() {
             b.tvPitGain.text = ""
             b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
             b.layoutTowerRows.removeAllViews()
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
             return
         }
 
@@ -558,6 +564,8 @@ class MainActivity : AppCompatActivity() {
         if (t != null) {
             realRows(b.layoutTowerRows, standing(), rankChange(t))
             b.layoutTowerRows.addView(note(promotionText(standing())))
+            b.btnLeague.visibility = View.VISIBLE
+            b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
             b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
             return
         }
@@ -631,6 +639,10 @@ class MainActivity : AppCompatActivity() {
         if (!demoMode && demoResultWin == null) {
             val now = LocalDate.now()
             val s = standing()
+            repository.latestCompletedTrip.value?.let { latest ->
+                b.btnLeagueBack.visibility = View.VISIBLE
+                b.btnLeagueBack.setOnClickListener { showResult(latest) }
+            }
             b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myTier 리그"
             b.tvDaysLeft.text = "${now.lengthOfMonth() - now.dayOfMonth}일 남음"
             b.tvTabModel.text = myModel

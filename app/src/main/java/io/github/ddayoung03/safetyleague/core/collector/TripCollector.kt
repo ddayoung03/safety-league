@@ -17,7 +17,7 @@ import kotlin.math.abs
  * 트립은 P가 아닌 기어에서 실제로 움직였을 때 시작한다 (P→R→P 주차는 트립 아님).
  */
 class TripCollector(
-    val date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+    var date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
     var streakDays: Int = 0,
     var leagueAvgEfficiency: Double = 0.0,
     val onTripStarted: () -> Unit = {},

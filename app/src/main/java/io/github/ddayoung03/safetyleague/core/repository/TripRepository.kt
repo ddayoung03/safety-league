@@ -36,6 +36,13 @@ class TripRepository private constructor(private val file: File) {
         persist()
     }
 
+    /** 차종을 정하기 전에 달린 트립을 그 차종 리그에 넣는다. */
+    fun assignUnassignedTrips(leagueKey: String) {
+        realTrips.replaceAll { if (it.leagueKey == null) it.copy(leagueKey = leagueKey) else it }
+        _latestCompletedTrip.value = realTrips.lastOrNull()
+        persist()
+    }
+
     /** 점수 집계에는 실제 유효 트립만 사용한다. */
     fun getAllTrips(leagueKey: String? = null): List<Trip> = realTrips.filter {
         it.isEligible && it.trip.km >= 3.0 && (leagueKey == null || it.leagueKey == leagueKey)
