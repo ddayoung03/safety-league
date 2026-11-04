@@ -45,6 +45,7 @@ import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
 import io.github.ddayoung03.safetyleague.core.calculator.SeasonRanking
 import io.github.ddayoung03.safetyleague.core.calculator.SeasonStanding
 import io.github.ddayoung03.safetyleague.core.data.DemoData
+import io.github.ddayoung03.safetyleague.core.data.SeasonDrivers
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
@@ -279,6 +280,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun show(target: Screen) {
         if (restricted && target != Screen.DRIVING) return
+        if (target != Screen.LEAGUE) leagueTab = LeagueTab.MODEL
         stopCrewEntrance()
         screen = target
         drivingBinding = null
@@ -417,6 +419,9 @@ class MainActivity : AppCompatActivity() {
     private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
     private val myTier get() = profileStore.load()?.tier ?: "브론즈"
     private val myModel get() = profileStore.load()?.model ?: "내 차종"
+    private val myRegion = "부산"
+    private enum class LeagueTab { MODEL, REGION, FRIENDS }
+    private var leagueTab = LeagueTab.MODEL
     private fun leagueTrips() = repository.getAllTrips(profileStore.load()?.leagueKey)
     private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = leagueTrips()) =
         SeasonRanking.calculate(trips, LocalDate.now(), myTier)
@@ -624,8 +629,18 @@ class MainActivity : AppCompatActivity() {
     private fun showLeague() {
         val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
         b.root.background = AsphaltDrawable(this)
-        b.tvTabModel.minHeight = dp(76)
-        b.tvTabModel.setOnClickListener { show(Screen.VEHICLE) }
+        b.tvTabModel.setOnClickListener {
+            if (leagueTab == LeagueTab.MODEL) show(Screen.VEHICLE) else { leagueTab = LeagueTab.MODEL; show(Screen.LEAGUE) }
+        }
+        b.tvTabRegion.setOnClickListener { leagueTab = LeagueTab.REGION; show(Screen.LEAGUE) }
+        b.tvTabFriends.setOnClickListener { leagueTab = LeagueTab.FRIENDS; show(Screen.LEAGUE) }
+        b.tvTabRegion.text = myRegion
+        for ((tab, kind) in listOf(b.tvTabModel to LeagueTab.MODEL, b.tvTabRegion to LeagueTab.REGION, b.tvTabFriends to LeagueTab.FRIENDS)) {
+            tab.minHeight = dp(76)
+            tab.setBackgroundColor(color(if (kind == leagueTab) R.color.white else R.color.cell))
+            tab.setTextColor(color(if (kind == leagueTab) R.color.asphalt else R.color.grey))
+        }
+        if (leagueTab != LeagueTab.MODEL) { showGroupBoard(b); return }
         if (!demoMode && demoResultWin == null) {
             val now = LocalDate.now()
             val s = standing()
@@ -678,6 +693,40 @@ class MainActivity : AppCompatActivity() {
         }
         b.layoutLeagueRows.addView(dots())
         b.layoutLeagueRows.addView(zoneLine("강등 라인 · 하위 30%", R.color.red))
+    }
+
+    /** 지역·친구 순위표. 다른 운전자는 가상 데이터이고, 내 행은 실제 모드면 실제 기록, 시연 모드면 시연 기록이다. */
+    private fun showGroupBoard(b: ViewLeagueBinding) {
+        val real = !demoMode && demoResultWin == null
+        val region = leagueTab == LeagueTab.REGION
+        val drivers = if (region) SeasonDrivers.region else SeasonDrivers.friends
+        val radius = if (region) 2 else drivers.size
+        val day = "2026-11-09"
+        val s = if (real) SeasonRanking.calculate(leagueTrips(), LocalDate.now(), myTier, drivers, radius)
+            else SeasonRanking.rank(DemoData.seasonAverage(day), DemoData.league.tier, drivers, radius)
+        if (real) {
+            val now = LocalDate.now()
+            repository.latestCompletedTrip.value?.let { latest ->
+                b.btnLeagueBack.visibility = View.VISIBLE
+                b.btnLeagueBack.setOnClickListener { showResult(latest) }
+            }
+            b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myTier 리그"
+            b.tvDaysLeft.text = "${now.lengthOfMonth() - now.dayOfMonth}일 남음"
+            b.tvTabModel.text = myModel
+            (b.tvSaved.parent.parent as View).visibility = View.GONE
+        } else {
+            b.tvSeasonTitle.text = "11월 시즌 · ${DemoData.league.tier} 리그"
+            b.tvDaysLeft.text = "${DemoData.daysLeft(day)}일 남음"
+            b.tvTabModel.text = DemoData.league.model
+            b.tvSaved.text = DemoData.savedWon
+            b.tvBrakesCut.text = DemoData.brakesCut
+            b.tvBrakesCaption.text = DemoData.brakesCaption
+        }
+        b.tvRankCaption.text = "내 순위 · ${if (region) myRegion else "친구"} ${s.total}명 중"
+        b.tvBigRank.text = s.rank?.let { "P$it" } ?: "–"
+        b.tvToLine.visibility = View.GONE
+        b.tierBar.visibility = View.GONE
+        realRows(b.layoutLeagueRows, s)
     }
 
     // ---------- 5. 주간 리포트 ----------

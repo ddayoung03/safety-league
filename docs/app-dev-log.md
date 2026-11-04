@@ -338,3 +338,9 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 해결 2: 콜드 부팅 직후 TripTrackingService ANR. 차량 신호 구독을 HandlerThread로 옮김. 콜드 부팅 직후 새 설치 1회에서 ANR 0회.
 - Virtual Console을 스크립트로 쓰려면 `POST /browser/session?client=...`를 1초마다 보내야 함(없으면 emulator_inactive 503). 주행 스크립트: captures/league-real-score/drive2.sh(저장소 밖).
 - 사용자가 결정할 것: main 병합. 다음 작업 범위(지역·친구 탭, 주간 리포트 실데이터, 시즌 종료 티어 이동, 위치 동의 화면).
+
+### 2026-11-05 — 리그 지역·친구 탭
+- 한 일(Claude): 리그 화면의 차종(기본)·지역·친구 탭을 눌러 순위표가 바뀌게 함. 순위는 기존 `SeasonRanking`을 운전자 목록·표시 범위를 받도록 넓혀 재사용(`rank()` 분리, 총원·승급/강등 라인을 목록 크기로 계산). 지역 가상 운전자 148명·친구 5명은 `SeasonDrivers`에 둠. 실제 모드는 내 행만 실제 기록, 시연 모드는 시연 기록(11/9 시즌 평균)만 씀. 지역 이름은 `MainActivity.myRegion`("부산") 한 곳에서 정함(위치 동의 화면이 들어올 자리). 위치 권한 요청 없음.
+- 지역·친구 탭에서는 티어 바와 승급 문구를 숨김(승급·강등은 차종 리그에만 해당). 차종 탭이 선택된 상태에서 다시 누르면 전처럼 차종 선택 화면으로 감. 리그 밖으로 나가면 차종 탭으로 돌아감.
+- 검증: 클라우드에서 Android Gradle 플러그인을 받지 못해(dl.google.com 프록시 403) 앱 빌드·`testDebugUnitTest`는 못 돌림. 순수 코드(core/calculator·data·model)와 그 테스트만 별도 JVM Gradle 프로젝트로 돌려 35개 통과(새 테스트 5개 포함). `MainActivity`는 컴파일 확인 전.
+- 사용자가 확인할 것: PC에서 빌드·단위 테스트, 에뮬레이터에서 세 탭 전환, 시연 값 유지, main 병합.
