@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
+import android.widget.ImageView
+import io.github.ddayoung03.safetyleague.ui.view.replayEventIcon
 import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
@@ -426,6 +428,13 @@ class MainActivity : AppCompatActivity() {
                     .apply { setMargins(0, dp(4), 0, dp(4)) }
             }
             item.addView(text(e.at, R.color.grey, 26f, number = true).apply { minWidth = dp(90) })
+            item.addView(ImageView(this).apply {
+                setImageResource(replayEventIcon(e.kind))
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                layoutParams = LinearLayout.LayoutParams(dp(36), dp(36)).apply {
+                    marginEnd = dp(12)
+                }
+            })
             item.addView(text(names[e.kind] ?: e.kind, if (e.kind == "lane") R.color.yellow else R.color.white))
             b.layoutEventList.addView(item)
         }

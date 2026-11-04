@@ -64,6 +64,10 @@ class CircuitRouteView @JvmOverloads constructor(
         strokeWidth = 2.5f
     }
 
+    private val eventIcons = listOf("lane", "brake", "accel").associateWith {
+        context.getDrawable(replayEventIcon(it))!!
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (routePoints.size < 2 || width == 0 || height == 0) return
@@ -141,16 +145,11 @@ class CircuitRouteView @JvmOverloads constructor(
                 val pt = LeagueCalculator.pointAt(routePoints, ev.t)
                 val scr = toScreen(pt)
 
-                val markerColor = when (ev.kind) {
-                    "lane" -> Color.parseColor("#FFC52E") // 깜빡이 누락: 노랑
-                    "brake" -> Color.parseColor("#F2F1EC") // 급제동: 흰색 (아쉬운 날 화면에 빨강 금지)
-                    "accel" -> Color.parseColor("#9BA1A8") // 급가속: 회색
-                    else -> Color.WHITE
-                }
-
-                eventPaint.color = markerColor
-                canvas.drawCircle(scr.first, scr.second, 11f, eventPaint)
-                canvas.drawCircle(scr.first, scr.second, 11f, eventBorderPaint)
+                val icon = eventIcons[ev.kind] ?: continue
+                val radius = 24 * resources.displayMetrics.density
+                icon.setBounds((scr.first - radius).toInt(), (scr.second - radius).toInt(),
+                    (scr.first + radius).toInt(), (scr.second + radius).toInt())
+                icon.draw(canvas)
             }
         }
     }
