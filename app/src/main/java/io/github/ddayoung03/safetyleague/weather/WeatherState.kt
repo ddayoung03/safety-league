@@ -17,9 +17,9 @@ fun inferWeather(signals: WeatherSignals, afterSunset: Boolean = false): Weather
     else -> Weather.SUN
 }
 
-/** A measured movement always wins over a contradictory gear value, including reverse. */
+/** Speeds below 0.3 m/s are stopped sensor noise; movement overrides the gear, including reverse. */
 fun isAmbientMotionAllowed(speedMps: Float?, gear: MotionGear): Boolean =
-    if (speedMps != null && speedMps.isFinite()) speedMps == 0f
+    if (speedMps != null && speedMps.isFinite()) kotlin.math.abs(speedMps) < .3f
     else gear == MotionGear.PARK || gear == MotionGear.NEUTRAL
 
 fun shouldAnimateWeather(visible: Boolean, resumed: Boolean, still: Boolean, transitioning: Boolean, weather: Weather = Weather.RAIN) =

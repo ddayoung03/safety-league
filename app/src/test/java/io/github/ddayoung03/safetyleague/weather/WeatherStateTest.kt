@@ -25,9 +25,19 @@ class WeatherStateTest {
     }
     @Test fun speedOverridesNeutralAndPark() {
         for (g in listOf(MotionGear.PARK, MotionGear.NEUTRAL, MotionGear.DRIVE, MotionGear.UNKNOWN)) {
-            assertFalse(isAmbientMotionAllowed(.01f, g))
+            assertFalse(isAmbientMotionAllowed(.3f, g))
             assertFalse(isAmbientMotionAllowed(-1f, g))
             assertTrue(isAmbientMotionAllowed(0f, g))
+        }
+    }
+    @Test fun stoppedSensorNoiseAllowsAmbientMotionBelowThreshold() {
+        for (gear in MotionGear.entries) {
+            for (speed in listOf(0f, .01f, -.01f, .299f, -.299f)) {
+                assertTrue("speed=$speed gear=$gear", isAmbientMotionAllowed(speed, gear))
+            }
+            for (speed in listOf(.3f, -.3f, .301f, -.301f, 1f, -1f)) {
+                assertFalse("speed=$speed gear=$gear", isAmbientMotionAllowed(speed, gear))
+            }
         }
     }
     @Test fun unknownSpeedOnlyAllowsKnownParkOrNeutral() {
