@@ -26,7 +26,7 @@ class TripCollector(
 
     companion object {
         const val HARD_ACCEL_MPS2 = 3.0     // 일반 출발(약 1.5~2.5 m/s²)보다 확실히 센 가속
-        const val HARD_BRAKE_MPS2 = -3.5    // 일반 정지(약 -2 m/s²)보다 확실히 센 감속
+        const val HARD_BRAKE_MPS2 = -3.5    // 일반 정지(약 -2 m/s²)보다 확실히 센 감속. 페달·회생제동 구분 없이 속도 변화로 본다.
         const val MOVING_MPS = 0.5f
         const val LANE_MIN_MPS = 8.3f       // 30 km/h 미만은 차선 변경을 보지 않는다
         const val FAST_MPS = 16.7f          // 60 km/h 이상은 조향을 더 작게 해도 차선이 바뀐다
@@ -57,11 +57,13 @@ class TripCollector(
     private var allBeltsFastened = true
 
     private var warningStartMs = 0L
-    private var brakePressed = false
+    private var warningOn = false
     private var turnSignal = TurnSignalState()
     private var lastSignalOnMs = Long.MIN_VALUE / 2
     private var seatBelts: Map<Int, Boolean> = emptyMap()
-    private var efficiency: Double? = null
+    private var efficiency: Double? = null   // 가장 최근의 정상 순간값
+    private var effMeters = 0.0              // 순간값이 있던 동안 달린 거리
+    private var effEnergy = 0.0              // 그 거리 ÷ 순간값의 합 (kWh 또는 L)
 
     private var lastSpeed = 0f
     private var lastSpeedMs = 0L
@@ -87,17 +89,19 @@ class TripCollector(
     private val rawEvents = mutableListOf<Pair<Long, String>>()
     val route = mutableListOf<Point2D>()
 
-    private fun startTrip(t: Long) {
+    private fun startTrip(t: Long, speedMps: Float) {
         onTripStarted()
         tripAvgEfficiency = leagueAvgEfficiency
         isTracking = true
         startTimeMs = t
         startOdometerKm = currentOdometerKm
         hardAccels = 0; hardBrakes = 0; laneChanges = 0; unindicatedLaneChanges = 0
-        doorOpenWhileMoving = 0; unresolvedWarningSeconds = 0L; warningStartMs = 0L
+        doorOpenWhileMoving = 0; unresolvedWarningSeconds = 0L
+        warningStartMs = if (warningOn) t else 0L // 출발 전부터 켜져 있던 경고는 출발 시각부터 잰다
         inHardAccel = false; inHardBrake = false; inManeuver = false
-        anchorSpeed = lastSpeed; anchorMs = t; integratedMeters = 0.0
-        efficiency = null
+        // 기준점은 트립을 시작한 표본 자신. 직전 속도(보통 0)를 쓰면 첫 구간 가속도가 부풀려진다.
+        anchorSpeed = speedMps; anchorMs = t; integratedMeters = 0.0
+        efficiency = null; effMeters = 0.0; effEnergy = 0.0
         rawEvents.clear(); route.clear()
         allBeltsFastened = seatBelts.isEmpty() || seatBelts.values.all { it }
     }
@@ -108,11 +112,15 @@ class TripCollector(
     }
 
     override fun onSpeedChanged(speedMps: Float, timestampMs: Long) {
-        if (!isTracking && gear != GearState.PARK && speedMps > MOVING_MPS) startTrip(timestampMs)
+        if (!isTracking && gear != GearState.PARK && speedMps > MOVING_MPS) startTrip(timestampMs, speedMps)
         if (isTracking && lastSpeedMs > 0L) {
             // 오도미터가 안 움직이는 환경(에뮬레이터)을 위해 속도 × 시간도 쌓아 둔다
             val gap = (timestampMs - lastSpeedMs) / 1000.0
-            if (gap in 0.0..5.0) integratedMeters += (lastSpeed + speedMps) / 2.0 * gap
+            if (gap in 0.0..5.0) {
+                val meters = (lastSpeed + speedMps) / 2.0 * gap
+                integratedMeters += meters
+                efficiency?.let { effMeters += meters; effEnergy += meters / it }
+            }
 
             val dt = (timestampMs - anchorMs) / 1000.0
             if (dt > 3.0) {
@@ -125,7 +133,7 @@ class TripCollector(
                     if (!inHardAccel) { hardAccels++; rawEvents += timestampMs to "accel" }
                     inHardAccel = true
                 } else if (accel < HARD_ACCEL_MPS2 / 2) inHardAccel = false
-                if (accel < HARD_BRAKE_MPS2 && brakePressed) {
+                if (accel < HARD_BRAKE_MPS2) {
                     if (!inHardBrake) { hardBrakes++; rawEvents += timestampMs to "brake" }
                     inHardBrake = true
                 } else if (accel > HARD_BRAKE_MPS2 / 2) inHardBrake = false
@@ -137,9 +145,8 @@ class TripCollector(
         lastSpeedMs = timestampMs
     }
 
-    override fun onBrakePedalChanged(isPressed: Boolean, timestampMs: Long) {
-        brakePressed = isPressed
-    }
+    // 급제동은 속도 변화로만 판정한다(회생제동 감속도 포함). 페달 신호는 쓰지 않는다.
+    override fun onBrakePedalChanged(isPressed: Boolean, timestampMs: Long) {}
 
     override fun onTurnSignalChanged(turnSignal: TurnSignalState, timestampMs: Long) {
         // 꺼지는 순간까지 켜져 있던 것으로 본다
@@ -176,6 +183,7 @@ class TripCollector(
     }
 
     override fun onTelltaleChanged(warningActive: Boolean, timestampMs: Long) {
+        warningOn = warningActive
         if (!isTracking) return
         if (warningActive && warningStartMs == 0L) warningStartMs = timestampMs
         if (!warningActive && warningStartMs > 0L) closeWarning(timestampMs)
@@ -199,9 +207,13 @@ class TripCollector(
         if (isTracking) route += point
     }
 
+    /** 순간값은 다음 값이 올 때까지 이어진다고 보고, 그동안 달린 거리로 가중한다. 0 이하·비정상 값은 버린다. */
     override fun onEfficiencyChanged(value: Double, timestampMs: Long) {
-        if (isTracking) efficiency = value
+        if (isTracking && value.isFinite() && value > 0.0) efficiency = value
     }
+
+    /** 트립 평균 = 총 거리 ÷ 총 소모량. 순간값 뒤로 달린 거리가 없으면 마지막 순간값. */
+    private fun tripEfficiency(): Double? = if (effEnergy > 0.0) effMeters / effEnergy else efficiency
 
     private fun finishTrip(endMs: Long) {
         isTracking = false
@@ -211,7 +223,7 @@ class TripCollector(
         val km = if (odoKm > 0.0) odoKm else integratedMeters / 1000.0
         val detail = ScoreCalculator.calculate(
             TripStats(
-                km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, efficiency,
+                km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, tripEfficiency(),
                 tripAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
             )
         )
@@ -222,7 +234,7 @@ class TripCollector(
         }
         onTripCompleted(
             CompletedTrip(
-                trip = Trip(date, if (eligible) LeagueCalculator.round1(detail.total) else 0.0, LeagueCalculator.round1(km), detail),
+                trip = Trip(date, if (eligible) ScoreCalculator.tripScore(detail) else 0.0, LeagueCalculator.round1(km), detail),
                 events = events,
                 route = route.toList(),
                 startTime = formatTime(startTimeMs),

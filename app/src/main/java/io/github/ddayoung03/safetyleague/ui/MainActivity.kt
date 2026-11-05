@@ -546,7 +546,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pit = pitBoard(t?.events ?: DemoData.lowDayEvents, t?.trip?.detailScore, demo = t == null)
-        b.tvPitWord.text = when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
+        b.tvPitWord.text = pit.word ?: when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
         b.tvPitTip.text = pit.tip
         b.tvPitReason.text = pit.reason
         b.tvPitGain.text = pit.gain
@@ -766,9 +766,10 @@ class MainActivity : AppCompatActivity() {
 
     // ---------- 피트 보드: 가장 많이 나온 사건 하나만 ----------
 
-    private data class Pit(val tip: String, val reason: String, val gain: String)
+    private data class Pit(val tip: String, val reason: String, val gain: String, val word: String? = null)
 
     private fun pitBoard(events: List<ReplayEvent>, detail: io.github.ddayoung03.safetyleague.core.model.DetailScore?, demo: Boolean): Pit {
+        if (!demo && detail != null) return io.github.ddayoung03.safetyleague.core.calculator.PitBoard.pick(detail, events).let { Pit(it.tip, it.reason, it.gain, it.word) }
         val order = listOf("lane", "brake", "accel")
         val kind = order.maxByOrNull { k -> events.count { it.kind == k } * 10 - order.indexOf(k) }
         val n = events.count { it.kind == kind }
