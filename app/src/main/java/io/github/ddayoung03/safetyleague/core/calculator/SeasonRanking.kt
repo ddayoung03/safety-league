@@ -39,8 +39,11 @@ object SeasonRanking {
         // 작은 리그(친구 등): 승급선은 최소 P1, 강등선은 승급선 뒤(1명이면 P2 = 강등 없음)
         val line = LeagueCalculator.promotionRank(board.size).coerceAtLeast(1)
         val demotion = LeagueCalculator.demotionRank(board.size).coerceAtLeast(line + 1)
-        return SeasonStanding(tier, rank, average, (rank - line).coerceAtLeast(0),
-            LeagueCalculator.round1((board[line - 1].avg - average).coerceAtLeast(0.0)),
+        val steps = (rank - line).coerceAtLeast(0)
+        // L7: 승급선과 동점(또는 0.05점 미만 차)이면 내가 뒤라 "0.0점"이 되므로, 남은 계단이 있으면 최소 0.1점
+        val points = LeagueCalculator.round1((board[line - 1].avg - average).coerceAtLeast(0.0))
+            .let { if (steps > 0) maxOf(it, 0.1) else it }
+        return SeasonStanding(tier, rank, average, steps, points,
             board.filter { it.rank in (rank - radius)..(rank + radius) },
             line, demotion, board.size)
     }

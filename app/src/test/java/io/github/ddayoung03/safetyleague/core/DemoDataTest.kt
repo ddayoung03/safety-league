@@ -36,10 +36,10 @@ class DemoDataTest {
 
     @Test
     fun testStreakCountsDriveDaysAbove70AndSkipsNoDriveDays() {
-        assertEquals(12, DemoData.streakAt("2026-11-06"))
-        assertEquals(13, DemoData.streakAt("2026-11-07"))
-        assertEquals(15, DemoData.streakAt("2026-11-09"))
-        assertEquals(11, DemoData.streakAt("2026-11-05")) // 11/5는 운전 안 한 날 (휴식) -> 이전 날의 11일 유지
+        assertEquals(10, DemoData.streakAt("2026-11-06"))
+        assertEquals(11, DemoData.streakAt("2026-11-07"))
+        assertEquals(13, DemoData.streakAt("2026-11-09"))
+        assertEquals(9, DemoData.streakAt("2026-11-05")) // 11/5는 운전 안 한 날 (휴식) -> 이전 날의 9일 유지
     }
 
     @Test
@@ -141,7 +141,7 @@ class DemoDataTest {
         val before = DemoData.ranks.getValue(LocalDate.parse(today).minusDays(1).toString())
         assertEquals(125, me)
         assertEquals(3, before - me) // 카드 ▲3
-        assertEquals(15, DemoData.streakAt(today)) // 카드 연속 기록 (11-09 기준)
+        assertEquals(13, DemoData.streakAt(today)) // 카드 연속 기록 (11-09 기준, 시안 result-win과 같은 13일)
         // 카드·리그·리포트 모두 같은 내 평균
         val myAvg = DemoData.neighbors().single { it.name == "나" }.avg
         assertEquals(88.8, myAvg, 0.001)
@@ -202,6 +202,7 @@ class DemoDataTest {
             unresolvedWarningSeconds = 0, doorOpenWhileMoving = 0,
             streakDays = DemoData.streakAt(LocalDate.parse(DemoData.today).minusDays(1).toString())
         )
+        assertEquals(DemoData.winDayDetail, ScoreCalculator.calculate(stats))
         assertEquals(92.0, ScoreCalculator.calculate(stats).total, 0.001)
         assertTrue(DemoData.winDayEvents.isEmpty())
     }

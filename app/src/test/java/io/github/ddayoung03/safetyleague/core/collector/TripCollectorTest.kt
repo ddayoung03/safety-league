@@ -335,4 +335,31 @@ class TripCollectorTest {
         c.park(60_000, 110.0)
         assertEquals(0, trips.single().events.count { it.kind == "brake" })
     }
+
+    // ---------- 점검 보고서 L1, 「트립 중 날짜 변경」 ----------
+
+    @Test fun l1ShortTripDistanceIsRoundedDownSoItNeverReads3km() {
+        val c = collector()
+        c.depart(1_000, odometer = 100.0); c.park(60_000, 102.96)
+        val r = trips.single()
+        assertFalse(r.isEligible)
+        assertEquals(2.9, r.trip.km, 0.0) // "3.0km"이면서 "3km 이상 달리면 기록돼요"가 같이 나오지 않게
+        assertEquals(0.0, r.trip.score, 0.0)
+    }
+
+    @Test fun l1EligibleTripDistanceIsStillRounded() {
+        val c = collector()
+        c.depart(1_000, odometer = 100.0); c.park(60_000, 103.06)
+        assertEquals(3.1, trips.single().trip.km, 0.0)
+        assertTrue(trips.single().isEligible)
+    }
+
+    @Test fun tripKeepsTheDateItStartedOnAcrossMidnight() {
+        // 서비스는 출발할 때(onTripStarted)만 날짜를 정한다. 자정을 넘겨 주차해도 출발한 날의 트립이다.
+        lateinit var c: TripCollector
+        c = TripCollector(date = "2026-11-06", streakDays = 12, leagueAvgEfficiency = 5.8,
+            onTripStarted = { c.date = "2026-11-07" }) { trips += it }
+        c.depart(1_000); c.park(60_000, 110.0)
+        assertEquals("2026-11-07", trips.single().trip.date)
+    }
 }

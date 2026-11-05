@@ -234,7 +234,9 @@ class TripCollector(
         }
         onTripCompleted(
             CompletedTrip(
-                trip = Trip(date, if (eligible) ScoreCalculator.tripScore(detail) else 0.0, LeagueCalculator.round1(km), detail),
+                // L1: 3km 미만은 버림으로 적는다(2.96km가 "3.0km"로 보이면서 제외되지 않게)
+                trip = Trip(date, if (eligible) ScoreCalculator.tripScore(detail) else 0.0,
+                    if (eligible) LeagueCalculator.round1(km) else kotlin.math.floor(km * 10) / 10, detail),
                 events = events,
                 route = route.toList(),
                 startTime = formatTime(startTimeMs),

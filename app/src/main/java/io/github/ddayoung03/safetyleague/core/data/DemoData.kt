@@ -12,6 +12,8 @@ import io.github.ddayoung03.safetyleague.core.model.Trip
  * 시연용 가상 운전자 "나"의 데이터.
  * 2026-11-05 정리: 92점 카드·리그·리포트가 모두 기준일 [today](11-09) 하나를 쓴다.
  * 그래서 11-07/11-09 점수를 맞바꿨고 mockups/demo-data.js와는 이 부분이 다르다.
+ * 10-26도 다르다(시안 81 → 68): 92점 카드 연속 기록을 시안과 같은 13일로 두려고 11-09에서 13일째에 끊기게 했다.
+ * 10월(지난 시즌)이고 지난주(10-27 ~ 11-02) 밖이라 다른 화면 숫자는 그대로다.
  */
 object DemoData {
     /** 시연의 "오늘". 92점 트립을 달린 날이자 리그·리포트 기준일. */
@@ -48,6 +50,9 @@ object DemoData {
      */
     val lowDayDetail = DetailScore(smoothness = 25.0, manner = 0.0, eco = 14.0, safety = 15.0, consistency = 10.0)
 
+    /** 이긴 날 92점 내역. 감점 사건 없음, 전비 리그 평균의 104%, 연속 10일 이상. 화면에는 내역 칸이 없고 각본 주행 검증에 쓴다. */
+    val winDayDetail = DetailScore(smoothness = 30.0, manner = 25.0, eco = 12.0, safety = 15.0, consistency = 10.0)
+
     /** 리그 화면 안전운전 효용 (시연용 가상값) */
     const val savedWon = "₩8,400"
     const val brakesCut = "3,120회"
@@ -66,7 +71,7 @@ object DemoData {
     val trips = listOf(
         Trip(date = "2026-10-24", score = 66.0),
         Trip(date = "2026-10-25", score = 80.0),
-        Trip(date = "2026-10-26", score = 81.0),
+        Trip(date = "2026-10-26", score = 68.0),
         Trip(date = "2026-10-27", score = 82.0),
         Trip(date = "2026-10-28", score = 85.0),
         Trip(date = "2026-10-29", score = 84.0),

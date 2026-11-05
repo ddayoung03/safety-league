@@ -109,4 +109,29 @@ class SeasonRankingTest {
         assertEquals(1, two.stepsToPromotion)
         assertEquals(10.0, two.pointsToPromotion, 0.001)
     }
+
+    // ---------- 점검 보고서 「테스트가 없는 점수·순위 로직」 ----------
+
+    @Test fun midRankStepsAndPointsAreTheRealValues() {
+        // 기본 분포(시연 순위표를 지남): 88.8 → P125, 승급선 P119 동래젠틀맨 89.7 → 6계단 · 0.9점
+        val s = SeasonRanking.rank(88.8, "골드", SeasonDrivers.drivers)
+        assertEquals(125, s.rank)
+        assertEquals(6, s.stepsToPromotion)
+        assertEquals(0.9, s.pointsToPromotion, 0.0)
+    }
+
+    @Test fun tieWithPromotionLineShowsAtLeastOneTenth() {
+        // L7: 승급선과 동점이면 내가 뒤(P(line+1))다. "1계단 · 0.0점" 대신 "1계단 · 0.1점"
+        val drivers = List(9) { DriverRank(it + 1, "운전자$it", 95.0 - it) } // 95.0 .. 87.0, 10명 → 승급선 P3
+        val lineAvg = 93.0
+        val s = SeasonRanking.rank(lineAvg, "실버", drivers)
+        assertEquals(3, s.promotionRank)
+        assertEquals(4, s.rank)
+        assertEquals(1, s.stepsToPromotion)
+        assertEquals(0.1, s.pointsToPromotion, 0.0)
+        // 승급권 안이면 0점 그대로
+        val inside = SeasonRanking.rank(93.5, "실버", drivers)
+        assertEquals(0, inside.stepsToPromotion)
+        assertEquals(0.0, inside.pointsToPromotion, 0.0)
+    }
 }

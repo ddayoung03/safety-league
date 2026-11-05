@@ -491,3 +491,78 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 검증: Android Gradle 플러그인을 받을 수 없어(dl.google.com 403) 앱 빌드와 `testDebugUnitTest`는 실행하지 못했다. 저장소 밖의 JVM Gradle 프로젝트(Kotlin 2.1.0, JUnit 4.13.2, kotlinx-coroutines-core 1.8.1, 커밋 안 함)로 `core/`(Android 의존 4개 파일 제외)와 `app/src/test/.../core/` 테스트를 돌렸다. 결과: 69개, 실패 0, 오류 0, 건너뜀 0(수정 전 기존 51개 통과 확인). `ui/view`·`weather` 테스트는 이 프로젝트에 넣지 않았다.
 - 컴파일하지 못한 코드: `ui/MainActivity.kt`의 3줄 변경(피트 보드 연결)은 Android 의존이라 컴파일하지 못했다. 에뮬레이터 빌드에서 확인이 필요하다.
 - 사용자가 결정할 것: main 병합(에뮬레이터에서 결과 카드·피트 보드·각본 주행 확인 후).
+
+### 2026-11-05 — 2차 클라우드 결과 병합(통합·시연 + 점수 계산) · 남은 문제 마무리
+- 병합(Claude): `claude/dazzling-goodall-e83ju7`(통합·시연·화면 수정)에서 이 브랜치를 만들고 `claude/vigilant-cori-5dzlwm`(점수 계산 수정)을 병합. 충돌은 `ui/MainActivity.kt` 2곳(피트 보드)과 이 파일. 이 파일은 양쪽 기록을 모두 남김(위 두 항목).
+- 피트 보드 충돌 정리: `pitBoard(events, detail, demo)` 하나로 합침.
+  - 실제 트립이고 세부 점수가 있으면 `core/calculator/PitBoard.pick` 결과(글자·문구·이유·「+N점 가능」).
+  - 시연 64점 카드(실제 트립 없음)는 `DemoData.lowDayDetail`(25/0/14/15/10)로 「깜빡이!」·「매너 +25점 가능」.
+  - 세부 점수가 없는 옛 실제 트립은 사건 횟수로 문구만 고르고 숫자는 비움. 실제 트립 경로에서 `DemoData` 값을 쓰는 곳은 없음(코드로 확인).
+  - 리플레이 하단 문구도 같은 함수(`demo = t == null`)를 씀. 리플레이에는 사건별 감점 숫자가 없음(문구만).
+- 두 브랜치의 전제 대조
+  - 같음: 각본 주행 92점(30/25/12/15/10, 18.4km, 사건 0)과 64점(25/0/14/15/10, 22.1km, 급가속 1·급제동 2·깜빡이 없는 차선 변경 4). 리그 평균 전비 5.8.
+  - 테스트로 고정: `DemoData.winDayDetail`(30/25/12/15/10)을 새로 두고, `MockVehicleDataSourceTest.scriptsMatchDemoCards`가 각본 결과를 `DemoData`의 내역·점수·거리·사건 종류와 비교. 연속 기록 입력도 `DemoData`에서 가져옴(이긴 날 = 기준일 전날까지 12일, 아쉬운 날 = `lowDayStreakBefore` 13일). `DemoDataTest`의 92점 계산도 `winDayDetail`과 비교.
+  - 남은 차이(이전 기록과 같음): 앱의 각본 주행은 저장소의 실제 연속 기록과 차종 프로필 기준을 쓰므로 새 설치(연속 0일)에서는 계산값이 7점 낮다. 결과 카드는 `DemoData`의 92/64를 보여 준다.
+- 92점 카드 연속 기록: 시안 `mockups/result-win.html`은 `streakAt('2026-11-07')` = **13일**. 통합 브랜치에서 92점 날을 11-09로 옮기며 15일이 됐음. **13일로 되돌림.** `DemoData.trips`의 10-26 점수를 81 → 68로 바꿔 11-09 기준 연속이 10-27부터 13일이 되게 함.
+  - 10-26은 10월(지난 시즌)이고 지난주(10-27 ~ 11-02, 85.7) 밖이라 92점(P125 ▲3), 64점(P126 ▼1), 골드 397명 중 P125, 시즌 평균 88.8, 리포트 88.8·+3.1·P131 → P125 ▲6은 그대로. 테스트로 확인.
+  - 바뀌는 값: 화면에 안 나오는 날짜별 연속(11-05 9일, 11-06 10일, 11-07 11일, 11-08 12일). 92점 계산의 연속 점수는 10일 이상이면 만점이라 그대로.
+  - 시안 파일은 고치지 않음. 시안 `demo-data.js`의 10-26은 81 그대로라 이 줄은 시안과 다름(`DemoData` 주석에 적음). 64점 카드 「13일 → 0일」은 시안과 같음.
+- M5 대체 판단 따라가기(코드만, 에뮬레이터 실행 못 함)
+  - 정상 에뮬레이터: `Car.createCar`와 `CarUxRestrictionsManager`를 얻으면 `uxFallback = false`라 기어·속도 판단은 쓰지 않음. P단 정지면 UX 제한 서비스가 「최적화 불필요」를 주므로 주행 중으로 고정되지 않음.
+  - 연결 실패(대체 판단) 직후: `onStart`에서 `connectUxRestrictions()`가 `weatherSource.start()`보다 먼저 돌아 기어가 UNKNOWN → 주행 중 화면. 이어서 `start()`가 `getProperty`로 현재 값을 바로 읽음(속도 → 기어 순). 기어 P를 받으면 `isDrivingByMotion` = false라 풀림. 속도 권한(`CAR_SPEED`)이 아직 없어 속도가 null이어도 P단이면 풀림. 기어는 `CAR_POWERTRAIN`(일반 권한)이라 첫 설치에도 들어옴.
+  - 풀린 뒤 화면: 진행 중 트립이 없으면 리그(차종을 안 골랐으면 차종 선택). 그래서 대체 판단 환경에서는 앱을 열 때 `onCreate`가 연 화면(위치 동의, 결과 카드 등) 대신 리그가 뜬다. 정상 에뮬레이터에서는 생기지 않음. 고치지 않음(H2의 「풀리면 리그」 결정을 건드리게 되어서).
+  - 고정될 수 있는 경우 1: 대체 판단 환경에서 `GEAR_SELECTION`도 못 받으면 계속 주행 중 화면(의도한 안전한 쪽).
+  - 고정될 수 있는 경우 2: 속도 속성이 오류 이벤트를 내면 `VehicleWeatherSource.clear`가 기어도 UNKNOWN으로 지움. 기어는 바뀔 때만 이벤트가 오므로 P단에 서 있는 동안 다시 풀리지 않음(앱을 다시 열면 풀림). 대체 판단 환경에서만 생기고 날씨 모듈 동작이라 고치지 않음.
+- 낮음 항목(점검 보고서 L1~L7)
+  - L1 고침: 3km 미만 트립 거리를 버림으로 저장(2.96km → 「2.9km」). 3km 이상은 전처럼 반올림. `TripCollector.finishTrip`.
+  - L2: 이미 고쳐져 있음(통합 브랜치). 경계 테스트 있음.
+  - L3 고침: 아쉬운 날 카드의 「전 → 후」 연속 기록을 둘 다 모든 리그 트립으로 셈(전에는 「전」만 현재 리그). 연속 기록은 사람 기준.
+  - L4 고치지 않음: 주행 중 도어 열림 −3은 안전 기본기(15점) 안의 감점이라 배점은 그대로다. 빼면 점수 동작이 바뀌고, 기획서는 저장소 밖이라 여기서 고칠 수 없음. 사용자가 기획서에 「도어 열림 −3」을 추가할지 정하면 됨.
+  - L5: 이미 고쳐져 있음(점수 계산 브랜치).
+  - L6 고침: 결과 카드 연속 기록을 오늘이 아니라 트립 날짜 기준으로 셈(이긴 날·아쉬운 날 모두). 쓰이지 않게 된 `MainActivity.today`를 지움.
+  - L7 고침: 승급까지 계단이 남았는데 점수 차가 0.0으로 반올림되면 0.1점으로 보여 줌(`SeasonRanking.rank`). 승급권 안이면 0점 그대로.
+- 「테스트가 없는 점수·순위 로직」 채운 것
+  - 이미 다른 작업이 채운 것: H1·H3·M1·H4·회생 감속·효율 신호 여러 번(TripCollectorTest), C3(MockVehicleDataSourceTest), DemoData 일관성(DemoDataTest), 피트 보드 선택(PitBoardTest), 작은 리그 순위선(SeasonRankingTest).
+  - 새로: `LeagueCalculatorTest`(1~6명·397명 순위선, 706.8/8 → 88.4와 353/4 → 88.3 반올림, `daysLeft` 마지막 날 0일, 하루 여러 트립 연속 기록, 3km 경계), `SeasonRankingTest` 2개(중간 순위 P125의 6계단·0.9점, L7 동점), `TripCollectorTest` 3개(L1 2.96km, 3.06km는 3.1km, 자정을 넘긴 트립은 출발한 날), `TripQueriesTest` 4개(리그·거리 필터, 리그 없는 트립만 배정, 연속 기록 범위 L3, 짧은 트립은 연속 기록에 영향 없음).
+  - `TripRepository`는 파일과 `org.json`을 써서 Android 단위 테스트에서 바로 돌릴 수 없음. 판단 부분만 순수 함수 `core/repository/TripQueries.kt`로 옮기고(`getAllTrips`·`assignUnassignedTrips`·`getStreak`가 그대로 부름) 그것을 테스트함. JSON 저장·읽기는 테스트하지 않음.
+  - 남은 공백: 결과 카드 이긴 날/아쉬운 날 판정(`showResult`의 `>= 70`)은 Activity 안에 있어 테스트하지 않음(점수가 정수 저장이라 경계 문제는 H1 테스트로 막힘).
+- M6(코드 변경 없음) 부팅 자동 시작 판단 재료
+  - 지금: 수집 서비스는 `MainActivity.onCreate`와 위치 동의 뒤에만 시작한다. 매니페스트에 부팅 수신기와 `RECEIVE_BOOT_COMPLETED`가 없다. `START_STICKY`라 프로세스가 죽으면 다시 살아나지만, 헤드유닛을 재부팅하면 앱을 열 때까지 기록하지 않는다.
+  - 시연에는 영향 없음: 시연은 앱을 열고 시작한다. 실제 사용자가 시동 후 앱을 열지 않고 달리는 경우에만 트립이 빠진다.
+  - 추가할 때 볼 것(추정 포함, 확인 필요)
+    - AAOS 차량은 시동을 끌 때 전원을 끄지 않고 대기(suspend)로 들어가는 경우가 많다. 그러면 시동마다 `BOOT_COMPLETED`가 오지 않고, 서비스가 살아 있으면 필요도 없다(추정). Pleos 헤드유닛이 어느 쪽인지 모른다.
+    - AAOS는 시스템 사용자와 운전자 사용자(보통 user 10)가 나뉜다. `BOOT_COMPLETED`는 운전자 사용자가 잠금 해제된 뒤 그 사용자에게 온다(추정).
+    - 부팅 직후(백그라운드)에 시작하는 포그라운드 서비스는 위치 「사용 중 허용」 권한을 쓰지 못한다. 그래서 `location` 타입으로 시작하면 실패할 수 있고, 백그라운드 위치 권한을 따로 받거나 경로 없이 `dataSync`만으로 시작해야 한다. targetSdk 35부터는 `BOOT_COMPLETED`에서 `dataSync` 타입 시작도 막힌다(지금은 34).
+    - 차량 시동 신호(`IGNITION_STATE`)로 시작하려 해도 그 신호를 받을 프로세스가 먼저 살아 있어야 한다.
+    - 개인정보: 앱을 열지 않아도 기록한다는 것을 위치 동의 화면이나 알림에 알려야 한다.
+  - 판단에 필요한 실험(사용자 PC): 에뮬레이터를 `adb reboot`한 뒤 앱을 열지 않고 Virtual Console로 주행 → `adb shell dumpsys activity services io.github.ddayoung03.safetyleague`에 서비스가 있는지, `trips.json`이 늘었는지. 에뮬레이터 「전원 끄기/켜기」(suspend)를 쓸 수 있으면 같은 실험.
+  - 제안: 코드 동결(11-13)까지는 넣지 않고 「시동 후 앱 열기」를 안내. 넣는다면 `RECEIVE_BOOT_COMPLETED` + 수신기 하나 + 경로 없이 시작이 가장 단순.
+- 가정(모호해서 가장 단순한 쪽을 고름)
+  - 92점 카드 연속 13일은 「보이지 않는 10월 점수 하나를 70점 미만으로」로 맞춤. 카드만 다른 날짜로 세는 방법은 기준일을 하나로 맞춘 C2와 어긋나서 고르지 않음.
+  - L1은 판정을 바꾸지 않고 3km 미만 표시만 버림. 3km 이상 반올림은 그대로(각본 18.4/22.1 유지).
+  - L6은 트립 날짜까지의 연속 기록. 같은 날 그 트립 뒤에 달린 트립도 들어감(지난 카드를 다시 열 때만 차이).
+  - L7은 「0.1점」 쪽을 고름(문구를 새로 만들지 않음).
+- 바꾸지 않음: 배점 30/25/20/15/10, 10km당 환산, 3km 미만 제외, 연속 70점 기준, 시연 머리 숫자 92점(P125 ▲3)·64점(P126 ▼1)·골드 397명 중 P125, `mockups/`.
+- 검증(클라우드)
+  - Android 앱 빌드는 못 함: Android Gradle 플러그인을 받지 못함(dl.google.com 403). 저장소 밖 JVM Gradle 프로젝트 두 개(커밋 안 함, Kotlin 2.1.0, JUnit 4.13.2, kotlinx-coroutines-core 1.8.1)를 씀.
+  - 단위 테스트: 순수 파일(`core/calculator`·`model`·`data`, `core/collector`의 순수 5개, `core/repository/TripQueries.kt`, `weather/WeatherState.kt`, `ui/view`의 순수 2개)과 저장소의 테스트 17개 클래스 전체 → **146개 통과, 실패 0**(병합 직후 131개 통과 → 새 15개).
+  - Android 의존 컴파일: Maven Central의 `org.robolectric:android-all:14-robolectric-10818077`(android.car 포함)을 compileOnly로 두고 컴파일 성공: `core/repository/`(TripRepository·SeasonSettlementStore·VehicleProfileStore·LocationConsentStore), `SafetyLeagueApp.kt`, `ui/view/DesignCanvas.kt`, `ui/view/KerbView.kt`, `core/collector/VehicleProfileReader.kt`.
+  - **컴파일하지 못한 파일**(AndroidX·Pleos SDK·R·뷰 바인딩이 필요): `ui/MainActivity.kt`, `ui/PermissionActivity.kt`, `ui/LocationConsentScreen.kt`, `service/TripTrackingService.kt`, `weather/VehicleWeatherSource.kt`, `core/collector/PleosVehicleDataSource.kt`, `ui/view/`의 나머지(CheckerFlagView, GlassDrawable, RainScoreView, CrewFaceView, DrivingTrackView, WeatherAmbientView, PositionChartView, CircuitRouteView, AsphaltDrawable, MetalTextView, SkewDrawable, FlameScoreView, ReplayEventIcon).
+  - 직접 대조: `ui/`의 바인딩 필드(`b.*`, `binding.*`)를 레이아웃 `@+id` 전체와 스크립트로 대조 → 없는 id 0개. 이번에 바꾼 `MainActivity` 줄이 부르는 것(`PitBoard.pick`, `Advice.word/tip/reason/gain`, `repository.getAllTrips()`, `Trip.date`, `tripsBefore`의 새 인자)은 모두 있음. 지운 `today`는 다른 곳에서 안 씀.
+
+## 사용자 PC 확인 목록 (이 브랜치 기준, 위 항목들의 확인 목록을 한 곳에 모음)
+1. 빌드: `.\gradlew.bat assembleDebug lintDebug -q` 통과. 특히 클라우드에서 컴파일하지 못한 `MainActivity.kt`·`PermissionActivity.kt`·`LocationConsentScreen.kt`·`TripTrackingService.kt`·`VehicleWeatherSource.kt`·`PleosVehicleDataSource.kt`.
+2. 단위 테스트: `.\gradlew.bat testDebugUnitTest -q` 통과. 저장소의 테스트 17개 클래스를 클라우드에서 모두 돌렸으므로 PC에서도 146개여야 함(새 클래스 `LeagueCalculatorTest`, `TripQueriesTest`).
+3. 첫 설치 흐름: 앱 삭제 후 설치 → 권한 창(별도 작업 창, 속도·알림만, 위치 없음) → 차종 선택(자동 인식이면 바로 배치) → 배치 → 「시작하기」 → 위치 동의 → 동의하면 위치 권한 창 → 리그. 주행 중 Pleos 홈 화면이 「주행 중에는 사용할 수 없습니다」로 앱을 가리지 않는지.
+4. 세 리그 탭: 차종(기본)·지역·친구 탭 전환, 친구 6명·지역 순위 정상, 지역·친구 탭에서 티어 바·승급 문구 숨김, 차종 탭을 다시 누르면 차종 선택, 앱이 죽지 않음.
+5. 리포트: 시연 11.03 ~ 11.09 · 주행 6일, 막대 「화 수 목 금 토 일 월」(「목」 휴식, 93 토만 노랑), 88.8, +3.1, P131 → P125 ▲6. 실제 모드 리그 → 「리포트」 → 「리그」 왕복, 트립 없을 때 빈 상태, 주행 뒤 값이 트립과 맞음.
+6. 위치 동의: 「경로 기록하기」 → 주행 뒤 리플레이에 경로, 「기록하지 않기」 → 경로 없음·점수 정상, 재시작 후 유지, 차종 탭 「경로 기록 설정」에서 바꾸기, 주행 중에는 동의 화면이 안 뜸.
+7. 시연 92점: 92점, 18.4km, **연속 13일**(시안과 같음), P125 ▲3, P126~P128 「추월」, 「0.3점 차」, 승급 라인까지 6계단. 리플레이 8:02 ~ 8:31 · 18.4km, 「감점 사건 없이 달렸어요」, 「다른 날의 예시」 없음.
+8. 시연 64점: 64점, 22.1km, 13일 → 0일, P126 ▼1, 해운대드라이버 「목표」·「0.4점 차」, 피트 보드 「깜빡이!」·「차선 바꿀 때 깜빡이부터 켜기」·「오늘 깜빡이 없이 차선 변경 4회」·「매너 +25점 가능」. 리플레이 6:08 ~ 6:42 · 22.1km와 「다른 날의 예시」. 빨강 없음.
+9. 시연 리그: 골드 397명 중 P125, 88.8, 승급 라인까지 6계단 · 0.9점, 21일 남음.
+10. 각본 주행: 시연 모드에서 이긴 날·아쉬운 날 각본 → 주행 중 화면에 점수·순위·감점 없음 → 끝나면 92/64 카드. 각본 뒤 `trips.json`이 늘지 않음.
+11. 실제 주행 복귀: 시연을 끄고 Virtual Console로 3km 이상 주행 → P → 이번 트립 카드(시연 숫자 아님). 70점 미만이면 피트 보드가 이 트립의 가장 큰 감점 항목(새 글자 「기본기!」·「에코!」·「좋아요!」가 보드 폭에 맞는지). 연속 기록이 트립 날짜 기준. 3km 미만이면 「이번 주행 2.9km」처럼 3.0으로 보이지 않음. 리그 순위·리포트 반영, 재시작 후 유지.
+12. 주행 중 제한: 주행 중에는 주행 중 화면만, P로 바꾸면 이번 트립 카드. D단 정지로 제한이 풀리는 설정이면 이전 트립 카드가 아니라 주행 중 화면 유지. 가능하면 CarUxRestrictions가 없는 이미지에서 P·정지 시 풀리는지(M5).
+13. 시즌 정산: 에뮬레이터 날짜를 다음 달 1일로 → 리그 화면에 결과 한 줄, 재시작해도 두 번 정산 안 함.
+14. M6 실험(선택): `adb reboot` 뒤 앱을 열지 않고 주행해 기록되는지(위 M6 항목).
+15. main 병합 여부 결정.

@@ -371,7 +371,6 @@ class MainActivity : AppCompatActivity() {
         if (view is ViewGroup) for (i in 0 until view.childCount) applySkew(view.getChildAt(i))
     }
 
-    private val today get() = LocalDate.now().toString()
     private val realTrip get() = shownTrip.takeIf { demoResultWin == null }
 
     private fun hideKeyboard() {
@@ -468,7 +467,7 @@ class MainActivity : AppCompatActivity() {
     private fun standing(trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = leagueTrips()) =
         SeasonRanking.calculate(trips, LocalDate.now(), myTier)
 
-    private fun tripsBefore(trip: CompletedTrip) = leagueTrips().toMutableList().apply {
+    private fun tripsBefore(trip: CompletedTrip, trips: List<io.github.ddayoung03.safetyleague.core.model.Trip> = leagueTrips()) = trips.toMutableList().apply {
         if (trip.isEligible) { val index = indexOfLast { it == trip.trip }; if (index >= 0) removeAt(index) }
     }
 
@@ -524,7 +523,7 @@ class MainActivity : AppCompatActivity() {
         val before = DemoData.ranks.getValue(LocalDate.parse(day).minusDays(1).toString())
         b.tvScore.text = (t?.trip?.score ?: DemoData.trips.first { it.date == day }.score).roundToInt().toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
-        b.tvStreak.text = "${if (t != null) repository.getStreak(today) else DemoData.streakAt(day)}일"
+        b.tvStreak.text = "${if (t != null) repository.getStreak(t.trip.date) else DemoData.streakAt(day)}일"
         b.tvRadioMessage.text = if (t == null) "멋진 레이스였어요!\n오늘 ${before - me}계단 올라섰어요" else "안전하게 완주했어요!\n다음 레이스도 함께해요"
         b.tvRankChange.text = "▲${before - me}"
         b.tvToPromotion.text = "승급 라인까지 ${me - LeagueCalculator.promotionRank(DemoData.league.total)}계단"
@@ -568,14 +567,15 @@ class MainActivity : AppCompatActivity() {
         b.kerbBottom.isMuted = true
         b.tvScore.text = (t?.trip?.score?.roundToInt() ?: DemoData.lowDayScore).toString()
         b.tvKm.text = "${t?.trip?.km ?: DemoData.lowDayKm}km"
-        val streakBefore = if (t != null) LeagueCalculator.streakAt(tripsBefore(t), today) else DemoData.lowDayStreakBefore
+        // L3·L6: 연속 기록은 사람 기준(모든 리그의 트립)이고 트립 날짜까지 센다. 전·후가 같은 범위다.
+        val streakBefore = if (t != null) LeagueCalculator.streakAt(tripsBefore(t, repository.getAllTrips()), t.trip.date) else DemoData.lowDayStreakBefore
         b.tvStreakChange.text = "${streakBefore}일 → 0일"
         t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
         b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
         if (t != null) {
             b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
             b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
-            b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(today)}일"
+            b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(t.trip.date)}일"
         }
         if (t != null && !t.isEligible) {
             // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
