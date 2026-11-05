@@ -1,7 +1,6 @@
 package io.github.ddayoung03.safetyleague.core.repository
 
 import android.content.Context
-import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.Point2D
@@ -38,17 +37,15 @@ class TripRepository private constructor(private val file: File) {
 
     /** 차종을 정하기 전에 달린 트립을 그 차종 리그에 넣는다. */
     fun assignUnassignedTrips(leagueKey: String) {
-        realTrips.replaceAll { if (it.leagueKey == null) it.copy(leagueKey = leagueKey) else it }
+        realTrips.replaceAll { TripQueries.withLeague(it, leagueKey) }
         _latestCompletedTrip.value = realTrips.lastOrNull()
         persist()
     }
 
     /** 점수 집계에는 실제 유효 트립만 사용한다. */
-    fun getAllTrips(leagueKey: String? = null): List<Trip> = realTrips.filter {
-        it.isEligible && it.trip.km >= 3.0 && (leagueKey == null || it.leagueKey == leagueKey)
-    }.map { it.trip }
+    fun getAllTrips(leagueKey: String? = null): List<Trip> = TripQueries.eligible(realTrips, leagueKey)
 
-    fun getStreak(untilDate: String): Int = LeagueCalculator.streakAt(getAllTrips(), untilDate)
+    fun getStreak(untilDate: String): Int = TripQueries.streak(realTrips, untilDate)
 
     private fun persist() {
         val arr = JSONArray()

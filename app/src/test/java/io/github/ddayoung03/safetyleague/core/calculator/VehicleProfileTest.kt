@@ -40,4 +40,22 @@ class VehicleProfileTest {
         assertNull(VehicleCatalog.manual("a".repeat(21), Powertrain.EV))
         assertEquals(20, VehicleCatalog.manual("a".repeat(20), Powertrain.EV)?.model?.length)
     }
+    @Test fun ecoBaselineIsPerModelWithPowertrainFallback() {
+        // M2: 같은 차종 평균(가상 기준표). 표에 없는 차종·동력 조합은 EV 5.8 / 내연 12.0
+        assertEquals(5.8, VehicleProfile("아이오닉 5", Powertrain.EV).averageEfficiency, 0.001)
+        assertNotEquals(5.8, VehicleProfile("GV60", Powertrain.EV).averageEfficiency, 0.001)
+        assertNotEquals(
+            VehicleProfile("아이오닉 6", Powertrain.EV).averageEfficiency,
+            VehicleProfile("GV60", Powertrain.EV).averageEfficiency, 0.001
+        )
+        assertNotEquals(
+            VehicleProfile("아반떼", Powertrain.ICE).averageEfficiency,
+            VehicleProfile("G80", Powertrain.ICE).averageEfficiency, 0.001
+        )
+        assertEquals(12.0, VehicleProfile("아이오닉 5", Powertrain.ICE).averageEfficiency, 0.001)
+        assertEquals(5.8, VehicleProfile("내 차", Powertrain.EV).averageEfficiency, 0.001)
+        for (v in VehicleCatalog.vehicles) {
+            assertTrue(v.model, VehicleProfile(v.model, v.powertrain).averageEfficiency > 0.0)
+        }
+    }
 }

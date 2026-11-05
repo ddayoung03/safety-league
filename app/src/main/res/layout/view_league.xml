@@ -46,6 +46,22 @@
             android:visibility="gone" />
 
         <TextView
+            android:id="@+id/btn_league_report"
+            android:layout_width="wrap_content"
+            android:layout_height="76dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/cell"
+            android:clickable="true"
+            android:contentDescription="주간 리포트 보기"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingHorizontal="24dp"
+            android:text="리포트"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:visibility="gone" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tv_season_title"
@@ -93,6 +109,7 @@
         android:background="@color/cell"
                 android:paddingHorizontal="22dp"
                 android:paddingVertical="12dp"
+                android:id="@+id/tv_tab_region"
                 android:text="부산"
                 android:textColor="@color/grey"
                 android:textSize="24sp" />
@@ -105,6 +122,7 @@
         android:background="@color/cell"
                 android:paddingHorizontal="22dp"
                 android:paddingVertical="12dp"
+                android:id="@+id/tv_tab_friends"
                 android:text="친구"
                 android:textColor="@color/grey"
                 android:textSize="24sp" />

@@ -17,11 +17,13 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
 import io.github.ddayoung03.safetyleague.core.collector.MockVehicleDataSource
 import io.github.ddayoung03.safetyleague.core.collector.PleosVehicleDataSource
 import io.github.ddayoung03.safetyleague.core.collector.TripCollector
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
+import io.github.ddayoung03.safetyleague.core.repository.LocationConsentStore
 import io.github.ddayoung03.safetyleague.core.repository.TripRepository
 import io.github.ddayoung03.safetyleague.ui.MainActivity
 import java.time.LocalDate
@@ -83,12 +85,15 @@ class TripTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // 위치 권한이 있을 때만 location 타입으로 (없이 location 타입이면 API 34에서 SecurityException)
+        // 경로 기록에 동의하지 않았으면 위치 권한이 있어도 location 타입을 쓰지 않는다
         val canLocate = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
+            PackageManager.PERMISSION_GRANTED &&
+            LocationPolicy.requestsLocationPermission(LocationConsentStore(this).load())
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (canLocate) ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         } else 0
         ServiceCompat.startForeground(this, TRACKING_ID, trackingNotification(), type)
+        if (!mockRunning) signals.post { pleos.syncLocation() } // 위치 동의가 바뀌었으면 반영
         return START_STICKY
     }
 

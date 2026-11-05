@@ -5,7 +5,9 @@ import java.util.Locale
 
 data class VehicleProfile(val model: String, val powertrain: Powertrain, val tier: String = "브론즈", val recognition: String = "manual") {
     val leagueKey get() = "$model:${powertrain.name}"
-    val averageEfficiency get() = if (powertrain == Powertrain.EV) DemoData.leagueAvgEfficiency else DemoData.leagueAvgFuelEconomy
+    /** 같은 차종 리그의 평균 전비/연비. 표에 없는 차종은 동력 방식별 기본값. */
+    val averageEfficiency get() = VehicleCatalog.averageEfficiency[leagueKey]
+        ?: if (powertrain == Powertrain.EV) DemoData.leagueAvgEfficiency else DemoData.leagueAvgFuelEconomy
 }
 
 data class SupportedVehicle(val make: String, val model: String, val englishModel: String, val powertrain: Powertrain)
@@ -23,6 +25,24 @@ object VehicleCatalog {
         SupportedVehicle("제네시스", "GV60", "GV60", Powertrain.EV),
         SupportedVehicle("제네시스", "G80", "G80", Powertrain.ICE)
     )
+
+    /**
+     * 차종별 평균 전비(km/kWh, EV)·연비(km/L, 내연). 실제 리그 평균 데이터가 없어 둔 시연용 가상 기준이다.
+     * 키는 VehicleProfile.leagueKey. 아이오닉 5는 시연 리그 기준(5.8)과 같다.
+     */
+    val averageEfficiency = mapOf(
+        "아이오닉 5:EV" to 5.8,
+        "아이오닉 6:EV" to 6.4,
+        "EV3:EV" to 6.0,
+        "EV6:EV" to 5.6,
+        "GV60:EV" to 5.2,
+        "아반떼:ICE" to 14.5,
+        "쏘나타:ICE" to 12.5,
+        "투싼:ICE" to 11.5,
+        "스포티지:ICE" to 11.8,
+        "G80:ICE" to 9.5
+    )
+
     private fun normalize(value: String?) = value.orEmpty().filterNot { it.isWhitespace() }.lowercase(Locale.ROOT)
 
     fun recognize(make: String?, model: String?, fuels: List<Int>?): VehicleProfile? {

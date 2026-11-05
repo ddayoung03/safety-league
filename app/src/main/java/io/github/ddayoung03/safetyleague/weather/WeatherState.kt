@@ -22,6 +22,13 @@ fun isAmbientMotionAllowed(speedMps: Float?, gear: MotionGear): Boolean =
     if (speedMps != null && speedMps.isFinite()) kotlin.math.abs(speedMps) < .3f
     else gear == MotionGear.PARK || gear == MotionGear.NEUTRAL
 
+/**
+ * CarUxRestrictions를 쓸 수 없을 때 주행 중인지. 안전한 쪽으로: P단이고 멈춰 있다고 확인될 때만 주행 중이 아니다.
+ * 기어를 모르거나(UNKNOWN) N·D·R이면 주행 중, P단이어도 0.3 m/s 이상 움직이면 주행 중.
+ */
+fun isDrivingByMotion(signals: WeatherSignals): Boolean =
+    signals.gear != MotionGear.PARK || !isAmbientMotionAllowed(signals.speedMps, signals.gear)
+
 fun shouldAnimateWeather(visible: Boolean, resumed: Boolean, still: Boolean, transitioning: Boolean, weather: Weather = Weather.RAIN) =
     visible && resumed && ((still && weather != Weather.SUN) || transitioning)
 

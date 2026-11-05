@@ -1,0 +1,33 @@
+package io.github.ddayoung03.safetyleague.ui
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import io.github.ddayoung03.safetyleague.R
+import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
+import io.github.ddayoung03.safetyleague.databinding.ViewLocationConsentBinding
+import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
+
+/**
+ * 위치 동의 화면. 차종 선택·배치 뒤, 그리고 차종 화면의 「경로 기록 설정」에서 연다.
+ * 주행 중에는 MainActivity.show()가 주행 중 화면 외에는 막으므로 여기서 따로 막지 않는다.
+ * [isDriving]은 버튼을 누른 순간 주행 중으로 바뀐 경우를 막는다.
+ */
+fun inflateLocationConsent(
+    inflater: LayoutInflater,
+    container: ViewGroup,
+    current: LocationConsent,
+    isDriving: () -> Boolean,
+    onDecided: (LocationConsent) -> Unit
+) {
+    val b = ViewLocationConsentBinding.inflate(inflater, container, true)
+    b.root.background = AsphaltDrawable(container.context)
+    if (current != LocationConsent.UNDECIDED) {
+        b.consentCurrent.visibility = View.VISIBLE
+        b.consentCurrent.setText(
+            if (current == LocationConsent.GRANTED) R.string.consent_now_granted else R.string.consent_now_denied
+        )
+    }
+    b.btnConsentAllow.setOnClickListener { if (!isDriving()) onDecided(LocationConsent.GRANTED) }
+    b.btnConsentDeny.setOnClickListener { if (!isDriving()) onDecided(LocationConsent.DENIED) }
+}
