@@ -566,3 +566,9 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 13. 시즌 정산: 에뮬레이터 날짜를 다음 달 1일로 → 리그 화면에 결과 한 줄, 재시작해도 두 번 정산 안 함.
 14. M6 실험(선택): `adb reboot` 뒤 앱을 열지 않고 주행해 기록되는지(위 M6 항목).
 15. main 병합 여부 결정.
+
+## 2026-11-05 MainActivity 기능별 파일 분리 (claude/split-main-activity)
+
+- 987줄이던 `ui/MainActivity.kt`를 336줄로 줄이고, 화면과 공용 코드를 `ui/` 아래 11개 새 파일로 옮겼다. 화면은 `internal fun MainActivity.showXxx()` 확장 함수이고, 상태는 `MainActivity`에 남겼다.
+- 동작 변경 없음: 분리 전후 코드 줄을 전부 비교해 접근 제한자·import 외에는 구역 주석 8줄만 빠진 것을 확인했다.
+- 확인: `assembleDebug`·`testDebugUnitTest` 통과(146개). 에뮬레이터 화면 확인은 아직 안 했다.
