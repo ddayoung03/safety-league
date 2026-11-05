@@ -69,17 +69,20 @@ class PositionChartView @JvmOverloads constructor(
 
     // 11.03 ~ 11.09 요일별 데이터
     private val days = listOf("월", "화", "수", "목", "금", "토", "일")
-    /** 요일별 순위(월~일)와 승급 라인. MainActivity가 DemoData에서 채운다. */
-    var ranks: List<Int> = emptyList()
+    /** 요일별 순위(월~일)와 승급 라인. 순위가 없는 날은 null(실제 모드: 시즌 첫 트립 전, 오늘 이후). */
+    var ranks: List<Int?> = emptyList()
         set(v) { field = v; invalidate() }
     var promotionLine: Int = 119
         set(v) { field = v; invalidate() }
-    private val minRank get() = promotionLine
-    private val maxRank get() = (ranks.maxOrNull() ?: promotionLine) + 3
+    private val known get() = ranks.filterNotNull()
+    private val minRank get() = minOf(promotionLine, known.minOrNull() ?: promotionLine)
+    private val maxRank get() = maxOf(promotionLine, known.maxOrNull() ?: promotionLine) + 3
+    /** 칸 간격. 시연 범위(15 이하)는 3, 실제 순위 폭이 크면 줄이 6개 남짓이 되게 넓힌다. */
+    private val step get() = maxOf(3, ((maxRank - minRank) + 4) / 5)
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (width == 0 || height == 0 || ranks.size != 7) return
+        if (width == 0 || height == 0 || ranks.size != 7 || known.isEmpty()) return
 
         val paddingLeft = 80f
         val paddingRight = 40f
@@ -99,7 +102,7 @@ class PositionChartView @JvmOverloads constructor(
         }
 
         // 1. 가로 그리드선 및 순위 라벨 (P119, P122, P125, P128, P131, P134)
-        for (r in minRank..maxRank step 3) {
+        for (r in minRank..maxRank step step) {
             val gy = getY(r)
             if (r == promotionLine) {
                 // 승급 라인 (노란 점선)
@@ -112,24 +115,35 @@ class PositionChartView @JvmOverloads constructor(
                 canvas.drawText("P$r", paddingLeft - 16f, gy + 8f, rankPaint)
             }
         }
+        if ((promotionLine - minRank) % step != 0) {
+            val gy = getY(promotionLine)
+            canvas.drawLine(paddingLeft, gy, width - paddingRight, gy, promoPaint)
+            highlightTextPaint.textAlign = Paint.Align.RIGHT
+            canvas.drawText("승급 라인", width - paddingRight, gy - 16f, highlightTextPaint)
+        }
 
         // 2. 순위 변화 연결선 (Polyline)
         val path = Path()
-        path.moveTo(getX(0), getY(ranks[0]))
-        for (i in 1 until ranks.size) {
-            path.lineTo(getX(i), getY(ranks[i]))
+        ranks.forEachIndexed { i, r ->
+            if (r == null) return@forEachIndexed
+            if (i > 0 && ranks[i - 1] != null) path.lineTo(getX(i), getY(r)) else path.moveTo(getX(i), getY(r))
         }
         canvas.drawPath(path, linePaint)
 
         // 3. 요일별 점 및 텍스트 렌더링
         // 전날보다 가장 많이 오른 날 강조
-        val bestJumpIndex = (1 until ranks.size).maxByOrNull { ranks[it - 1] - ranks[it] } ?: 0
-        val bestJump = if (bestJumpIndex > 0) ranks[bestJumpIndex - 1] - ranks[bestJumpIndex] else 0
+        fun jump(i: Int) = ranks[i - 1]?.let { a -> ranks[i]?.let { b -> a - b } }
+        val bestJumpIndex = (1 until ranks.size).filter { jump(it) != null }.maxByOrNull { jump(it)!! } ?: 0
+        val bestJump = if (bestJumpIndex > 0) jump(bestJumpIndex)!! else 0
         for (i in days.indices) {
             val px = getX(i)
-            val py = getY(ranks[i])
+            // 하단 요일 라벨
+            textPaint.textAlign = Paint.Align.CENTER
+            textPaint.typeface = dayFont
+            canvas.drawText(days[i], px, height - 16f, textPaint)
+            val py = getY(ranks[i] ?: continue)
 
-            if (i == bestJumpIndex) {
+            if (i == bestJumpIndex && bestJump > 0) {
                 // 금요일 최고 상승 강조 (노란 점 + ▲3 텍스트)
                 pointPaint.color = Color.parseColor("#FFC52E")
                 canvas.drawCircle(px, py, 11f, pointPaint)
@@ -140,11 +154,6 @@ class PositionChartView @JvmOverloads constructor(
                 canvas.drawCircle(px, py, 8f, pointPaint)
                 canvas.drawCircle(px, py, 8f, pointStrokePaint)
             }
-
-            // 하단 요일 라벨
-            textPaint.textAlign = Paint.Align.CENTER
-            textPaint.typeface = dayFont
-            canvas.drawText(days[i], px, height - 16f, textPaint)
         }
     }
 }
