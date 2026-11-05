@@ -1,5 +1,6 @@
 package io.github.ddayoung03.safetyleague.core.calculator
 
+import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.TripStats
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -89,5 +90,17 @@ class ScoreCalculatorTest {
                 efficiency = 0.1, allBeltsFastened = false, unresolvedWarningSeconds = 9999, doorOpenWhileMoving = 9)
         )
         assertEquals(0.9, worst.total, 0.001) // 거리 요소 3 × 3/10만 남음
+    }
+
+    @Test
+    fun tripScoreIsTheWholeNumberShownOnTheCard() {
+        // H1: 판정·저장·표시가 같은 정수를 쓴다 (69.5~69.9는 70, 69.4는 69)
+        fun score(consistency: Double) = ScoreCalculator.tripScore(DetailScore(30.0, 8.3, 10.0, 15.0, consistency))
+        assertEquals(69.0, score(6.1), 0.0)  // 69.4
+        assertEquals(70.0, score(6.2), 0.0)  // 69.5
+        assertEquals(70.0, score(6.5), 0.0)  // 69.8 (보고서 재현 값)
+        assertEquals(70.0, score(6.6), 0.0)  // 69.9
+        assertEquals(70.0, score(6.7), 0.0)  // 70.0
+        assertEquals(92.0, ScoreCalculator.tripScore(DetailScore(30.0, 25.0, 12.0, 15.0, 10.0)), 0.0)
     }
 }

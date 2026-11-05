@@ -10,8 +10,8 @@ import io.github.ddayoung03.safetyleague.core.model.TripStats
 object ScoreCalculator {
 
     // 부드러움: 10km당 급가속 1회 -3, 급제동 1회 -4 (급제동이 사고 위험이 더 커서 더 무겁게)
-    private const val ACCEL_PENALTY_PER_10KM = 3.0
-    private const val BRAKE_PENALTY_PER_10KM = 4.0
+    const val ACCEL_PENALTY_PER_10KM = 3.0
+    const val BRAKE_PENALTY_PER_10KM = 4.0
 
     // 에코: 리그 평균 대비 80% 이하 0점, 120% 이상 만점, 평균이면 절반
     private const val ECO_FLOOR_RATIO = 0.8
@@ -57,6 +57,12 @@ object ScoreCalculator {
             consistency = clampRound(consistency, 10.0)
         )
     }
+
+    /**
+     * 저장·판정·표시에 쓰는 트립 점수. 결과 카드가 정수로 보여 주므로 정수로 반올림해 저장한다.
+     * 그래야 "70"으로 보이는 트립이 연속 안전 주행(70점 이상)에서도 70점으로 판정된다.
+     */
+    fun tripScore(d: DetailScore): Double = Math.round(LeagueCalculator.round1(d.total)).toDouble()
 
     private fun clampRound(v: Double, max: Double) = LeagueCalculator.round1(v.coerceIn(0.0, max))
 }

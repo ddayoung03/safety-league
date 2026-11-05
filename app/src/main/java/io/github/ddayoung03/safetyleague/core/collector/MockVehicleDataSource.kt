@@ -32,7 +32,9 @@ class MockVehicleDataSource(
     }
 
     /**
-     * 이긴 날 (11/7 금 92점 18.4km 주행) 시뮬레이션 재생
+     * 이긴 날 (11/7 토 18.4km) 시뮬레이션 재생.
+     * 실제 TripCollector·ScoreCalculator로 계산하면 92점: 부드러움 30 / 매너 25 / 에코 12 / 안전 15 / 꾸준함 10
+     * (아이오닉 5 리그 평균 전비 5.8, 각본 전 연속 기록 10일 이상일 때. MockVehicleDataSourceTest로 고정)
      */
     fun simulateWinDay(speedMultiplier: Long = 100L) {
         val l = listener ?: return
@@ -40,50 +42,58 @@ class MockVehicleDataSource(
 
         simulationJob = scope.launch {
             val now = System.currentTimeMillis()
+            fun speed(mps: Float, at: Long) = l.onSpeedChanged(mps, now + at)
+
             // 1. 출발 전: P단, 전 좌석 안전벨트 착용 완료
             l.onGearChanged(GearState.PARK, now)
             l.onSeatBeltChanged(mapOf(0 to true, 1 to true), now + 100)
             l.onOdometerChanged(1000.0, now + 100)
             delay(10 * speedMultiplier)
 
-            // 2. 출발: D단 진입 (트립 시작)
+            // 2. 출발: D단 진입, 움직이면 트립 시작
             l.onGearChanged(GearState.DRIVE, now + 500)
-            delay(10 * speedMultiplier)
-
-            // 3. 부드러운 가속 및 주행
-            l.onSpeedChanged(10f, now + 1000)
+            speed(2f, 1000)
+            l.onEfficiencyChanged(6.032, now + 1000) // 리그 평균 5.8의 104% → 에코 12
             l.onLocationChanged(DemoData.route[0], now + 1000)
             delay(10 * speedMultiplier)
 
-            l.onSpeedChanged(18f, now + 2000) // 약 65km/h 정속 주행
-            l.onLocationChanged(DemoData.route[4], now + 2000)
+            // 3. 부드러운 가속 (초당 2~2.5 m/s, 급가속 기준 3.0 아래)
+            speed(4f, 2000); speed(6.5f, 3000); speed(9f, 4000); speed(11.5f, 5000)
+            delay(10 * speedMultiplier)
+            speed(14f, 6000); speed(16f, 7000); speed(18f, 8000) // 약 65km/h
+            l.onLocationChanged(DemoData.route[4], now + 8000)
+            speed(18f, 9000)
             delay(10 * speedMultiplier)
 
-            // 깜빡이 켜고 차선 변경 (정상 매너 운전)
-            l.onTurnSignalChanged(TurnSignalState(left = true), now + 3000)
-            l.onSteeringWheelAngleChanged(-16f, now + 3200)
+            // 깜빡이 켜고 차선 변경 (정상 매너 운전, 조향 1.5초 유지)
+            l.onTurnSignalChanged(TurnSignalState(left = true), now + 9500)
+            l.onSteeringWheelAngleChanged(-16f, now + 10000)
             delay(5 * speedMultiplier)
-            l.onSteeringWheelAngleChanged(0f, now + 3600)
-            l.onTurnSignalChanged(TurnSignalState(left = false), now + 3800)
-            l.onLocationChanged(DemoData.route[8], now + 3800)
+            l.onSteeringWheelAngleChanged(0f, now + 11500)
+            l.onTurnSignalChanged(TurnSignalState(left = false), now + 12000)
+            l.onLocationChanged(DemoData.route[8], now + 12000)
+            speed(18f, 12000)
             delay(10 * speedMultiplier)
 
-            // 4. 도착 지점 접근 및 감속
-            l.onLocationChanged(DemoData.route.last(), now + 4500)
-            l.onBrakePedalChanged(true, now + 4500)
-            l.onSpeedChanged(5f, now + 4800)
-            l.onSpeedChanged(0f, now + 5000)
-            l.onBrakePedalChanged(false, now + 5000)
-            l.onOdometerChanged(1018.4, now + 5000) // 18.4km 완료
+            // 4. 도착 지점 접근 및 완만한 감속 (초당 2.5 m/s, 급제동 기준 3.5 아래)
+            l.onLocationChanged(DemoData.route.last(), now + 13000)
+            l.onBrakePedalChanged(true, now + 13000)
+            speed(15.5f, 13000); speed(13f, 14000); speed(10.5f, 15000); speed(8f, 16000)
+            delay(5 * speedMultiplier)
+            speed(5.5f, 17000); speed(3f, 18000); speed(0.5f, 19000); speed(0f, 19500)
+            l.onBrakePedalChanged(false, now + 19500)
+            l.onOdometerChanged(1018.4, now + 19500) // 18.4km 완료
             delay(5 * speedMultiplier)
 
             // 5. P단 주차 (트립 종료 및 결과 카드 트리거!)
-            l.onGearChanged(GearState.PARK, now + 5200)
+            l.onGearChanged(GearState.PARK, now + 20000)
         }
     }
 
     /**
-     * 아쉬운 날 (64점 22.1km, 깜빡이 누락 4회, 급제동 2회, 급가속 1회) 시뮬레이션 재생
+     * 아쉬운 날 (22.1km, 깜빡이 누락 4회, 급제동 2회, 급가속 1회) 시뮬레이션 재생.
+     * 실제 TripCollector·ScoreCalculator로 계산하면 64점: 부드러움 25 / 매너 0 / 에코 14 / 안전 15 / 꾸준함 10
+     * (아이오닉 5 리그 평균 전비 5.8, 각본 전 연속 기록 10일 이상일 때. MockVehicleDataSourceTest로 고정)
      */
     fun simulateLowDay(speedMultiplier: Long = 100L) {
         val l = listener ?: return
@@ -91,6 +101,9 @@ class MockVehicleDataSource(
 
         simulationJob = scope.launch {
             val now = System.currentTimeMillis()
+            fun speed(mps: Float, at: Long) = l.onSpeedChanged(mps, now + at)
+            fun steer(deg: Float, at: Long) = l.onSteeringWheelAngleChanged(deg, now + at)
+
             l.onGearChanged(GearState.PARK, now)
             l.onSeatBeltChanged(mapOf(0 to true), now + 100)
             l.onOdometerChanged(2000.0, now + 100)
@@ -98,61 +111,69 @@ class MockVehicleDataSource(
 
             // D단 출발
             l.onGearChanged(GearState.DRIVE, now + 500)
+            speed(2f, 1000)
+            l.onEfficiencyChanged(6.264, now + 1000) // 리그 평균 5.8의 108% → 에코 14
+            speed(4f, 2000); speed(6f, 3000)
             delay(5 * speedMultiplier)
 
-            // 1) 급가속
-            l.onSpeedChanged(5f, now + 1000)
-            l.onSpeedChanged(12f, now + 1500) // accel > 3.0 m/s²
-            l.onLocationChanged(Point2D(14.0, 50.0), now + 1500)
+            // 1) 급가속: 0.5초마다 +2 m/s (4 m/s²)
+            speed(8f, 3500); speed(10f, 4000); speed(12f, 4500); speed(13f, 5000); speed(14f, 6000)
+            l.onLocationChanged(Point2D(14.0, 50.0), now + 6000)
             delay(5 * speedMultiplier)
 
-            // 2) 깜빡이 없는 차선 변경 1
-            l.onTurnSignalChanged(TurnSignalState(false, false), now + 2000)
-            l.onSteeringWheelAngleChanged(18f, now + 2200)
-            l.onSteeringWheelAngleChanged(0f, now + 2600)
-            l.onLocationChanged(Point2D(26.0, 34.0), now + 2600)
+            // 2) 깜빡이 없는 차선 변경 1 (조향 1.5초 유지)
+            l.onTurnSignalChanged(TurnSignalState(false, false), now + 6200)
+            steer(18f, 6500); steer(0f, 8000)
+            l.onLocationChanged(Point2D(26.0, 34.0), now + 8000)
+            speed(18f, 9000)
             delay(5 * speedMultiplier)
 
-            // 3) 급제동 1
-            l.onBrakePedalChanged(true, now + 3000)
-            l.onSpeedChanged(18f, now + 3000)
-            l.onSpeedChanged(8f, now + 3500) // 감속 > -3.5 m/s²
-            l.onBrakePedalChanged(false, now + 3600)
-            l.onLocationChanged(Point2D(46.0, 30.0), now + 3600)
+            // 3) 급제동 1: 0.5초마다 -3 m/s (6 m/s²)
+            l.onBrakePedalChanged(true, now + 10000)
+            speed(18f, 10000); speed(15f, 10500); speed(12f, 11000); speed(10f, 11500); speed(9f, 12000)
+            l.onBrakePedalChanged(false, now + 12000)
+            speed(9f, 13000)
+            l.onLocationChanged(Point2D(46.0, 30.0), now + 13000)
             delay(5 * speedMultiplier)
 
             // 4) 깜빡이 없는 차선 변경 2
-            l.onSteeringWheelAngleChanged(-20f, now + 4000)
-            l.onSteeringWheelAngleChanged(0f, now + 4400)
-            l.onLocationChanged(Point2D(58.0, 14.0), now + 4400)
+            steer(-20f, 13500)
+            speed(11f, 14000)
+            steer(0f, 15000)
+            speed(13f, 15000); speed(15f, 16000)
+            l.onLocationChanged(Point2D(58.0, 14.0), now + 16000)
             delay(5 * speedMultiplier)
 
             // 5) 깜빡이 없는 차선 변경 3
-            l.onSteeringWheelAngleChanged(16f, now + 5000)
-            l.onSteeringWheelAngleChanged(0f, now + 5400)
-            l.onLocationChanged(Point2D(80.0, 12.0), now + 5400)
+            steer(16f, 16500)
+            speed(15f, 17000)
+            steer(0f, 18000)
+            speed(15f, 18000)
+            l.onLocationChanged(Point2D(80.0, 12.0), now + 18000)
             delay(5 * speedMultiplier)
 
             // 6) 급제동 2
-            l.onBrakePedalChanged(true, now + 6000)
-            l.onSpeedChanged(15f, now + 6000)
-            l.onSpeedChanged(6f, now + 6500)
-            l.onBrakePedalChanged(false, now + 6600)
-            l.onLocationChanged(Point2D(88.0, 20.0), now + 6600)
+            l.onBrakePedalChanged(true, now + 19000)
+            speed(15f, 19000); speed(12f, 19500); speed(9.5f, 20000)
+            l.onBrakePedalChanged(false, now + 20000)
+            speed(9f, 21000)
+            l.onLocationChanged(Point2D(88.0, 20.0), now + 21000)
             delay(5 * speedMultiplier)
 
             // 7) 깜빡이 없는 차선 변경 4
-            l.onSteeringWheelAngleChanged(-17f, now + 7000)
-            l.onSteeringWheelAngleChanged(0f, now + 7400)
-            l.onLocationChanged(Point2D(90.0, 48.0), now + 7400)
+            steer(-17f, 21500)
+            speed(9f, 22000)
+            steer(0f, 23000)
+            speed(9f, 23000)
+            l.onLocationChanged(Point2D(90.0, 48.0), now + 23000)
             delay(5 * speedMultiplier)
 
-            // 도착 및 P단 주차
-            l.onSpeedChanged(0f, now + 8000)
-            l.onOdometerChanged(2022.1, now + 8000) // 22.1km
+            // 도착: 완만하게 멈추고 P단 주차
+            speed(6.5f, 24000); speed(4f, 25000); speed(1.5f, 26000); speed(0f, 27000)
+            l.onOdometerChanged(2022.1, now + 27000) // 22.1km
             delay(5 * speedMultiplier)
 
-            l.onGearChanged(GearState.PARK, now + 8500)
+            l.onGearChanged(GearState.PARK, now + 27500)
         }
     }
 }
