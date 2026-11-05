@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="consent_title">주행 경로를 기록할까요?</string>
+    <string name="consent_private">경로는 리플레이에서 내 화면에만 보여요. 리그에는 점수와 순위만 올라가고 경로는 공유하지 않아요.</string>
+    <string name="consent_optional">기록하지 않아도 점수와 리그는 그대로 이용할 수 있어요. 차종 화면의 「경로 기록 설정」에서 언제든 바꿀 수 있어요.</string>
+    <string name="consent_allow">경로 기록하기</string>
+    <string name="consent_deny">기록하지 않기</string>
+    <string name="consent_now_granted">지금은 경로를 기록하고 있어요</string>
+    <string name="consent_now_denied">지금은 경로를 기록하지 않아요</string>
+    <string name="consent_settings">경로 기록 설정</string>
+</resources>

@@ -50,6 +50,9 @@ import io.github.ddayoung03.safetyleague.core.data.SeasonDrivers
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
+import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
+import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
+import io.github.ddayoung03.safetyleague.core.repository.LocationConsentStore
 import io.github.ddayoung03.safetyleague.core.repository.TripRepository
 import io.github.ddayoung03.safetyleague.databinding.ActivityMainBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
@@ -71,7 +74,7 @@ import kotlin.math.roundToInt
  */
 class MainActivity : AppCompatActivity() {
 
-    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT }
+    private enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: TripRepository
@@ -145,6 +148,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (!handleResultIntent(intent)) {
+            if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
             val latest = repository.latestCompletedTrip.value
             if (latest != null && !settled) showResult(latest) else show(Screen.LEAGUE)
         }
@@ -299,6 +303,7 @@ class MainActivity : AppCompatActivity() {
             Screen.REPORT -> showReport()
             Screen.VEHICLE -> showVehicleSelection()
             Screen.PLACEMENT -> showPlacement()
+            Screen.CONSENT -> showLocationConsent()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         applySkew(binding.screenContainer)
@@ -389,6 +394,7 @@ class MainActivity : AppCompatActivity() {
             b.vehicleGrid.visibility = View.GONE
             b.customForm.visibility = View.VISIBLE
         }
+        if (consentStore.load() != LocationConsent.UNDECIDED) addChoice(getString(R.string.consent_settings)) { show(Screen.CONSENT) }
         b.btnVehicleList.setOnClickListener {
             hideKeyboard(); b.customForm.visibility = View.GONE; b.vehicleGrid.visibility = View.VISIBLE
         }
@@ -413,10 +419,25 @@ class MainActivity : AppCompatActivity() {
         b.btnChangeVehicle.setOnClickListener { show(Screen.VEHICLE) }
         b.btnStart.setOnClickListener {
             if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }
+            if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return@setOnClickListener }
             demoResultWin = null
             repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
         }
     }
+
+    private val consentStore by lazy { LocationConsentStore(this) }
+
+    private fun showLocationConsent() =
+        inflateLocationConsent(layoutInflater, binding.screenContainer, consentStore.load(), { restricted }) { consent ->
+            consentStore.save(consent)
+            // 위치 권한도 기존 권한 창처럼 별도 작업 창에서 묻는다 (MainActivity 위에 띄우면 주행 중 홈 화면이 앱을 가림)
+            if (consent == LocationConsent.GRANTED && missingPermissions(this).isNotEmpty()) {
+                PermissionActivity.askInOwnTask(this); return@inflateLocationConsent
+            }
+            startTracking() // 서비스가 동의에 맞춰 위치 수집을 켜거나 끈다
+            demoResultWin = null
+            repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
+        }
 
     private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
     private val seasonStore by lazy { io.github.ddayoung03.safetyleague.core.repository.SeasonSettlementStore(this) }
