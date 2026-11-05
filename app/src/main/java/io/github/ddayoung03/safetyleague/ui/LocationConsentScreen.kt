@@ -31,3 +31,15 @@ fun inflateLocationConsent(
     b.btnConsentAllow.setOnClickListener { if (!isDriving()) onDecided(LocationConsent.GRANTED) }
     b.btnConsentDeny.setOnClickListener { if (!isDriving()) onDecided(LocationConsent.DENIED) }
 }
+
+internal fun MainActivity.showLocationConsent() =
+    inflateLocationConsent(layoutInflater, binding.screenContainer, consentStore.load(), { restricted }) { consent ->
+        consentStore.save(consent)
+        // 위치 권한도 기존 권한 창처럼 별도 작업 창에서 묻는다 (MainActivity 위에 띄우면 주행 중 홈 화면이 앱을 가림)
+        if (consent == LocationConsent.GRANTED && missingPermissions(this).isNotEmpty()) {
+            PermissionActivity.askInOwnTask(this); return@inflateLocationConsent
+        }
+        startTracking() // 서비스가 동의에 맞춰 위치 수집을 켜거나 끈다
+        demoResultWin = null
+        repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
+    }
