@@ -571,4 +571,6 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 
 - 987줄이던 `ui/MainActivity.kt`를 336줄로 줄이고, 화면과 공용 코드를 `ui/` 아래 11개 새 파일로 옮겼다. 화면은 `internal fun MainActivity.showXxx()` 확장 함수이고, 상태는 `MainActivity`에 남겼다.
 - 동작 변경 없음: 분리 전후 코드 줄을 전부 비교해 접근 제한자·import 외에는 구역 주석 8줄만 빠진 것을 확인했다.
-- 확인: `assembleDebug`·`testDebugUnitTest` 통과(146개). 에뮬레이터 화면 확인은 아직 안 했다.
+- 확인: `assembleDebug`·`testDebugUnitTest` 통과(146개). 
+- 에뮬레이터(Pleos_Connect, GPU host·cold boot): 실제 모드 결과 카드·리플레이·리그 3탭·리포트, 시연 92/64 카드·리플레이·리그·리포트·주행 중, 배치·차종·위치 동의 화면 통과. 숫자는 확인 목록과 일치, 앱 충돌 0건. 각본 주행 두 종 모두 결과 카드까지 도착했고 `trips.json`은 늘지 않음. 각본이 빨리 끝나 그 사이의 주행 중 화면은 못 봤고, Virtual Console 실제 주행(주행 중 제한·P단 결과)은 이번에 안 돌림.
+- 분리와 무관하게 발견: 시연 리포트의 순위 차트 아래 요일이 월~일로 고정(`PositionChartView.kt:71`)이라 11.03(화)~11.09(월)인 막대 요일과 다르다.
