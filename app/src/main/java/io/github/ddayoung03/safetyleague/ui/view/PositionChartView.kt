@@ -67,9 +67,10 @@ class PositionChartView @JvmOverloads constructor(
         color = Color.parseColor("#F2F1EC")
     }
 
-    // 11.03 ~ 11.09 요일별 데이터
-    private val days = listOf("월", "화", "수", "목", "금", "토", "일")
-    /** 요일별 순위(월~일)와 승급 라인. 순위가 없는 날은 null(실제 모드: 시즌 첫 트립 전, 오늘 이후). */
+    /** 가로축 요일. 시연 리포트는 화~월이라 막대와 같은 목록을 넘긴다. */
+    var days = listOf("월", "화", "수", "목", "금", "토", "일")
+        set(v) { field = v; invalidate() }
+    /** 요일별 순위([days] 순서)와 승급 라인. 순위가 없는 날은 null(실제 모드: 시즌 첫 트립 전, 오늘 이후). */
     var ranks: List<Int?> = emptyList()
         set(v) { field = v; invalidate() }
     var promotionLine: Int = 119

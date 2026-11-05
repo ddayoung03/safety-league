@@ -52,7 +52,7 @@ internal fun MainActivity.showResultLow() {
     b.tvPitGain.text = pit.gain
 
     if (t != null) {
-        realRows(b.layoutTowerRows, standing(), rankChange(t))
+        realRows(b.layoutTowerRows, standing(), rankChange(t), rowLow)
         b.layoutTowerRows.addView(note(promotionText(standing())))
         b.btnLeague.visibility = View.VISIBLE
         b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
