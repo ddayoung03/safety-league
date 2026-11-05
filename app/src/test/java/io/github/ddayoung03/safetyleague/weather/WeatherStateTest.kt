@@ -76,4 +76,14 @@ class WeatherStateTest {
             assertFalse(shouldAnimateWeather(false, true, true, true, weather))
         }
     }
+
+    /** CarUxRestrictions 연결 실패 시: P단·정차로 확인될 때만 제한을 푼다 (점검 보고서 M5) */
+    @Test fun withoutUxRestrictionsUnknownOrMovingCountsAsDriving() {
+        assertTrue(isDrivingByMotion(WeatherSignals()))
+        assertTrue(isDrivingByMotion(WeatherSignals(gear = MotionGear.DRIVE, speedMps = 0f)))
+        assertTrue(isDrivingByMotion(WeatherSignals(gear = MotionGear.NEUTRAL, speedMps = 0f)))
+        assertTrue(isDrivingByMotion(WeatherSignals(gear = MotionGear.PARK, speedMps = 2f)))
+        assertFalse(isDrivingByMotion(WeatherSignals(gear = MotionGear.PARK, speedMps = 0f)))
+        assertFalse(isDrivingByMotion(WeatherSignals(gear = MotionGear.PARK)))
+    }
 }

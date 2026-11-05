@@ -1,6 +1,7 @@
 package io.github.ddayoung03.safetyleague.core.calculator
 
 import io.github.ddayoung03.safetyleague.core.data.SeasonDrivers
+import io.github.ddayoung03.safetyleague.core.model.DriverRank
 import io.github.ddayoung03.safetyleague.core.model.Trip
 import org.junit.Assert.*
 import org.junit.Test
@@ -20,9 +21,9 @@ class SeasonRankingTest {
     }
 
     @Test fun tiedDriverFollowsExistingDriversDeterministically() {
-        val result = rank(trip(88.0))
+        val result = rank(trip(96.4)) // P1 광안대교출근과 동점
         assertEquals(2, result.rank)
-        assertEquals(88.0, result.neighbors.first().avg, 0.001)
+        assertEquals(96.4, result.neighbors.first().avg, 0.001)
         assertEquals("나", result.neighbors[1].name)
     }
 
@@ -89,5 +90,23 @@ class SeasonRankingTest {
         assertEquals(397, result.total)
         assertEquals(119, result.promotionRank)
         assertEquals(279, result.demotionRank)
+    }
+
+    @Test fun smallBoardsHaveValidSeparateLines() {
+        for (others in 0..5) {
+            val drivers = List(others) { DriverRank(it + 1, "친구$it", 90.0 - it) }
+            for (avg in listOf(100.0, 85.0, 0.0)) {
+                val s = SeasonRanking.rank(avg, "실버", drivers, drivers.size)
+                assertEquals(others + 1, s.total)
+                assertTrue("승급선은 1..총원", s.promotionRank in 1..s.total)
+                assertTrue("강등선은 승급선 뒤", s.demotionRank > s.promotionRank)
+                assertTrue(s.pointsToPromotion >= 0.0)
+            }
+        }
+        val two = SeasonRanking.rank(80.0, "실버", listOf(DriverRank(1, "친구", 90.0)))
+        assertEquals(1, two.promotionRank)
+        assertEquals(2, two.demotionRank)
+        assertEquals(1, two.stepsToPromotion)
+        assertEquals(10.0, two.pointsToPromotion, 0.001)
     }
 }

@@ -36,10 +36,12 @@ object SeasonRanking {
         val board = (drivers + DriverRank(0, "나", average))
             .sortedByDescending { it.avg }.mapIndexed { index, driver -> driver.copy(rank = index + 1) }
         val rank = board.first { it.name == "나" }.rank
+        // 작은 리그(친구 등): 승급선은 최소 P1, 강등선은 승급선 뒤(1명이면 P2 = 강등 없음)
         val line = LeagueCalculator.promotionRank(board.size).coerceAtLeast(1)
+        val demotion = LeagueCalculator.demotionRank(board.size).coerceAtLeast(line + 1)
         return SeasonStanding(tier, rank, average, (rank - line).coerceAtLeast(0),
             LeagueCalculator.round1((board[line - 1].avg - average).coerceAtLeast(0.0)),
             board.filter { it.rank in (rank - radius)..(rank + radius) },
-            line, LeagueCalculator.demotionRank(board.size), board.size)
+            line, demotion, board.size)
     }
 }
