@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity() {
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         startTracking()
+        val settled = seasonStore.settleIfNeeded(repository)
         if (profileStore.load() == null) {
             val detected = VehicleProfileReader.read(this)
             if (detected != null) { profileStore.save(detected); show(Screen.PLACEMENT) }
@@ -145,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (!handleResultIntent(intent)) {
             val latest = repository.latestCompletedTrip.value
-            if (latest != null) showResult(latest) else show(Screen.LEAGUE)
+            if (latest != null && !settled) showResult(latest) else show(Screen.LEAGUE)
         }
     }
 
@@ -418,6 +419,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
+    private val seasonStore by lazy { io.github.ddayoung03.safetyleague.core.repository.SeasonSettlementStore(this) }
     private val myTier get() = profileStore.load()?.tier ?: "브론즈"
     private val myModel get() = profileStore.load()?.model ?: "내 차종"
     private val myRegion = "부산"
@@ -667,6 +669,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             realRows(b.layoutLeagueRows, s)
+            // 새 시즌 첫 주행 전까지 지난 시즌 결과를 한 줄로 알린다
+            if (s.rank == null) seasonStore.notice()?.let { b.layoutLeagueRows.addView(note(it), 0) }
             if (s.rank != null) b.layoutLeagueRows.addView(note("승급 P${s.promotionRank} · 강등 P${s.demotionRank}"))
             return
         }
