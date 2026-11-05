@@ -13,23 +13,33 @@ data class SeasonStanding(
     val pointsToPromotion: Double,
     val neighbors: List<DriverRank>,
     val promotionRank: Int = LeagueCalculator.promotionRank(397),
-    val demotionRank: Int = LeagueCalculator.demotionRank(397)
+    val demotionRank: Int = LeagueCalculator.demotionRank(397),
+    val total: Int = 397
 )
 
 object SeasonRanking {
-    fun calculate(trips: List<Trip>, today: LocalDate, tier: String): SeasonStanding {
+    fun calculate(
+        trips: List<Trip>, today: LocalDate, tier: String,
+        drivers: List<DriverRank> = SeasonDrivers.drivers, radius: Int = 2
+    ): SeasonStanding {
         val from = today.withDayOfMonth(1).toString()
         val to = today.withDayOfMonth(today.lengthOfMonth()).toString()
         val eligible = trips.filter { it.km >= 3.0 && it.date in from..to }
-        if (eligible.isEmpty()) return SeasonStanding(tier, null, null, 0, 0.0, emptyList())
-        val average = LeagueCalculator.average(eligible, from, to)
+        if (eligible.isEmpty()) return SeasonStanding(tier, null, null, 0, 0.0, emptyList(),
+            total = drivers.size + 1)
+        return rank(LeagueCalculator.average(eligible, from, to), tier, drivers, radius)
+    }
+
+    /** 내 시즌 평균을 가상 운전자 목록 사이에 넣어 순위를 매긴다. 차종·지역·친구 순위표가 함께 쓴다. */
+    fun rank(average: Double, tier: String, drivers: List<DriverRank>, radius: Int = 2): SeasonStanding {
         // 동점은 기존 가상 운전자 뒤. 표시 평균과 정렬 평균이 같고 실행마다 순서가 같다.
-        val board = (SeasonDrivers.drivers + DriverRank(0, "나", average))
+        val board = (drivers + DriverRank(0, "나", average))
             .sortedByDescending { it.avg }.mapIndexed { index, driver -> driver.copy(rank = index + 1) }
         val rank = board.first { it.name == "나" }.rank
-        val line = LeagueCalculator.promotionRank(board.size)
+        val line = LeagueCalculator.promotionRank(board.size).coerceAtLeast(1)
         return SeasonStanding(tier, rank, average, (rank - line).coerceAtLeast(0),
             LeagueCalculator.round1((board[line - 1].avg - average).coerceAtLeast(0.0)),
-            board.filter { it.rank in (rank - 2)..(rank + 2) })
+            board.filter { it.rank in (rank - radius)..(rank + radius) },
+            line, LeagueCalculator.demotionRank(board.size), board.size)
     }
 }
