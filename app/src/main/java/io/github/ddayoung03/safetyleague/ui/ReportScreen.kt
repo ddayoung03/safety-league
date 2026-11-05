@@ -34,9 +34,11 @@ internal fun MainActivity.showReport() {
     b.tvRankMove.text = "P${ranks.first()} → P${ranks.last()} ${if (move >= 0) "▲$move" else "▼${-move}"}"
     b.tvNextPlan.text = "깜빡이 누락만 줄이면 승급 라인까지 ${ranks.last() - line}계단, 평균 +${LeagueCalculator.round1(lineAvg - DemoData.seasonAverage(week.last()))}점이면 돼요"
     b.positionChart.promotionLine = line
-    b.positionChart.ranks = ranks
     // 11.03(화) ~ 11.09(월)이라 요일은 날짜에서 계산한다
-    scoreBars(b.layoutScoreBars, scores, week.map { weekdayNames[LocalDate.parse(it).dayOfWeek.value - 1] })
+    val days = week.map { weekdayNames[LocalDate.parse(it).dayOfWeek.value - 1] }
+    b.positionChart.days = days
+    b.positionChart.ranks = ranks
+    scoreBars(b.layoutScoreBars, scores, days)
 }
 
 /** 실제 모드: 이번 주(월~일) 리그 트립으로 채운다. 트립이 없으면 빈 상태. */

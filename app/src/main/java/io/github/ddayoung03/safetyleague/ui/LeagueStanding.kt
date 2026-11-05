@@ -28,11 +28,11 @@ internal fun MainActivity.promotionText(s: SeasonStanding): String = when {
     else -> "승급까지 ${s.stepsToPromotion}계단 · ${s.pointsToPromotion}점"
 }
 
-internal fun MainActivity.realRows(container: LinearLayout, s: SeasonStanding, change: String = "") {
+internal fun MainActivity.realRows(container: LinearLayout, s: SeasonStanding, change: String = "", size: RowSize = rowWin) {
     container.removeAllViews()
     if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
     for (r in s.neighbors) {
-        container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else ""))
+        container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else "", size = size))
         val gap = LeagueCalculator.round1(r.avg - s.average!!)
         if (r.rank == s.rank - 1 && gap > 0.0) container.addView(note("앞 순위까지 ${gap}점"))
     }
