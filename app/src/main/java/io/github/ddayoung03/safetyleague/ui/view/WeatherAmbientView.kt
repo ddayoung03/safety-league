@@ -121,7 +121,7 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
         canvas.clipOutRect(50 * d, 40 * d, 650 * d, 120 * d)
         canvas.clipOutRect(50 * d, 150 * d, 1120 * d, 350 * d)
         canvas.clipOutRect(50 * d, height - 300 * d, width - 50 * d, height - 40 * d)
-        paint.color = context.getColor(if (weather == Weather.RAIN) R.color.weather_rain else R.color.white)
+        paint.color = context.getColor(if (weather == Weather.RAIN) R.color.weather_rain else R.color.ink_text)
         paint.strokeWidth = 2 * d
         for ((i, dot) in dots.withIndex()) {
             val x = dot[0] * width
@@ -135,7 +135,7 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
         if (weather == Weather.NIGHT || weather == Weather.SUN) {
-            paint.color = context.getColor(if (weather == Weather.SUN) R.color.yellow else R.color.white)
+            paint.color = context.getColor(if (weather == Weather.SUN) R.color.yellow else R.color.ink_text)
             paint.alpha = ((if (weather == Weather.SUN) 25 else 140) * fade).toInt()
             if (weather == Weather.SUN) {
                 canvas.drawCircle(width * .88f, -10 * d, 70 * d, paint)

@@ -4,7 +4,6 @@ import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
-import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import io.github.ddayoung03.safetyleague.ui.view.DrivingTrackState
 import io.github.ddayoung03.safetyleague.weather.*
 
@@ -12,7 +11,6 @@ internal fun MainActivity.showDriving() {
     binding.screenContainer.removeAllViews()
     val b = ViewDrivingBinding.inflate(layoutInflater, binding.screenContainer, true)
     drivingBinding = b
-    b.root.background = AsphaltDrawable(this, subdued = true)
     updateDrivingProgress()
     updateWeather()
 }

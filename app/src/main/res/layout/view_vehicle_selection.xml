@@ -2,13 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:paddingHorizontal="64dp" android:paddingTop="48dp"
-    android:background="@color/asphalt">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="어떤 차로 달리시나요?" android:textSize="52sp" android:textColor="@color/white"
-        android:fontFamily="@font/pretendard_black" />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" android:text="같은 차종 운전자끼리 겨뤄요"
-        android:textSize="26sp" android:textColor="@color/grey" />
+    android:background="@drawable/bg_result">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="어떤 차로 달리시나요?" android:textSize="52sp" android:textColor="@color/ink_text"
+                android:fontFamily="@font/pretendard_black" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="같은 차종 운전자끼리 겨뤄요"
+                android:textSize="26sp" android:textColor="@color/ink_muted" />
+        </LinearLayout>
+        <!-- 토끼 자리. 손 흔들며 맞이한다. 스프라이트가 준비되면 RabbitView가 들어온다 -->
+        <FrameLayout android:id="@+id/rabbit_slot" android:layout_width="128dp" android:layout_height="128dp" />
+    </LinearLayout>
     <GridLayout android:id="@+id/vehicle_grid" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:columnCount="3" android:layout_marginTop="32dp" />
     <LinearLayout android:id="@+id/custom_form" android:layout_width="match_parent"
@@ -17,23 +25,23 @@
         <EditText android:id="@+id/vehicle_name" android:layout_width="match_parent"
             android:layout_height="76dp" android:hint="차종 이름 (20자까지)" android:maxLength="20"
             android:inputType="textCapCharacters" android:singleLine="true" android:imeOptions="actionDone|flagNoExtractUi|flagNoFullscreen"
-            android:textSize="28sp" android:textColor="@color/white" android:textColorHint="@color/grey"
-            android:paddingHorizontal="20dp" android:background="@color/cell" />
+            android:textSize="28sp" android:textColor="@color/ink_text" android:textColorHint="@color/ink_muted"
+            android:paddingHorizontal="20dp" android:background="@color/ink_glow" />
         <RadioGroup android:id="@+id/powertrain_group" android:layout_width="match_parent"
             android:layout_height="76dp" android:orientation="horizontal" android:layout_marginTop="16dp"
             android:checkedButton="@id/power_ev">
             <RadioButton android:id="@+id/power_ev" android:layout_width="300dp" android:layout_height="76dp"
-                android:text="EV" android:textSize="28sp" android:textColor="@color/white" android:buttonTint="@color/yellow" />
+                android:text="EV" android:textSize="28sp" android:textColor="@color/ink_text" android:buttonTint="@color/yellow" />
             <RadioButton android:id="@+id/power_ice" android:layout_width="300dp" android:layout_height="76dp"
-                android:text="내연기관" android:textSize="28sp" android:textColor="@color/white" android:buttonTint="@color/yellow" />
+                android:text="내연기관" android:textSize="28sp" android:textColor="@color/ink_text" android:buttonTint="@color/yellow" />
         </RadioGroup>
         <TextView android:id="@+id/name_error" android:layout_width="match_parent" android:layout_height="40dp"
             android:textSize="24sp" android:textColor="@color/yellow" android:accessibilityLiveRegion="polite" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="76dp" android:orientation="horizontal">
             <Button android:id="@+id/btn_custom_confirm" style="@style/DemoButton" android:layout_width="360dp"
-                android:text="이 차종으로 시작" android:textColor="@color/asphalt" android:backgroundTint="@color/yellow" />
+                android:text="이 차종으로 시작" android:textColor="@color/ink" />
             <Button android:id="@+id/btn_vehicle_list" style="@style/DemoButton" android:layout_width="240dp"
-                android:layout_marginStart="20dp" android:text="목록으로" android:backgroundTint="@color/cell" />
+                android:layout_marginStart="20dp" android:text="목록으로" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

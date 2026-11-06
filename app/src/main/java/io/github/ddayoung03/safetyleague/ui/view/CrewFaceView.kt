@@ -13,7 +13,7 @@ class CrewFaceView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val clip = Path()
     init {
         setImageResource(R.drawable.crew_face)
-        setBackgroundColor(context.getColor(R.color.cell))
+        setBackgroundColor(context.getColor(R.color.ink_glow))
         scaleType = ScaleType.FIT_CENTER
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
     }

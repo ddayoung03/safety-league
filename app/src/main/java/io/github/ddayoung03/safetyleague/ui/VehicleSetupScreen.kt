@@ -15,7 +15,6 @@ import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
 import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
 import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
 import io.github.ddayoung03.safetyleague.ui.motion.stagger
-import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import java.time.LocalDate
 
 internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
@@ -29,12 +28,11 @@ internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
 
 internal fun MainActivity.showVehicleSelection() {
     val b = ViewVehicleSelectionBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.root.background = AsphaltDrawable(this)
     fun addChoice(label: String, action: () -> Unit) {
         val button = Button(this).apply {
             text = label; textSize = 26f; isAllCaps = false
-            setTextColor(color(R.color.white))
-            backgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.cell))
+            setTextColor(color(R.color.ink_text))
+            skewButton(R.color.ink_glow)
             setOnClickListener { if (!restricted) action() }
         }
         b.vehicleGrid.addView(button, GridLayout.LayoutParams().apply {
@@ -51,6 +49,8 @@ internal fun MainActivity.showVehicleSelection() {
         b.customForm.visibility = View.VISIBLE
     }
     if (consentStore.load() != LocationConsent.UNDECIDED) addChoice(getString(R.string.consent_settings)) { show(Screen.CONSENT) }
+    b.btnCustomConfirm.skewButton(R.color.yellow)
+    b.btnVehicleList.skewButton(R.color.ink_glow)
     b.btnVehicleList.setOnClickListener {
         hideKeyboard(); b.customForm.visibility = View.GONE; b.vehicleGrid.visibility = View.VISIBLE
     }
@@ -61,6 +61,7 @@ internal fun MainActivity.showVehicleSelection() {
         if (profile == null) b.nameError.text = "차종 이름을 1~20자로 입력해 주세요"
         else selectVehicle(profile)
     }
+    ScreenTransition.stagger(b.root, b.vehicleGrid.children.toList(), motion, MotionTokens.BASE)
 }
 
 internal fun MainActivity.showPlacement() {

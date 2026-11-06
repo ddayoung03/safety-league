@@ -9,7 +9,6 @@ import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
 import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
 import io.github.ddayoung03.safetyleague.databinding.ViewLocationConsentBinding
-import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 
 /**
  * 위치 동의 화면. 차종 선택·배치 뒤, 그리고 차종 화면의 「경로 기록 설정」에서 연다.
@@ -24,7 +23,8 @@ fun inflateLocationConsent(
     onDecided: (LocationConsent) -> Unit
 ) {
     val b = ViewLocationConsentBinding.inflate(inflater, container, true)
-    b.root.background = AsphaltDrawable(container.context)
+    b.btnConsentAllow.skewButton(R.color.yellow)
+    b.btnConsentDeny.skewButton(R.color.ink_glow)
     if (current != LocationConsent.UNDECIDED) {
         b.consentCurrent.visibility = View.VISIBLE
         b.consentCurrent.setText(

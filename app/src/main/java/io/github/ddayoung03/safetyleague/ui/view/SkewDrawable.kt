@@ -6,7 +6,7 @@ import android.graphics.*
 import android.graphics.drawable.Drawable
 
 /** Background only: labels and hit areas stay upright. */
-class SkewDrawable(color: Int, private val outline: Int? = null, private val density: Float = 1f, private val gradientColors: IntArray? = null, glow: Int? = null) : Drawable() {
+class SkewDrawable(color: Int, private val outline: Int? = null, private val density: Float = 1f, glow: Int? = null) : Drawable() {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color
         if (glow != null) setShadowLayer(15 * density, 0f, 0f, glow)
@@ -14,8 +14,6 @@ class SkewDrawable(color: Int, private val outline: Int? = null, private val den
     private val path = Path()
     override fun onBoundsChange(bounds: Rect) {
         val inset = bounds.height() * 0.176327f // tan(10 degrees)
-        paint.shader = gradientColors?.let { LinearGradient(bounds.left.toFloat(), bounds.top.toFloat(),
-            bounds.right.toFloat(), bounds.bottom.toFloat(), it, null, Shader.TileMode.CLAMP) }
         path.reset()
         path.moveTo(bounds.left + inset, bounds.top.toFloat())
         path.lineTo(bounds.right.toFloat(), bounds.top.toFloat())
@@ -28,8 +26,6 @@ class SkewDrawable(color: Int, private val outline: Int? = null, private val den
         canvas.drawPath(path, paint)
         outline?.let {
             val fill = paint.color
-            val shader = paint.shader
-            paint.shader = null
             paint.color = it
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = 3 * density
@@ -39,7 +35,6 @@ class SkewDrawable(color: Int, private val outline: Int? = null, private val den
             }
             paint.pathEffect = null
             paint.color = fill
-            paint.shader = shader
         }
     }
     override fun setAlpha(alpha: Int) { paint.alpha = alpha; invalidateSelf() }

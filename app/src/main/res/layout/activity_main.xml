@@ -14,7 +14,7 @@
         android:id="@+id/demo_bar"
         android:layout_width="match_parent"
         android:layout_height="76dp"
-        android:background="@color/cell"
+        android:background="@color/ink_glow"
         android:scrollbars="none"
         android:visibility="gone">
 
@@ -63,9 +63,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:background="@color/cell"
+        android:background="@color/ink_glow"
         android:padding="12dp"
-        android:textColor="@color/white"
+        android:textColor="@color/ink_text"
         android:textSize="24sp"
         android:visibility="gone" />
 

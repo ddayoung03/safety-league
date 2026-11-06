@@ -1,5 +1,8 @@
 package io.github.ddayoung03.safetyleague.ui
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.animation.StateListAnimator
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -7,10 +10,11 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import io.github.ddayoung03.safetyleague.R
-import io.github.ddayoung03.safetyleague.ui.view.GlassDrawable
+import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import kotlin.math.roundToInt
 
@@ -44,20 +48,20 @@ internal fun MainActivity.zoneLine(s: String, colorId: Int) = text("─── $s
 }
 
 internal fun MainActivity.applySkew(view: View) {
-    (view.background as? ColorDrawable)?.let { original ->
-        val shade = original.color
-        if (view.tag == "skew") {
-            val gradient = when (shade) {
-                color(R.color.yellow) -> intArrayOf(color(R.color.yellow_light), shade, color(R.color.yellow_dark))
-                color(R.color.white) -> intArrayOf(color(R.color.metal_top), color(R.color.white_bottom))
-                color(R.color.cell) -> intArrayOf(color(R.color.glass_top), color(R.color.glass_bottom))
-                else -> null
-            }
-            view.background = SkewDrawable(shade, density = resources.displayMetrics.density, gradientColors = gradient)
-        } else if (shade == color(R.color.cell)) {
-            view.background = GlassDrawable(this)
-            view.elevation = dp(3).toFloat()
-        }
-    }
+    val shade = (view.background as? ColorDrawable)?.color
+    if (view.tag == "skew" && shade != null) view.background = SkewDrawable(shade, density = resources.displayMetrics.density)
     if (view is ViewGroup) for (i in 0 until view.childCount) applySkew(view.getChildAt(i))
 }
+
+/** 기울어진 바탕과 눌림. 머티리얼 버튼은 스타일의 틴트가 새 바탕을 덮으므로 틴트를 지운다. */
+internal fun Button.skewButton(colorId: Int) {
+    background = SkewDrawable(context.getColor(colorId), density = resources.displayMetrics.density)
+    backgroundTintList = null
+    stateListAnimator = StateListAnimator().apply {
+        addState(intArrayOf(android.R.attr.state_pressed), pressScale(.96f))
+        addState(intArrayOf(), pressScale(1f))
+    }
+}
+
+private fun View.pressScale(to: Float) = ObjectAnimator.ofPropertyValuesHolder(this,
+    PropertyValuesHolder.ofFloat(View.SCALE_X, to), PropertyValuesHolder.ofFloat(View.SCALE_Y, to)).setDuration(MotionTokens.FAST)
