@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     internal var demoMode = false
     /** 시연 모드에서 각본 주행을 돌렸으면 결과 카드는 각본 화면(92점/64점)으로 보여 준다. */
     internal var demoResultWin: Boolean? = null
+    /** 트립이나 시연 각본이 방금 끝났다. 큰 연출은 이때만 돈다. show()가 화면을 만든 뒤 거짓으로 돌린다. */
+    internal var resultJustFinished = false
     /** 결과 카드와 리플레이가 보여 줄 실제 트립 (없으면 시연 데이터) */
     private var shownTrip: CompletedTrip? = null
     internal var drivingKmShown = -1
@@ -259,6 +261,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onTripResult(trip: CompletedTrip) {
         if (restricted) { pendingResult = trip; return } // 주차(P)하면 제한이 풀리면서 applyRestriction이 연다
+        resultJustFinished = true // 시연 각본의 끝도 여기로 온다
         if (service?.lastResultWasDemo == true) show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
         else showResult(trip)
     }
@@ -295,8 +298,9 @@ class MainActivity : AppCompatActivity() {
             Screen.CONSENT -> showLocationConsent()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
+        resultJustFinished = false
         applySkew(binding.screenContainer)
-        if (!restricted) ScreenTransition.enter(binding.screenContainer, motion)
+        if (!restricted && target != Screen.WIN) ScreenTransition.enter(binding.screenContainer, motion) // WIN은 playResultWin이 맡는다
         if (target == Screen.WIN || target == Screen.LOW) {
             binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
                 crew.post {

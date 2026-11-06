@@ -6,8 +6,11 @@ import android.graphics.*
 import android.graphics.drawable.Drawable
 
 /** Background only: labels and hit areas stay upright. */
-class SkewDrawable(color: Int, private val outline: Int? = null, private val density: Float = 1f, private val gradientColors: IntArray? = null) : Drawable() {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+class SkewDrawable(color: Int, private val outline: Int? = null, private val density: Float = 1f, private val gradientColors: IntArray? = null, glow: Int? = null) : Drawable() {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = color
+        if (glow != null) setShadowLayer(15 * density, 0f, 0f, glow)
+    }
     private val path = Path()
     override fun onBoundsChange(bounds: Rect) {
         val inset = bounds.height() * 0.176327f // tan(10 degrees)

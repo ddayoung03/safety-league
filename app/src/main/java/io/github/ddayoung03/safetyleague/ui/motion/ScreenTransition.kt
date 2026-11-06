@@ -7,7 +7,7 @@ import android.view.animation.DecelerateInterpolator
 object ScreenTransition
 
 /** 새 화면(container의 자식)을 페이드와 아래에서 위 이동으로 들인다. transform과 alpha만 쓴다. */
-fun ScreenTransition.enter(container: ViewGroup, scope: MotionScope) {
+fun ScreenTransition.enter(container: ViewGroup, scope: MotionScope, durationMs: Long = MotionTokens.SLOW) {
     if (!animationsEnabled()) return
     val lift = 24 * container.resources.displayMetrics.density
     for (i in 0 until container.childCount) {
@@ -16,7 +16,7 @@ fun ScreenTransition.enter(container: ViewGroup, scope: MotionScope) {
         v.translationY = lift
         val settle = { v.alpha = 1f; v.translationY = 0f }
         val handle = scope.add(onFinish = settle, cancel = { v.animate().cancel() })
-        v.animate().alpha(1f).translationY(0f).setDuration(MotionTokens.SLOW)
+        v.animate().alpha(1f).translationY(0f).setDuration(durationMs)
             .setInterpolator(DecelerateInterpolator())
             .withEndAction { settle(); handle.done() }.start()
     }
