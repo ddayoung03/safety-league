@@ -128,7 +128,7 @@
    - [이긴날 시연], [아쉬운날 시연] 버튼 탑재로 가상 주행 $\rightarrow$ P단 주차 $\rightarrow$ 결과 카드 자동 팝업 라이프사이클을 100% 재현 시연 가능.
 
 4. **빌드 및 패키징 완료**:
-   - `assembleDebug` 및 `testDebugUnitTest` (15개 전체 통과) $\rightarrow$ [`app-debug.apk`](file:///C:/Users/PTY/Desktop/현대차앱개발공모전/safety-league/app/build/outputs/apk/debug/app-debug.apk) (18MB) 생성 완료.
+   - `assembleDebug` 및 `testDebugUnitTest` (15개 전체 통과) $\rightarrow$ `app/build/outputs/apk/debug/app-debug.apk` (18MB) 생성 완료.
 
 ---
 

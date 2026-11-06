@@ -3,6 +3,30 @@
 실제 차량 신호(방향지시등·브레이크·조향각·안전벨트·경고등)로 트립마다 안전 운전 점수(100점)를 매기고,
 같은 차종 운전자끼리 월간 시즌 리그로 겨루는 Pleos Connect(AAOS) 앱.
 
+## 구현 현황
+
+Pleos Connect 에뮬레이터에서 동작하는 안드로이드 앱입니다. 소스는 [`app/`](app/)에 있습니다.
+
+- 실제 차량 신호 수집: Vehicle State SDK, AAOS CarPropertyManager
+- 트립 점수, 결과 카드, 레이스 리플레이, 주간 리포트, 월간 시즌 정산
+- 주행 중 화면 제한(CarUxRestrictions), 경로 기록 동의
+- 점수 계산은 순수 함수로 분리했고 단위 테스트가 있습니다.
+
+리그의 다른 운전자는 시연용 가상 데이터입니다. 순위 서버 연동은 출시 후 계획입니다. 에뮬레이터는 전비 신호를 지원하지 않습니다.
+
+## 빌드와 실행
+
+필요한 것: JDK 17, Android SDK 34, [Pleos Connect 에뮬레이터](https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator).
+
+```
+./gradlew assembleDebug          # 앱 빌드
+./gradlew testDebugUnitTest      # 단위 테스트
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb forward tcp:8088 tcp:8088    # Virtual Console: http://127.0.0.1:8088/
+```
+
+Virtual Console에서 기어를 D로 놓고 ACCEL로 3km 이상 달린 뒤 P로 바꾸면 결과 카드가 뜹니다. 앱 왼쪽 위 모서리를 길게 누르면 시연 모드가 열립니다.
+
 ## 화면 시안
 
 **주행 결과 — 잘 달린 날.** 주차(P단)하면 레이스 종료 화면이 뜹니다. 오늘 제친 운전자와 승급 라인까지 남은 거리가 보입니다.
