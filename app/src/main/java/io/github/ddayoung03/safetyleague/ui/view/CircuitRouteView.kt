@@ -6,7 +6,6 @@ import androidx.core.graphics.withTranslation
 import android.content.Context
 import io.github.ddayoung03.safetyleague.R
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
@@ -52,13 +51,7 @@ class CircuitRouteView @JvmOverloads constructor(
             rebuild()
         }
 
-    var isBackgroundMode: Boolean = false // 결과 카드 배경용 흐린 모드
-        set(value) {
-            field = value
-            trim()
-        }
-
-    /** 그려진 길이의 비율(0~1). 리플레이에만 쓰고, 배경 모드는 늘 끝까지 그린다. */
+    /** 그려진 길이의 비율(0~1).  */
     var progress: Float = 1f
         set(value) {
             field = value.coerceIn(0f, 1f)
@@ -83,7 +76,6 @@ class CircuitRouteView @JvmOverloads constructor(
     private val shadowColor = context.getColor(R.color.shadow)
     private val edgeColor = ColorUtils.setAlphaComponent(context.getColor(R.color.ink_text), 40)
     private val asphaltColor = context.getColor(R.color.ink_glow)
-    private val fadedColor = Color.argb(30, 242, 241, 236) // 흐린 서킷
     private val inkColor = context.getColor(R.color.ink)
     private val textColor = context.getColor(R.color.ink_text)
     private val yellowColor = context.getColor(R.color.yellow)
@@ -174,7 +166,7 @@ class CircuitRouteView @JvmOverloads constructor(
     /** 그릴 부분을 잘라 둔다. 그 끝이 차의 자리다. */
     private fun trim() {
         visibleCount = visibleEvents(eventPositions, progress)
-        val end = measure.length * (if (isBackgroundMode) 1f else progress)
+        val end = measure.length * progress
         drawn.reset()
         measure.getSegment(0f, end, drawn, true)
         measure.getPosTan(end, carPos, null)
@@ -187,43 +179,35 @@ class CircuitRouteView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
 
         // Shadow below the road, never above event labels.
-        roadPaint.strokeWidth = if (isBackgroundMode) 36f * (scale / 6f).coerceAtLeast(1f) else 44f
+        roadPaint.strokeWidth = 44f
         roadPaint.color = shadowColor
         canvas.withTranslation(0f, 8 * density) {
             drawPath(drawn, roadPaint)
         }
         // 1. 도로 아스팔트 베이스
-        if (isBackgroundMode) {
-            roadPaint.strokeWidth = 36f * (scale / 6f).coerceAtLeast(1f)
-            roadPaint.color = fadedColor
-            canvas.drawPath(drawn, roadPaint)
-        } else {
-            roadPaint.strokeWidth = 44f
-            roadPaint.color = edgeColor
-            canvas.drawPath(drawn, roadPaint)
+        roadPaint.strokeWidth = 44f
+        roadPaint.color = edgeColor
+        canvas.drawPath(drawn, roadPaint)
 
-            roadPaint.strokeWidth = 36f
-            roadPaint.color = asphaltColor
-            canvas.drawPath(drawn, roadPaint)
+        roadPaint.strokeWidth = 36f
+        roadPaint.color = asphaltColor
+        canvas.drawPath(drawn, roadPaint)
 
-            // 중앙선
-            canvas.drawPath(drawn, centerLinePaint)
-        }
+        // 중앙선
+        canvas.drawPath(drawn, centerLinePaint)
 
         // 2. 출발점 (그린 서클) & 도착점 (체커기 마커). 도착점은 차가 닿으면 나온다.
         eventPaint.color = textColor // 출발: 트랙 화이트
         canvas.drawCircle(ends[0], ends[1], 9f, eventPaint)
         canvas.drawCircle(ends[0], ends[1], 9f, eventBorderPaint)
 
-        val arrived = isBackgroundMode || progress >= 1f
-        if (arrived) {
+        if (progress >= 1f) {
             eventPaint.color = textColor
             canvas.drawCircle(ends[2], ends[3], 10f, eventPaint)
             eventPaint.color = inkColor
             canvas.drawCircle(ends[2], ends[3], 5f, eventPaint)
             canvas.drawCircle(ends[2], ends[3], 10f, eventBorderPaint)
         }
-        if (isBackgroundMode) return
 
         // 3. 리플레이 이벤트 마커 렌더링
         for (i in 0 until visibleCount) {
@@ -236,7 +220,7 @@ class CircuitRouteView @JvmOverloads constructor(
         }
 
         // 4. 달리는 차
-        if (progress > 0f && !arrived) {
+        if (progress > 0f && progress < 1f) {
             eventPaint.color = yellowColor
             canvas.drawCircle(carPos[0], carPos[1], 10 * density, eventPaint)
             canvas.drawCircle(carPos[0], carPos[1], 10 * density, eventBorderPaint)
