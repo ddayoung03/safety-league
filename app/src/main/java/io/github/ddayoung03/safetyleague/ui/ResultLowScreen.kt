@@ -18,6 +18,7 @@ internal fun MainActivity.showResultLow() {
     b.checkerStrip.background = checkerTile()
     b.btnLeague.background = skew(R.color.ink_glow)
     b.btnReplay.background = skew(R.color.ink_text)
+    listOf(b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
     b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
     b.routeBg.isBackgroundMode = true

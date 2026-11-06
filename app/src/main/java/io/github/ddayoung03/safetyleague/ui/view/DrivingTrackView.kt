@@ -17,7 +17,7 @@ class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: Attrib
     private val d = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val yellow = context.getColor(R.color.yellow)
-    private val empty = context.getColor(R.color.ink_glow)
+    private val empty = context.getColor(R.color.track_empty)
     private val grey = context.getColor(R.color.ink_muted)
     private val line = context.getColor(R.color.ink_muted)
     private val car = ContextCompat.getDrawable(context, R.drawable.ic_track_car)!!

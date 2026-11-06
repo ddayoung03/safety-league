@@ -78,6 +78,7 @@ internal fun MainActivity.showPlacement() {
     b.placementModel.text = "${profile.model} 리그"
     b.placementTier.text = "${profile.tier} 단계에 배치되었습니다"
     b.placementRecognition.visibility = if (profile.recognition == "auto") View.VISIBLE else View.GONE
+    listOf(b.btnStart, b.btnChangeVehicle).forEach { it.pressFeedback() }
     b.btnChangeVehicle.setOnClickListener { show(Screen.VEHICLE) }
     b.btnStart.setOnClickListener {
         if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }

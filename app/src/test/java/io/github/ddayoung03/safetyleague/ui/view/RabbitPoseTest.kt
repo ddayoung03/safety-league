@@ -67,10 +67,10 @@ class RabbitPoseTest {
     }
 
     @Test fun scaleIsLargestWholeNumberThatFits() {
-        assertEquals(1, spriteScale(128, 128, 1.31f)) // 빈 자리 128dp, 시연 창
-        assertEquals(2, spriteScale(180, 245, 1.31f)) // 이긴 날
-        assertEquals(3, spriteScale(270, 380, 1.31f)) // 아쉬운 날
-        assertEquals(2, spriteScale(270, 380, 1f))
+        assertEquals(2, spriteScale(180, 245, 1.31f)) // 화면별 토끼 자리
+        assertEquals(3, spriteScale(268, 368, 1.31f)) // 이긴 날
+        assertEquals(4, spriteScale(356, 488, 1.31f)) // 아쉬운 날
+        assertEquals(3, spriteScale(356, 488, 1f))
         assertEquals(1, spriteScale(10, 10, 1f)) // 너무 작아도 0배는 없다
     }
 

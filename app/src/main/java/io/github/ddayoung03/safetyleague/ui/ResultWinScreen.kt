@@ -28,6 +28,7 @@ internal fun MainActivity.showResultWin() {
     b.progressFill.background = skew(R.color.yellow)
     b.btnLeague.background = skew(R.color.ink_glow)
     b.btnReplay.background = skew(R.color.yellow)
+    listOf(b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
     b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
 

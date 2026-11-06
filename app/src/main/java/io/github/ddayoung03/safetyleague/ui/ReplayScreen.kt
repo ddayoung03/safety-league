@@ -66,6 +66,7 @@ internal fun MainActivity.showReplay() {
     if (events.isEmpty()) b.layoutEventList.addView(note("감점 사건 없이 달렸어요"))
     b.tvReplayTip.text = if (t != null && !t.isEligible) SHORT_TRIP_TIP
     else pitBoard(events, if (t == null && !win) DemoData.lowDayDetail else t?.trip?.detailScore, demo = t == null).tip
+    b.btnBack.pressFeedback()
     b.btnBack.setOnClickListener {
         if (realTrip != null) showResult(realTrip!!) else show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
     }

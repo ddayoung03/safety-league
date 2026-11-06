@@ -24,6 +24,7 @@ internal fun MainActivity.showLeague() {
     b.checkerStrip.background = checkerTile()
     b.tvToLine.background = skew(R.color.yellow)
     b.tvTabRegion.text = myRegion
+    listOf(b.btnLeagueReport, b.btnLeagueBack, b.tvTabModel, b.tvTabRegion, b.tvTabFriends).forEach { it.pressFeedback() }
     b.btnLeagueReport.setOnClickListener { show(Screen.REPORT) }
     if (real) {
         val now = LocalDate.now()

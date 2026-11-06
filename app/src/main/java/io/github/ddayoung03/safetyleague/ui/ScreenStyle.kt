@@ -57,8 +57,13 @@ internal fun MainActivity.applySkew(view: View) {
 internal fun Button.skewButton(colorId: Int) {
     background = SkewDrawable(context.getColor(colorId), density = resources.displayMetrics.density)
     backgroundTintList = null
+    pressFeedback(.96f)
+}
+
+/** 누르는 동안 살짝 작아진다. 자리는 움직이지 않는다. */
+internal fun View.pressFeedback(to: Float = .97f) {
     stateListAnimator = StateListAnimator().apply {
-        addState(intArrayOf(android.R.attr.state_pressed), pressScale(.96f))
+        addState(intArrayOf(android.R.attr.state_pressed), pressScale(to))
         addState(intArrayOf(), pressScale(1f))
     }
 }

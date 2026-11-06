@@ -87,7 +87,7 @@
     <!-- 왼쪽 대형 서킷 뷰 -->
     <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
         android:id="@+id/route_replay_view"
-        android:layout_width="760dp"
+        android:layout_width="668dp"
         android:layout_height="456dp"
         android:layout_gravity="start|top"
         android:layout_marginStart="30dp"
@@ -153,13 +153,13 @@
             android:textSize="30sp" />
     </LinearLayout>
 
-    <!-- 토끼 자리. 피트 보드 띠 오른쪽 끝에 올라선다. -->
+    <!-- 토끼 자리. 경로와 사건 목록 사이에서 피트 보드 띠 위에 선다. 띠와 겹치지 않는다. -->
     <io.github.ddayoung03.safetyleague.ui.view.RabbitView
         android:id="@+id/rabbit"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="80dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_width="180dp"
+        android:layout_height="245dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="660dp"
+        android:layout_marginBottom="124dp" />
 
 </FrameLayout>

@@ -17,7 +17,7 @@
                 android:layout_marginTop="16dp" android:text="@string/consent_optional"
                 android:textSize="26sp" android:textColor="@color/ink_muted" />
         </LinearLayout>
-        <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="128dp" android:layout_height="128dp"
+        <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="180dp" android:layout_height="245dp"
             android:layout_marginStart="24dp" />
     </LinearLayout>
     <TextView android:id="@+id/consent_current" android:layout_width="match_parent" android:layout_height="48dp"
