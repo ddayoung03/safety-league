@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>캐릭터 후보 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--y:#FFC52E;--ink:#17191F}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#0D0F13;color:#F2F2EE;font-family:Pretendard,sans-serif}
+.top{display:flex;align-items:center;gap:10px;padding:14px 24px;flex-wrap:wrap}
+.top h1{font-size:18px;margin:0 auto 0 0;font-weight:700}
+.a{height:42px;padding:0 16px;border-radius:12px;border:1px solid #2B2F37;background:#15171C;color:#C9CCD2;font:700 15px Pretendard;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.a:active{transform:scale(.96)}.a.on{background:var(--y);border-color:var(--y);color:#14161A}
+.cap{padding:0 24px 8px;color:#9AA0AA;font-size:16px;min-height:28px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:6px 24px 20px}
+.card{background:#14171C;border:2px solid #20242B;border-radius:20px;padding:14px 14px 18px;cursor:pointer;transition:border-color .15s;overflow:hidden}
+.card.sel{border-color:var(--y)}
+.card h2{margin:6px 6px 4px;font-size:21px}.card p{margin:0 6px;color:#A3A9B2;font-size:15px;line-height:1.5}
+.st{height:400px;display:flex;align-items:flex-end;justify-content:center;position:relative;border-radius:14px;background:radial-gradient(240px 110px at 50% 92%,#262B34 0,transparent 70%)}
+svg{width:272px;height:320px;overflow:visible}
+
+/* 리그: 파츠별 회전축은 SVG 좌표 기준 */
+.fig{transform-origin:130px 300px}
+.head{transform-origin:130px 165px;animation:hb 3s ease-in-out infinite}
+.torso{transform-origin:130px 240px;animation:br 3s ease-in-out infinite}
+.armL{transform-origin:90px 175px;transition:transform .25s cubic-bezier(.2,1.3,.35,1)}
+.armR{transform-origin:170px 175px;transition:transform .25s cubic-bezier(.2,1.3,.35,1)}
+.legL{transform-origin:106px 228px}.legR{transform-origin:154px 228px}
+.lid{transform-origin:130px 100px;animation:bl 4s infinite}
+.e{display:none}.e.norm{display:block}
+.flag,.board,.mic,.spd,.wv{display:none}
+@keyframes hb{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+@keyframes br{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.02)}}
+@keyframes bl{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.1)}}
+.cloth{transform-origin:0 -95px;animation:cl .5s ease-in-out infinite alternate}
+@keyframes cl{from{transform:skewY(-9deg) scaleX(1)}to{transform:skewY(9deg) scaleX(.93)}}
+
+/* 승리 */
+.win .fig{animation:jump .8s cubic-bezier(.3,.7,.4,1) infinite}
+.win .armL{animation:up1 .4s ease-in-out infinite alternate}
+.win .armR{animation:up2 .4s ease-in-out infinite alternate}
+.win .flag{display:block}.win .e{display:none}.win .e.happy{display:block}
+@keyframes jump{0%,100%{transform:translateY(0) scale(1.06,.92)}18%{transform:translateY(-8px) scale(.96,1.05)}50%{transform:translateY(-46px) scale(1,1)}82%{transform:translateY(-6px) scale(.97,1.04)}}
+@keyframes up1{from{transform:rotate(118deg)}to{transform:rotate(138deg)}}
+@keyframes up2{from{transform:rotate(-112deg)}to{transform:rotate(-132deg)}}
+
+/* 추월 */
+.over .fig{animation:lean .32s ease-in-out infinite alternate}
+.over .legL{animation:run .26s ease-in-out infinite alternate}
+.over .legR{animation:run .26s ease-in-out infinite alternate-reverse}
+.over .armL{animation:pump .26s ease-in-out infinite alternate-reverse}
+.over .armR{animation:pump2 .26s ease-in-out infinite alternate-reverse}
+.over .spd{display:block}.over .spd line{animation:sp .4s linear infinite}
+.over .spd line:nth-child(2){animation-delay:.12s}.over .spd line:nth-child(3){animation-delay:.25s}
+.over .e{display:none}.over .e.focus{display:block}
+@keyframes lean{from{transform:rotate(9deg) translateY(0)}to{transform:rotate(11deg) translateY(-7px)}}
+@keyframes run{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+@keyframes pump{from{transform:rotate(-32deg)}to{transform:rotate(38deg)}}
+@keyframes pump2{from{transform:rotate(-38deg)}to{transform:rotate(32deg)}}
+@keyframes sp{from{transform:translateX(50px);opacity:.9}to{transform:translateX(-70px);opacity:0}}
+
+/* 아쉬운 날: 혼내지 않고 보드를 들어 준다 */
+.pit .board{display:block;transform-origin:130px 200px;animation:nod 1.5s ease-in-out infinite}
+.pit .head{animation:tilt 1.5s ease-in-out infinite}
+.pit .e{display:none}.pit .e.kind{display:block}
+@keyframes nod{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg) translateY(-4px)}}
+@keyframes tilt{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(-1deg) translateY(3px)}}
+
+/* 팀 라디오 */
+.rad .armR{transform:rotate(-98deg)}
+.rad .mic,.rad .wv{display:block}
+.rad .wv rect{transform-box:fill-box;transform-origin:50% 50%;animation:wvv .5s ease-in-out infinite alternate}
+.rad .wv rect:nth-child(2){animation-delay:.12s}.rad .wv rect:nth-child(3){animation-delay:.24s}
+.rad .head{animation:talk .7s ease-in-out infinite alternate}
+.rad .e{display:none}.rad .e.happy{display:block}
+@keyframes wvv{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
+@keyframes talk{from{transform:rotate(2deg)}to{transform:rotate(5deg) translateY(-3px)}}
+
+/* 로딩: 깃발을 크게 흔든다 */
+.load .flag{display:block}
+.load .armR{animation:swing .55s ease-in-out infinite alternate}
+.load .fig{animation:sway .55s ease-in-out infinite alternate}
+.load .e{display:none}.load .e.focus{display:block}
+@keyframes swing{from{transform:rotate(-92deg)}to{transform:rotate(-142deg)}}
+@keyframes sway{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+
+/* 토끼 귀: 감정을 귀로 표현한다 */
+.earL{transform-origin:100px 62px;animation:eaL 3s ease-in-out infinite}
+.earR{transform-origin:160px 62px;animation:eaR 3s ease-in-out infinite}
+@keyframes eaL{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(-1deg)}}
+@keyframes eaR{0%,100%{transform:rotate(5deg)}50%{transform:rotate(1deg)}}
+.win .earL{animation:weL .4s ease-in-out infinite alternate}.win .earR{animation:weR .4s ease-in-out infinite alternate}
+@keyframes weL{from{transform:rotate(-16deg)}to{transform:rotate(4deg)}}
+@keyframes weR{from{transform:rotate(16deg)}to{transform:rotate(-4deg)}}
+.over .earL{animation:oeL .22s ease-in-out infinite alternate}.over .earR{animation:oeR .22s ease-in-out infinite alternate}
+@keyframes oeL{from{transform:rotate(-62deg)}to{transform:rotate(-54deg)}}
+@keyframes oeR{from{transform:rotate(-40deg)}to{transform:rotate(-32deg)}}
+.pit .earL{animation:none;transform:rotate(-96deg)}.pit .earR{animation:none;transform:rotate(96deg)}
+.rad .earR{animation:none;transform:rotate(58deg)}
+.load .earL{animation:weL .55s ease-in-out infinite alternate}.load .earR{animation:weR .55s ease-in-out infinite alternate}
+
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>레이싱 슈트 캐릭터 후보 4종 · 동작을 눌러 비교</h1>
+  <button class="a" data-p="idle">대기</button>
+  <button class="a" data-p="win">결과 승리</button>
+  <button class="a" data-p="over">순위 추월</button>
+  <button class="a" data-p="pit">아쉬운 날</button>
+  <button class="a" data-p="rad">팀 라디오</button>
+  <button class="a" data-p="load">로딩</button>
+</div>
+<div class="cap" id="cap"></div>
+<div class="grid" id="grid"></div>
+<script>
+const CAP={idle:'대기: 화면 구석에서 숨 쉬고 눈을 깜빡입니다',win:'결과 승리: 체커기를 들고 뜁니다',over:'순위 추월: 내 줄이 올라갈 때 앞으로 달립니다',pit:'아쉬운 날: 혼내지 않고 피트 보드를 들어 줍니다',rad:'팀 라디오: 무전기로 말을 겁니다',load:'로딩: 오른쪽 아래에서 체커기를 흔듭니다'};
+
+function rig(c,head,behind=''){return `<svg viewBox="0 0 260 320" aria-hidden="true">
+<g class="spd" stroke="#FFC52E" stroke-width="5" stroke-linecap="round"><line x1="20" y1="130" x2="62" y2="130"/><line x1="4" y1="190" x2="56" y2="190"/><line x1="24" y1="248" x2="60" y2="248"/></g>
+<g class="fig">${behind}
+<g class="legL"><path d="M106 226 L100 278" stroke="${c.suit}" stroke-width="30" stroke-linecap="round"/><path d="M84 300c0-14 8-22 20-22s16 8 16 14v8z" fill="${c.boot}"/><path d="M84 300h36" stroke="${c.accent}" stroke-width="5"/></g>
+<g class="legR"><path d="M154 226 L160 278" stroke="${c.suit}" stroke-width="30" stroke-linecap="round"/><path d="M176 300c0-14-8-22-20-22s-16 8-16 14v8z" fill="${c.boot}"/><path d="M140 300h36" stroke="${c.accent}" stroke-width="5"/></g>
+<g class="armL"><path d="M90 175 L58 222" stroke="${c.suit}" stroke-width="25" stroke-linecap="round"/><path d="M72 201l-9 13" stroke="${c.accent}" stroke-width="25"/><circle cx="54" cy="228" r="16" fill="${c.glove}"/></g>
+<g class="torso"><path d="M86 168c26-16 62-16 88 0l6 62c-30 16-70 16-100 0z" fill="${c.suit}"/>
+<path d="M118 156h24l6 88h-36z" fill="${c.accent}"/><path d="M124 156h12l3 88h-18z" fill="${c.stripe}"/>
+<path d="M82 222c32 12 64 12 96 0l1 12c-32 14-66 14-98 0z" fill="${c.belt}"/><rect x="120" y="224" width="20" height="13" rx="3" fill="#FFC52E"/>
+<path d="M152 182l15-4 1 15c0 8-6 12-9 13-4-2-8-6-8-13z" fill="#FFC52E" stroke="#17191F" stroke-width="2"/>
+<path d="M92 184h20v8H92zM92 197h15v6H92z" fill="${c.patch}"/></g>
+<g class="armR"><path d="M170 175 L202 222" stroke="${c.suit}" stroke-width="25" stroke-linecap="round"/><path d="M188 201l9 13" stroke="${c.accent}" stroke-width="25"/>
+<g class="flag" transform="translate(206 228) rotate(120)"><path d="M0 8V-98" stroke="#E7E7E1" stroke-width="6" stroke-linecap="round"/><g class="cloth">${checker()}</g></g>
+<g class="mic"><rect x="196" y="204" width="20" height="34" rx="6" fill="#20242B" stroke="#FFC52E" stroke-width="3"/></g>
+<circle cx="206" cy="228" r="16" fill="${c.glove}"/></g>
+${head}
+<g class="wv" transform="translate(214 66)" fill="#FFC52E"><rect x="0" y="0" width="7" height="34" rx="3"/><rect x="13" y="-7" width="7" height="48" rx="3"/><rect x="26" y="2" width="7" height="30" rx="3"/></g>
+<g class="board"><rect x="40" y="166" width="180" height="82" rx="8" fill="#F4F2EA" stroke="#20242B" stroke-width="6"/><text x="130" y="220" text-anchor="middle" font-size="36" font-weight="900" font-family="Pretendard" fill="#20242B">천천히!</text><circle cx="54" cy="240" r="15" fill="${c.glove}"/><circle cx="206" cy="240" r="15" fill="${c.glove}"/></g>
+</g></svg>`}
+function checker(){let s='';for(let i=0;i<7;i++)for(let j=0;j<4;j++)s+=`<rect x="${i*10}" y="${-98+j*10}" width="10.3" height="10.3" fill="${(i+j)%2?'#17191F':'#F4F2EA'}"/>`;return s}
+
+/* 1. 헬멧 크루 */
+const H1=`<g class="head"><path d="M130 165c-14 0-20 2-24 8h48c-4-6-10-8-24-8z" fill="#17191F"/>
+<path d="M38 96C38 42 80 12 130 12s92 30 92 84c0 42-26 72-68 72h-48c-42 0-68-30-68-72z" fill="#FFC52E"/>
+<path d="M38 96c0 16 3 30 9 42 10-34 38-54 83-54s73 20 83 54c6-12 9-26 9-42-16-30-48-42-92-42s-76 12-92 42z" fill="#E59A12" opacity=".55"/>
+<path d="M112 13c12-2 24-2 36 0l-3 50h-30z" fill="#D42232"/><path d="M122 12h16l-1 51h-14z" fill="#fff"/>
+<path d="M200 44l30-22 4 6-22 30z" fill="#D42232"/><path d="M60 44L30 22l-4 6 22 30z" fill="#D42232"/>
+<rect x="56" y="70" width="148" height="66" rx="30" fill="#14161C"/><path d="M72 84c26-9 80-10 112-2" stroke="#fff" stroke-opacity=".2" stroke-width="7" fill="none" stroke-linecap="round"/>
+<g class="lid" fill="none" stroke="#7DF9FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+<g class="e norm"><circle cx="102" cy="104" r="11" fill="#7DF9FF" stroke="none"/><circle cx="158" cy="104" r="11" fill="#7DF9FF" stroke="none"/></g>
+<g class="e happy"><path d="M86 112l16-16 16 16M142 112l16-16 16 16"/></g>
+<g class="e focus"><path d="M86 96l32 12M174 96l-32 12"/></g>
+<g class="e kind"><path d="M88 104q14 12 28 0M144 104q14 12 28 0"/></g></g>
+<path d="M92 150h76" stroke="#17191F" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/></g>`;
+
+/* 2. 거북이 드라이버 */
+const eyeT=`<g class="lid"><g class="e norm"><circle cx="102" cy="98" r="19" fill="#fff"/><circle cx="158" cy="98" r="19" fill="#fff"/><circle cx="106" cy="100" r="10" fill="#17191F"/><circle cx="154" cy="100" r="10" fill="#17191F"/><circle cx="110" cy="95" r="3.5" fill="#fff"/><circle cx="158" cy="95" r="3.5" fill="#fff"/></g>
+<g class="e happy" fill="none" stroke="#17191F" stroke-width="8" stroke-linecap="round"><path d="M86 104q16-20 32 0M142 104q16-20 32 0"/></g>
+<g class="e focus"><circle cx="102" cy="100" r="18" fill="#fff"/><circle cx="158" cy="100" r="18" fill="#fff"/><circle cx="108" cy="102" r="10" fill="#17191F"/><circle cx="164" cy="102" r="10" fill="#17191F"/><path d="M80 84l42 10M180 84l-42 10" stroke="#17191F" stroke-width="8" stroke-linecap="round"/></g>
+<g class="e kind"><circle cx="102" cy="100" r="19" fill="#fff"/><circle cx="158" cy="100" r="19" fill="#fff"/><circle cx="102" cy="103" r="11" fill="#17191F"/><circle cx="158" cy="103" r="11" fill="#17191F"/><circle cx="106" cy="98" r="4" fill="#fff"/><circle cx="162" cy="98" r="4" fill="#fff"/><path d="M84 84l30-9M176 84l-30-9" stroke="#2F7A4B" stroke-width="7" stroke-linecap="round"/></g></g>`;
+const H2=`<g class="head"><path d="M112 152h36v26h-36z" fill="#58B878"/>
+<ellipse cx="130" cy="106" rx="76" ry="66" fill="#6FCF8E"/><ellipse cx="130" cy="132" rx="50" ry="30" fill="#9BE3B0"/>
+<path d="M50 96C48 42 88 14 130 14s82 28 80 82c-20-22-48-32-80-32S70 74 50 96z" fill="#FFC52E"/>
+<path d="M112 15c12-2 24-2 36 0l-4 48c-9-1-19-1-28 0z" fill="#D42232"/><path d="M122 14h16l-2 49h-12z" fill="#fff"/>
+<path d="M50 96c-6 10-8 22-6 32l14-6c-2-10 0-20 6-30z" fill="#E59A12"/><path d="M210 96c6 10 8 22 6 32l-14-6c2-10 0-20-6-30z" fill="#E59A12"/>
+${eyeT}<path d="M112 136q18 14 36 0" fill="none" stroke="#2F7A4B" stroke-width="6" stroke-linecap="round"/>
+<circle cx="74" cy="126" r="9" fill="#FF9EA6" opacity=".6"/><circle cx="186" cy="126" r="9" fill="#FF9EA6" opacity=".6"/></g>`;
+const SH=`<g><ellipse cx="130" cy="202" rx="86" ry="82" fill="#2F7A4B"/><ellipse cx="130" cy="202" rx="86" ry="82" fill="none" stroke="#17191F" stroke-width="12" stroke-dasharray="14 14"/><ellipse cx="130" cy="202" rx="86" ry="82" fill="none" stroke="#F4F2EA" stroke-width="12" stroke-dasharray="14 14" stroke-dashoffset="14"/></g>`;
+
+/* 3. 시그널 크루 */
+const lamp=(x,col)=>`<circle cx="${x}" cy="98" r="24" fill="#0A0C10"/><circle cx="${x}" cy="98" r="17" fill="${col}"/>`;
+const H3=`<g class="head"><path d="M116 150h28v24h-28z" fill="#20242B"/>
+<rect x="30" y="52" width="200" height="104" rx="34" fill="#20242B"/><rect x="30" y="52" width="200" height="104" rx="34" fill="none" stroke="#FFC52E" stroke-width="7"/>
+<path d="M44 58c30-26 142-26 172 0l14 20H30z" fill="#FFC52E"/><path d="M116 34h28l6 28h-40z" fill="#D42232"/>
+<g class="lid"><g class="e norm">${lamp(84,'#35E08A')}${lamp(176,'#35E08A')}</g>
+<g class="e happy">${lamp(84,'#0A0C10')}${lamp(176,'#0A0C10')}<path d="M68 106q16-22 32 0M160 106q16-22 32 0" fill="none" stroke="#35E08A" stroke-width="9" stroke-linecap="round"/></g>
+<g class="e focus">${lamp(84,'#FFC52E')}${lamp(176,'#FFC52E')}<path d="M60 76l48 14M200 76l-48 14" stroke="#20242B" stroke-width="12"/></g>
+<g class="e kind">${lamp(84,'#FFC52E')}${lamp(176,'#FFC52E')}<path d="M62 92h44M154 92h44" stroke="#0A0C10" stroke-width="14"/></g></g>
+<circle cx="130" cy="98" r="9" fill="#3A3F49"/><path d="M112 134q18 12 36 0" fill="none" stroke="#35E08A" stroke-width="6" stroke-linecap="round"/></g>`;
+
+/* 4. 토끼 레이서 */
+const ear=(c,x,flip)=>`<g class="${c}"><path d="M${x-20} 66C${x-30} 30 ${x-22} -38 ${x} -44c22 6 30 74 20 110z" fill="#F7F3EA"/><path d="M${x-9} 62C${x-15} 30 ${x-11} -18 ${x} -24c11 6 15 56 9 86z" fill="#FFB3BE"/></g>`;
+const H4=`<g class="head">${ear('earL',100)}${ear('earR',160)}<path d="M112 152h36v26h-36z" fill="#E9E3D6"/>
+<ellipse cx="130" cy="108" rx="74" ry="64" fill="#F7F3EA"/>
+<path d="M52 98C50 44 88 16 130 16s80 28 78 82c-20-22-46-32-78-32S72 76 52 98z" fill="#D42232"/>
+<path d="M114 17c10-2 22-2 32 0l-3 49c-9-1-17-1-26 0z" fill="#F7F3EA"/><path d="M124 16h12l-2 50h-8z" fill="#FFC52E"/>
+<path d="M52 98c-6 10-8 22-6 32l14-6c-2-10 0-20 6-30z" fill="#8E1020"/><path d="M208 98c6 10 8 22 6 32l-14-6c2-10 0-20-6-30z" fill="#8E1020"/>
+${eyeT.replaceAll('#2F7A4B','#8A7E6C')}<path d="M122 120h16l-8 9z" fill="#FF8FA0"/><path d="M130 129v7M116 136q7 7 14 0q7 7 14 0" fill="none" stroke="#8A7E6C" stroke-width="5" stroke-linecap="round"/><rect x="123" y="139" width="14" height="11" rx="3" fill="#fff" stroke="#D8D1C2" stroke-width="2"/>
+<circle cx="76" cy="128" r="9" fill="#FFB3BE" opacity=".7"/><circle cx="184" cy="128" r="9" fill="#FFB3BE" opacity=".7"/></g>`;
+
+const C=[
+ {id:'helmet',n:'헬멧 크루',d:'지금 캐릭터의 발전형. 큰 헬멧과 날개, 바이저 눈빛 표정',c:{suit:'#F2F1EC',accent:'#D42232',stripe:'#FFC52E',belt:'#20242B',glove:'#20242B',boot:'#20242B',patch:'#C9CDD6'},h:H1},
+ {id:'turtle',n:'거북이 드라이버',d:'느려도 안전하게 이기는 이야기. 체커 무늬 등껍질이 실루엣',c:{suit:'#D42232',accent:'#F2F1EC',stripe:'#FFC52E',belt:'#20242B',glove:'#FFC52E',boot:'#F2F1EC',patch:'#FFC52E'},h:H2,b:SH},
+ {id:'signal',n:'시그널 크루',d:'신호등이 얼굴인 정비 크루. 출발 신호등 연출과 이어짐',c:{suit:'#26408B',accent:'#FFC52E',stripe:'#F2F1EC',belt:'#14161C',glove:'#F2F1EC',boot:'#14161C',patch:'#FFC52E'},h:H3},
+ {id:'rabbit',n:'토끼 레이서',d:'헬멧을 뚫고 나온 긴 귀가 실루엣. 귀가 감정을 표현',c:{suit:'#FFC52E',accent:'#17191F',stripe:'#D42232',belt:'#17191F',glove:'#D42232',boot:'#17191F',patch:'#17191F'},h:H4}];
+
+const grid=document.getElementById('grid');
+grid.innerHTML=C.map(x=>`<div class="card" data-c="${x.id}"><div class="st idle">${rig(x.c,x.h,x.b||'')}</div><h2>${x.n}</h2><p>${x.d}</p></div>`).join('');
+const btns=[...document.querySelectorAll('.a')],order=['idle','win','over','pit','rad','load'];let auto=true,i=0;
+function set(p){btns.forEach(b=>b.classList.toggle('on',b.dataset.p===p));document.querySelectorAll('.st').forEach(s=>s.className='st '+p);document.getElementById('cap').textContent=CAP[p];}
+btns.forEach(b=>b.onclick=()=>{auto=false;set(b.dataset.p);try{window.brainstorm&&window.brainstorm.send({type:'click',choice:b.dataset.p,text:b.textContent})}catch(e){}});
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.querySelectorAll('.card').forEach(x=>x.classList.toggle('sel',x===c));try{window.brainstorm&&window.brainstorm.send({type:'click',choice:c.dataset.c,text:c.querySelector('h2').textContent})}catch(e){}});
+const h=location.hash.slice(1);set(order.includes(h)?h:'win');if(h)auto=false;else i=1;
+setInterval(()=>{if(auto){i=(i+1)%order.length;set(order[i]);}},3200);
+</script>
+</body>
+</html>

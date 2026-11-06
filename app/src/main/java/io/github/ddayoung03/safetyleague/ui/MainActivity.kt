@@ -8,6 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import io.github.ddayoung03.safetyleague.ui.view.canAnimateCrew
+import io.github.ddayoung03.safetyleague.ui.motion.MotionScope
+import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
+import io.github.ddayoung03.safetyleague.ui.motion.enter
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -46,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var car: Car? = null
     private var uxManager: CarUxRestrictionsManager? = null
 
+    internal val motion = MotionScope()
     internal var restricted = false
     /** CarUxRestrictions에 연결하지 못했으면 기어·속도로 주행 중인지 판단한다(모르면 주행 중). */
     private var uxFallback = false
@@ -151,6 +155,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        motion.finishAll()
         stopCrewEntrance()
         handler.removeCallbacks(drivingTick)
         super.onPause()
@@ -276,6 +281,7 @@ class MainActivity : AppCompatActivity() {
         binding.demoBar.visibility = if (target != Screen.DRIVING && demoMode) View.VISIBLE else View.GONE
         binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
+        motion.finishAll()
         binding.screenContainer.removeAllViews()
         when (target) {
             Screen.WIN -> showResultWin()
@@ -289,6 +295,7 @@ class MainActivity : AppCompatActivity() {
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         applySkew(binding.screenContainer)
+        if (!restricted) ScreenTransition.enter(binding.screenContainer, motion)
         if (target == Screen.WIN || target == Screen.LOW) {
             binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
                 crew.post {

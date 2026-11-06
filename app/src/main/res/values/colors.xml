@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Safety League Design Tokens -->
+    <color name="ink">#0D0F13</color>
+    <color name="ink_glow">#1C2028</color>
+    <color name="ink_text">#F4F4F1</color>
+    <color name="ink_muted">#8A909B</color>
+    <color name="signal_red">#E8202F</color>
     <color name="asphalt">#24272C</color>
     <color name="asphalt_deep">#1B1E23</color>
     <color name="cell">#2E3238</color>
