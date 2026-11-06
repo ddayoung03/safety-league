@@ -36,6 +36,9 @@ fun overtakeRanks(before: Int?, after: Int?, max: Int = 3): List<Int> {
     return (minOf(before - after, max) - 1 downTo 0).map { after + it }
 }
 
+/** 점수 글자 크기(sp). 세 자리는 두 자리와 폭이 같게 줄여 오른쪽 끝을 지킨다. */
+fun scoreTextSp(score: Int): Float = if (score >= 100) 190f else 262f
+
 /** 승급 막대는 승급 라인 앞 30계단을 보여 준다. */
 fun promotionProgress(steps: Int): Float = (1f - steps / 30f).coerceIn(0f, 1f)
 

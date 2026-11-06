@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.flagLoaderRabbit.pose = Pose.LOAD
-        binding.root.post { showFlagLoader() }
+        binding.root.post { showFlagLoader(text = R.string.loader_start) }
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         startTracking()

@@ -5,6 +5,7 @@ import io.github.ddayoung03.safetyleague.ui.motion.ResultIntro.CALM
 import io.github.ddayoung03.safetyleague.ui.motion.ResultIntro.NONE
 import io.github.ddayoung03.safetyleague.ui.motion.ResultIntro.QUICK
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ResultMotionTest {
@@ -81,5 +82,11 @@ class ResultMotionTest {
         scope.finishAll()
         kept.forEach { it.run() }
         assertEquals(listOf("final"), log)
+    }
+
+    @Test fun threeDigitScoreShrinksToTwoDigitWidth() {
+        assertEquals(262f, scoreTextSp(92), 0f)
+        assertEquals(262f, scoreTextSp(99), 0f)
+        assertTrue(scoreTextSp(100) < 262f)
     }
 }

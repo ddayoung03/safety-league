@@ -15,6 +15,7 @@ import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
 import io.github.ddayoung03.safetyleague.ui.motion.playResultWin
 import io.github.ddayoung03.safetyleague.ui.motion.promotionProgress
 import io.github.ddayoung03.safetyleague.ui.motion.resultIntro
+import io.github.ddayoung03.safetyleague.ui.motion.scoreTextSp
 import io.github.ddayoung03.safetyleague.ui.view.Pose
 import java.time.LocalDate
 import kotlin.math.roundToInt
@@ -36,6 +37,9 @@ internal fun MainActivity.showResultWin() {
     val t = realTrip
     val score = (t?.trip?.score ?: DemoData.trips.first { it.date == day }.score).roundToInt()
     b.tvScore.text = "$score"
+    val ascent = b.tvScore.paint.fontMetricsInt.ascent
+    b.tvScore.textSize = scoreTextSp(score)
+    b.tvScore.setPadding(0, b.tvScore.paint.fontMetricsInt.ascent - ascent, 0, 0) // 글자가 줄어도 기준선은 그대로
     fixScoreWidth(b.tvScore)
     b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
     b.tvStreak.text = "연속 ${if (t != null) repository.getStreak(t.trip.date) else DemoData.streakAt(day)}일"
