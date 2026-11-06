@@ -62,7 +62,7 @@
             android:textSize="44sp" />
     </LinearLayout>
 
-    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="356dp" android:layout_height="488dp" android:layout_marginStart="376dp" android:layout_marginTop="-38dp" />
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="268dp" android:layout_height="368dp" android:layout_marginStart="420dp" android:layout_marginTop="82dp" />
 
     <!-- 피트 보드: 다음에 고칠 것 하나. 머리글은 팀 라디오 알약이다. -->
     <LinearLayout
