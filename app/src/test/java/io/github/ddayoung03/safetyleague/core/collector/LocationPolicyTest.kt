@@ -15,13 +15,25 @@ class LocationPolicyTest {
 
     @Test
     fun grantedUsesFusedThenNaviThenLocationManager() {
-        assertEquals(listOf(FUSED, NAVI, OS), LocationPolicy.sourceOrder(GRANTED))
+        assertEquals(listOf(FUSED, NAVI, OS), LocationPolicy.sourceOrder(GRANTED, osPermission = true))
     }
 
     @Test
     fun deniedOrUndecidedStartsNoSource() {
-        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(DENIED))
-        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(UNDECIDED))
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(DENIED, osPermission = true))
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(UNDECIDED, osPermission = true))
+    }
+
+    @Test
+    fun osPermissionDeniedStartsNoSourceEvenWithConsent() {
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(GRANTED, osPermission = false))
+    }
+
+    @Test
+    fun consentWithoutOsPermissionShowsAsNotRecording() {
+        assertEquals(DENIED, LocationPolicy.effectiveConsent(GRANTED, osPermission = false))
+        assertEquals(GRANTED, LocationPolicy.effectiveConsent(GRANTED, osPermission = true))
+        assertEquals(DENIED, LocationPolicy.effectiveConsent(DENIED, osPermission = true))
     }
 
     @Test

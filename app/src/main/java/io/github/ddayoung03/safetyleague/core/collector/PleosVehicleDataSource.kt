@@ -165,16 +165,19 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
     /** 위치 동의가 바뀌었으면 위치 수집을 켜거나 끈다. 서비스가 onStartCommand마다 부른다. */
     fun syncLocation() {
         val l = listener ?: return
-        val wanted = LocationPolicy.sourceOrder(LocationConsentStore(context).load()).isNotEmpty()
+        val wanted = locationOrder().isNotEmpty()
         // 켜진 출처가 없으면(권한을 막 받았거나 모두 실패) 처음부터 다시 시도한다
         if (wanted && location?.activeName == null) { runCatching { location?.stop() }; location = null; startLocation(l) }
         else if (!wanted && location != null) { runCatching { location?.stop() }; location = null }
     }
 
+    private fun locationOrder() = LocationPolicy.sourceOrder(LocationConsentStore(context).load(),
+        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+
     private fun startLocation(l: VehicleSignalListener) {
-        // 동의하지 않았으면 위치 출처를 하나도 켜지 않는다 (점수·리그는 위치 없이 동작)
-        val order = LocationPolicy.sourceOrder(LocationConsentStore(context).load())
-        if (order.isEmpty()) { Log.i(tag, "Location: 경로 기록 동의 안 함"); return }
+        // 동의나 OS 권한이 없으면 위치 출처를 하나도 켜지 않는다 (점수·리그는 위치 없이 동작)
+        val order = locationOrder()
+        if (order.isEmpty()) { Log.i(tag, "Location: 경로 기록 동의 또는 OS 위치 권한 없음"); return }
         val sources = order.map {
             when (it) {
                 LocationProvider.FUSED -> fusedSource()

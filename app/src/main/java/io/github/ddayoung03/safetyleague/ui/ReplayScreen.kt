@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
 import io.github.ddayoung03.safetyleague.core.data.DemoData
+import io.github.ddayoung03.safetyleague.core.model.Point2D
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
 import io.github.ddayoung03.safetyleague.databinding.ViewReplayBinding
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
@@ -23,10 +24,11 @@ internal fun MainActivity.showReplay() {
     else if (win) "${DemoData.winDayStart} ~ ${DemoData.winDayEnd} · ${DemoData.winDayKm}km"
     else "${DemoData.lowDayStart} ~ ${DemoData.lowDayEnd} · ${DemoData.lowDayKm}km"
     b.routeReplayView.isBackgroundMode = false
-    val moved = t == null || t.route.distinct().size >= 2
+    val routeNote = t?.let { routeNote(it.route) }
+    val moved = routeNote == null
     b.routeReplayView.routePoints = if (t == null) DemoData.route else RouteNormalizer.normalize(t.route)
     b.routeReplayView.visibility = if (moved) View.VISIBLE else View.INVISIBLE
-    if (!moved) b.tvReplayMeta.text = "${t!!.startTime} ~ ${t.endTime} · ${t.trip.km}km · 위치 변화가 없어 경로를 그리지 못했어요"
+    if (!moved) b.tvReplayMeta.text = "${t!!.startTime} ~ ${t.endTime} · ${t.trip.km}km · $routeNote"
     b.routeReplayView.replayEvents = events
 
     val names = mapOf("accel" to "급가속", "brake" to "급제동", "lane" to "깜빡이 없이 차선 변경")
@@ -52,8 +54,17 @@ internal fun MainActivity.showReplay() {
         b.layoutEventList.addView(item)
     }
     if (events.isEmpty()) b.layoutEventList.addView(note("감점 사건 없이 달렸어요"))
-    b.tvReplayTip.text = pitBoard(events, if (t == null && !win) DemoData.lowDayDetail else t?.trip?.detailScore, demo = t == null).tip
+    b.tvReplayTip.text = if (t != null && !t.isEligible) SHORT_TRIP_TIP
+    else pitBoard(events, if (t == null && !win) DemoData.lowDayDetail else t?.trip?.detailScore, demo = t == null).tip
     b.btnBack.setOnClickListener {
         if (realTrip != null) showResult(realTrip!!) else show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
     }
 }
+
+/** 경로를 그릴 수 없을 때 이유. 그릴 수 있으면 null. */
+internal fun routeNote(route: List<Point2D>): String? =
+    when {
+        route.isEmpty() -> "경로를 기록하지 않았어요"
+        route.distinct().size >= 2 -> null
+        else -> "위치 변화가 없어 경로를 그리지 못했어요"
+    }

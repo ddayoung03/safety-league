@@ -34,11 +34,13 @@ internal fun MainActivity.showResultLow() {
         b.tvScore.text = "–"
         b.tvStreakChange.text = "${streakBefore}일 그대로"
         b.tvPitWord.text = "다음에!"
-        b.tvPitTip.text = "3km 이상 달리면 기록돼요"
+        b.tvPitTip.text = SHORT_TRIP_TIP
         b.tvPitReason.text = "이번 주행 ${t.trip.km}km"
         b.tvPitGain.text = ""
         b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
         b.layoutTowerRows.removeAllViews()
+        b.layoutSeasonHeader.visibility = View.GONE
+        b.tvStreakHint.visibility = View.GONE
         b.btnLeague.visibility = View.VISIBLE
         b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
         return

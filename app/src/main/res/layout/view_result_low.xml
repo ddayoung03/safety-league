@@ -162,6 +162,7 @@
         android:paddingBottom="56dp">
 
         <LinearLayout
+            android:id="@+id/layout_season_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="14dp"
@@ -294,6 +295,7 @@
                     android:paddingEnd="10dp" />
 
                 <TextView
+                    android:id="@+id/tv_streak_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="다음 주행 70점이면 1일부터 다시"
