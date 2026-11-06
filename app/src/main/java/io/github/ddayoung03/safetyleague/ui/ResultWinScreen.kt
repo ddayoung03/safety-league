@@ -15,20 +15,18 @@ import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
 import io.github.ddayoung03.safetyleague.ui.motion.playResultWin
 import io.github.ddayoung03.safetyleague.ui.motion.promotionProgress
 import io.github.ddayoung03.safetyleague.ui.motion.resultIntro
-import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
 internal fun MainActivity.showResultWin() {
     val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
-    fun skew(colorId: Int) = SkewDrawable(color(colorId), density = resources.displayMetrics.density)
     b.checkerStrip.background = checkerTile()
     b.scoreUnderline.background = skew(R.color.yellow)
     b.promotionTrack.background = skew(R.color.ink_glow)
     b.progressFill.background = skew(R.color.yellow)
     b.btnLeague.background = skew(R.color.ink_glow)
     b.btnReplay.background = skew(R.color.yellow)
-    b.btnLeague.setOnClickListener { show(Screen.LEAGUE) }
+    b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
 
     val day = DemoData.today

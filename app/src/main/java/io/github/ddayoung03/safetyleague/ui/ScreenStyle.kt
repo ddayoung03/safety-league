@@ -32,13 +32,15 @@ internal fun MainActivity.text(s: String, colorId: Int, sizeSp: Float = 24f, num
     }
 }
 
+internal fun MainActivity.skew(colorId: Int) = SkewDrawable(color(colorId), density = resources.displayMetrics.density)
+
 internal fun MainActivity.note(s: String) = text(s, R.color.yellow).apply { setPadding(dp(12), dp(4), 0, dp(10)) }
 
-internal fun MainActivity.dots() = text("⋯", R.color.grey).apply { gravity = Gravity.CENTER }
+internal fun MainActivity.dots() = text("⋯", R.color.ink_muted, 19f).apply { gravity = Gravity.CENTER }
 
-internal fun MainActivity.zoneLine(s: String, colorId: Int) = text("─── $s ───", colorId).apply {
+internal fun MainActivity.zoneLine(s: String, colorId: Int) = text("─── $s ───", colorId, 19f).apply {
     gravity = Gravity.CENTER
-    setPadding(0, dp(6), 0, dp(6))
+    setPadding(0, dp(2), 0, dp(6))
 }
 
 internal fun MainActivity.applySkew(view: View) {

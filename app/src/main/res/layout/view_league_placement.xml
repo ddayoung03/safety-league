@@ -1,29 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/asphalt">
-    <View android:layout_width="8dp" android:layout_height="220dp"
-        android:layout_marginStart="64dp" android:layout_marginTop="128dp" android:background="@color/bronze" />
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_result">
+    <View android:id="@+id/checker_strip" android:layout_width="match_parent" android:layout_height="12dp" />
+    <View android:layout_width="8dp" android:layout_height="196dp"
+        android:layout_marginStart="72dp" android:layout_marginTop="136dp" android:background="@color/yellow" />
     <TextView android:id="@+id/placement_season" android:layout_width="1100dp" android:layout_height="48dp"
-        android:layout_marginStart="64dp" android:layout_marginTop="56dp" android:textSize="28sp" android:textColor="@color/grey" />
+        android:layout_marginStart="72dp" android:layout_marginTop="60dp" android:textSize="22sp" android:textColor="@color/ink_muted" />
     <TextView android:id="@+id/placement_model" android:layout_width="1080dp" android:layout_height="90dp"
-        android:layout_marginStart="100dp" android:layout_marginTop="136dp" android:textSize="56sp"
-        android:fontFamily="@font/pretendard_black" android:textColor="@color/white" android:maxLines="1"
+        android:layout_marginStart="108dp" android:layout_marginTop="136dp" android:textSize="56sp"
+        android:fontFamily="@font/pretendard_black" android:textColor="@color/ink_text" android:maxLines="1"
         app:autoSizeTextType="uniform" app:autoSizeMinTextSize="28sp" app:autoSizeMaxTextSize="56sp" />
     <TextView android:id="@+id/placement_tier" android:layout_width="1080dp" android:layout_height="80dp"
-        android:layout_marginStart="100dp" android:layout_marginTop="236dp" android:textSize="44sp"
-        android:textColor="@color/bronze" android:text="브론즈 단계에 배치되었습니다" />
-    <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView android:layout_width="100dp" android:layout_height="100dp"
-        android:layout_marginStart="64dp" android:layout_marginTop="380dp" />
-    <TextView android:layout_width="960dp" android:layout_height="100dp" android:gravity="center_vertical"
-        android:layout_marginStart="188dp" android:layout_marginTop="380dp" android:text="첫 레이스를 시작해 볼까요?"
-        android:textSize="32sp" android:textColor="@color/white" />
-    <Button android:id="@+id/btn_start" style="@style/DemoButton" android:layout_width="440dp"
-        android:layout_marginStart="64dp" android:layout_marginTop="540dp" android:text="시작하기"
-        android:textSize="30sp" android:textColor="@color/asphalt" android:backgroundTint="@color/yellow" />
-    <Button android:id="@+id/btn_change_vehicle" style="@style/DemoButton" android:layout_width="260dp"
-        android:layout_marginStart="528dp" android:layout_marginTop="540dp" android:text="차종 변경" android:backgroundTint="@color/cell" />
+        android:layout_marginStart="108dp" android:layout_marginTop="236dp" android:textSize="44sp"
+        android:textColor="@color/yellow" android:text="브론즈 단계에 배치되었습니다" />
+    <!-- 토끼 자리. 스프라이트가 준비되면 RabbitView가 들어온다 -->
+    <FrameLayout android:id="@+id/rabbit_slot" android:layout_width="128dp" android:layout_height="128dp"
+        android:layout_marginStart="72dp" android:layout_marginTop="364dp" />
+    <TextView android:layout_width="960dp" android:layout_height="128dp" android:gravity="center_vertical"
+        android:layout_marginStart="216dp" android:layout_marginTop="364dp" android:text="첫 레이스를 시작해 볼까요?"
+        android:textSize="32sp" android:textColor="@color/ink_text" />
+    <FrameLayout android:id="@+id/btn_start" android:layout_width="440dp" android:layout_height="76dp"
+        android:layout_marginStart="72dp" android:layout_marginTop="524dp" android:clickable="true" android:focusable="true">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"
+            android:text="시작하기" android:textColor="@color/ink" android:textSize="28sp" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/btn_change_vehicle" android:layout_width="260dp" android:layout_height="76dp"
+        android:layout_marginStart="526dp" android:layout_marginTop="524dp" android:clickable="true" android:focusable="true">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"
+            android:text="차종 변경" android:textColor="@color/ink_text" android:textSize="24sp" />
+    </FrameLayout>
     <TextView android:id="@+id/placement_recognition" android:layout_width="match_parent" android:layout_height="48dp"
-        android:layout_marginStart="64dp" android:layout_marginTop="636dp" android:text="차량 정보로 확인했어요"
-        android:textSize="24sp" android:textColor="@color/grey" />
+        android:layout_marginStart="72dp" android:layout_marginTop="620dp" android:text="차량 정보로 확인했어요"
+        android:textSize="22sp" android:textColor="@color/ink_muted" />
 </FrameLayout>

@@ -68,9 +68,12 @@ class MotionSequence(
     fun endAt(ms: Long) = at(ms) { stop(); handle.done(); finish() }
 }
 
+internal fun View.motionSequence(scope: MotionScope, finish: () -> Unit) =
+    MotionSequence(scope, { r, ms -> postDelayed(r, ms) }, { removeCallbacks(it) }, finish)
+
 /** 화면을 누르면 건너뛰는 순서기. 숨은 버튼은 터치를 받지 않고, 나타난 뒤부터 자기 클릭을 받는다. */
 private fun MainActivity.skippableSequence(root: View, settle: () -> Unit): MotionSequence {
-    val seq = MotionSequence(motion, { r, ms -> root.postDelayed(r, ms) }, { root.removeCallbacks(it) }) {
+    val seq = root.motionSequence(motion) {
         root.setOnClickListener(null)
         root.isClickable = false
         settle()
@@ -79,7 +82,7 @@ private fun MainActivity.skippableSequence(root: View, settle: () -> Unit): Moti
     return seq
 }
 
-private fun View.settleShown() {
+internal fun View.settleShown() {
     animate().cancel()
     visibility = View.VISIBLE
     alpha = 1f

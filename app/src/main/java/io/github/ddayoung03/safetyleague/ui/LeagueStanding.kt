@@ -44,10 +44,10 @@ internal fun towerNote(s: SeasonStanding): String {
 
 internal fun MainActivity.realRows(container: LinearLayout, s: SeasonStanding) {
     container.removeAllViews()
-    if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
+    val gap = towerNote(s)
+    if (s.rank == null) { container.addView(note(gap)); return }
     for (r in s.neighbors) {
-        container.addView(towerRow(r, r.name == "나"))
-        val gap = LeagueCalculator.round1(r.avg - s.average!!)
-        if (r.rank == s.rank - 1 && gap > 0.0) container.addView(note("앞 순위까지 ${gap}점"))
+        container.addView(timingRow(r, r.name == "나").view)
+        if (r.rank == s.rank - 1 && gap.isNotEmpty()) container.addView(note(gap))
     }
 }

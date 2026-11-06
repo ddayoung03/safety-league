@@ -3,6 +3,7 @@ package io.github.ddayoung03.safetyleague.ui
 import android.view.View
 import android.widget.Button
 import android.widget.GridLayout
+import androidx.core.view.children
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
 import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
@@ -11,6 +12,9 @@ import io.github.ddayoung03.safetyleague.core.model.VehicleCatalog
 import io.github.ddayoung03.safetyleague.core.model.VehicleProfile
 import io.github.ddayoung03.safetyleague.databinding.ViewLeaguePlacementBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
+import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
+import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
+import io.github.ddayoung03.safetyleague.ui.motion.stagger
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 import java.time.LocalDate
 
@@ -61,7 +65,9 @@ internal fun MainActivity.showVehicleSelection() {
 
 internal fun MainActivity.showPlacement() {
     val b = ViewLeaguePlacementBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.root.background = AsphaltDrawable(this)
+    b.checkerStrip.background = checkerTile()
+    b.btnStart.background = skew(R.color.yellow)
+    b.btnChangeVehicle.background = skew(R.color.ink_glow)
     val profile = profileStore.load() ?: VehicleProfile("아이오닉 5", Powertrain.EV)
     val now = LocalDate.now()
     b.placementSeason.text = "${now.year}년 ${now.monthValue}월 시즌"
@@ -75,4 +81,5 @@ internal fun MainActivity.showPlacement() {
         demoResultWin = null
         repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
     }
+    ScreenTransition.stagger(b.root, b.root.children.drop(1).toList(), motion, MotionTokens.BASE) // 맨 앞 체커 띠는 그대로 둔다
 }

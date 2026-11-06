@@ -13,6 +13,7 @@ import io.github.ddayoung03.safetyleague.ui.motion.SoundFx
 import io.github.ddayoung03.safetyleague.ui.motion.canPlaySound
 import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
 import io.github.ddayoung03.safetyleague.ui.motion.enter
+import io.github.ddayoung03.safetyleague.ui.motion.revealFrom
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     private var uxManager: CarUxRestrictionsManager? = null
 
     internal val motion = MotionScope()
-    internal val sound by lazy { SoundFx(this) }
+    internal lateinit var sound: SoundFx
     internal var restricted = false
     /** CarUxRestrictions에 연결하지 못했으면 기어·속도로 주행 중인지 판단한다(모르면 주행 중). */
     private var uxFallback = false
@@ -113,6 +114,7 @@ class MainActivity : AppCompatActivity() {
             finishAndRemoveTask()
             return
         }
+        sound = SoundFx(this) // 불러오는 데 시간이 걸려 첫 연출 전에 미리 만든다
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.root.post { showFlagLoader() }
@@ -168,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        sound.release()
+        if (::sound.isInitialized) sound.release()
         super.onDestroy()
     }
 
@@ -283,7 +285,8 @@ class MainActivity : AppCompatActivity() {
         show(if (trip.trip.score >= 70.0) Screen.WIN else Screen.LOW)
     }
 
-    internal fun show(target: Screen) {
+    /** [origin]을 주면 그 버튼에서 원이 퍼지며 열린다. 없으면(앱 시작, 뒤로) 보통 전환이다. */
+    internal fun show(target: Screen, origin: View? = null) {
         if (restricted && target != Screen.DRIVING) return
         if (target != Screen.LEAGUE) leagueTab = LeagueTab.MODEL
         stopCrewEntrance()
@@ -294,6 +297,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnWeather.visibility = if (target == Screen.DRIVING) View.GONE else View.VISIBLE
         handler.removeCallbacks(drivingTick)
         motion.finishAll()
+        val reveal = origin?.let { ScreenTransition.revealFrom(it, binding.screenContainer, motion) }
         binding.screenContainer.removeAllViews()
         when (target) {
             Screen.WIN -> showResultWin()
@@ -308,7 +312,8 @@ class MainActivity : AppCompatActivity() {
         }
         resultJustFinished = false
         applySkew(binding.screenContainer)
-        if (!restricted && target != Screen.WIN && target != Screen.LOW) ScreenTransition.enter(binding.screenContainer, motion) // 결과 화면은 playResultWin·playResultLow가 맡는다
+        if (reveal != null) reveal()
+        else if (!restricted && target != Screen.WIN && target != Screen.LOW) ScreenTransition.enter(binding.screenContainer, motion) // 결과 화면은 playResultWin·playResultLow가 맡는다
         if (target == Screen.WIN || target == Screen.LOW) {
             binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
                 crew.post {
@@ -328,13 +333,9 @@ class MainActivity : AppCompatActivity() {
     private fun crewMotionAllowed() = canAnimateCrew(weatherSignals.gear, weatherSignals.speedMps,
         lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted)
 
-    /** 연출 시작에 한 번 불러 포커스를 얻고, 소리를 내도 되는지 답한다. 안 되면 포커스는 바로 돌려준다. */
-    internal fun requestSound(): Boolean {
-        val ok = canPlaySound(weatherSignals.gear, weatherSignals.speedMps,
-            lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted, sound.requestFocus())
-        if (!ok) sound.stopAll()
-        return ok
-    }
+    /** 연출 시작에 한 번 불러 소리를 내도 되는지 답한다. 포커스는 낼 수 있는 조건일 때만 얻는다. */
+    internal fun requestSound() = canPlaySound(weatherSignals.gear, weatherSignals.speedMps,
+        lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted, focus = true) && sound.requestFocus()
 
     private fun stopCrewEntrance() {
         crewAnimator?.let { animation ->
