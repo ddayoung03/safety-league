@@ -12,6 +12,7 @@
 | `prototypes/character-concepts.html` | 레이싱 슈트 캐릭터 후보 4종, 동작 6종 | 토끼 레이서 선택 |
 | `previews/` | 위 시안의 캡처 PNG | 참고용 |
 | `generated/` | 외부 도구로 만든 이미지. 생성할 때 만든다 | 비어 있음 |
+| `sound/make_fx.py` | 결과 연출 효과음 4종(`app/src/main/res/raw/fx_*.wav`)을 파이썬 표준 라이브러리로 합성하는 스크립트. 사인과 잡음, 외부 음원 없음 | 사용 중 |
 
 HTML은 브라우저에서 바로 열린다. 글꼴은 CDN에서 받으므로 인터넷이 필요하다.
 

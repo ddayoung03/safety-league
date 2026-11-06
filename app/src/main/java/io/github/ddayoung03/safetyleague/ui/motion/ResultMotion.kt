@@ -148,17 +148,21 @@ internal fun MainActivity.playResultWin(
     fun spring(v: View, property: DynamicAnimation.ViewProperty, to: Float) = springTo(v, property, to).also { springs += it }
 
     val seq = skippableSequence(b.root, ::settle)
+    val audible = requestSound()
+    val voice = if (audible) motion.add(cancel = sound::stopAll) else null
+    fun beep(fx: Fx) { if (audible) sound.play(fx) }
     staged.forEach { it.visibility = View.INVISIBLE }
     b.hold.visibility = View.VISIBLE
     showFlagLoader()
 
     // 1. 신호등이 켜지고, 로딩이 끝나는 순간 꺼진다
-    for (i in 0 until LIGHT_COUNT) seq.at(i * MotionTokens.LIGHT_STEP) { b.startLights.lit = i + 1 }
+    for (i in 0 until LIGHT_COUNT) seq.at(i * MotionTokens.LIGHT_STEP) { b.startLights.lit = i + 1; beep(Fx.LIGHT) }
     var t = MotionTokens.LOADER_MAX
 
     // 2. 소등과 함께 속도선과 점수 카운트
     seq.at(t) {
         b.startLights.lit = 0
+        beep(Fx.GO)
         b.hold.animate().alpha(0f).setDuration(MotionTokens.BASE).withEndAction { b.hold.visibility = View.GONE }.start()
         grow(b.checkerStrip)
         b.tvTopTitle.visibility = View.VISIBLE
@@ -200,13 +204,14 @@ internal fun MainActivity.playResultWin(
             val target = tops[slot] - tops[me]
             mySpring?.animateToFinalPosition(target) ?: run { mySpring = spring(rows[me].view, DynamicAnimation.TRANSLATION_Y, target) }
             rows[me].rank.text = "P$rank"
+            beep(Fx.OVERTAKE)
         }
     }
     t += maxOf(ranks.size, 1) * MotionTokens.OVERTAKE_STEP + MotionTokens.BASE
 
     // 5. 정보 등장
     val infoFromX = -dp(26).toFloat()
-    seq.at(t) { pop(b.tvRankChange, fromX = infoFromX); pop(b.tvTowerNote) }
+    seq.at(t) { beep(Fx.WIN); pop(b.tvRankChange, fromX = infoFromX); pop(b.tvTowerNote) }
     t += MotionTokens.STAGGER * 2
     seq.at(t) { pop(b.promotionBlock, fromX = infoFromX); grow(b.progressFill, progress, MotionTokens.SLOW * 2) }
     t += MotionTokens.STAGGER * 2
@@ -237,7 +242,9 @@ internal fun MainActivity.playResultWin(
     val buttonFromX = dp(30).toFloat()
     seq.at(t) { pop(b.btnLeague, fromX = buttonFromX) }
     seq.at(t + MotionTokens.STAGGER * 2) { pop(b.btnReplay, fromX = buttonFromX) }
-    seq.endAt(t + MotionTokens.STAGGER * 2 + MotionTokens.SLOW)
+    val end = t + MotionTokens.STAGGER * 2 + MotionTokens.SLOW
+    if (voice != null) seq.at(end) { voice.done(); sound.stopAll() }
+    seq.endAt(end)
 }
 
 /**

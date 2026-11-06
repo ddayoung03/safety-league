@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import io.github.ddayoung03.safetyleague.ui.view.canAnimateCrew
 import io.github.ddayoung03.safetyleague.ui.motion.MotionScope
+import io.github.ddayoung03.safetyleague.ui.motion.SoundFx
+import io.github.ddayoung03.safetyleague.ui.motion.canPlaySound
 import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
 import io.github.ddayoung03.safetyleague.ui.motion.enter
 import android.graphics.Typeface
@@ -50,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private var uxManager: CarUxRestrictionsManager? = null
 
     internal val motion = MotionScope()
+    internal val sound by lazy { SoundFx(this) }
     internal var restricted = false
     /** CarUxRestrictions에 연결하지 못했으면 기어·속도로 주행 중인지 판단한다(모르면 주행 중). */
     private var uxFallback = false
@@ -162,6 +165,11 @@ class MainActivity : AppCompatActivity() {
         stopCrewEntrance()
         handler.removeCallbacks(drivingTick)
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        sound.release()
+        super.onDestroy()
     }
 
     override fun onStop() {
@@ -319,6 +327,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun crewMotionAllowed() = canAnimateCrew(weatherSignals.gear, weatherSignals.speedMps,
         lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted)
+
+    /** 연출 시작에 한 번 불러 포커스를 얻고, 소리를 내도 되는지 답한다. 안 되면 포커스는 바로 돌려준다. */
+    internal fun requestSound(): Boolean {
+        val ok = canPlaySound(weatherSignals.gear, weatherSignals.speedMps,
+            lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted, sound.requestFocus())
+        if (!ok) sound.stopAll()
+        return ok
+    }
 
     private fun stopCrewEntrance() {
         crewAnimator?.let { animation ->
