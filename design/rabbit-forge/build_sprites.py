@@ -4,6 +4,9 @@ import pathlib
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage
+
+import inbetween
 
 HERE = pathlib.Path(__file__).resolve().parent
 GRID_H = 136          # character height of the master in sprite pixels
@@ -13,16 +16,21 @@ COLORS = 48
 
 ACTIONS = {
     'idle': (['master', 'master', 'master', 'idle_blink'], [500, 500, 500, 140], True),
-    'win': (['win_crouch', 'win_jump', 'win_jump', 'win_land'], [140, 220, 220, 180], True),
-    'overtake': (['overtake_1', 'overtake_2', 'overtake_3', 'overtake_4'], [90, 90, 90, 90], True),
+    'win': (['win_crouch', 'win_jump', 'win_jump', 'win_land'], [110, 100, 60, 60, 70, 110, 60, 60, 90, 130], True),
+    'overtake': (['overtake_1', 'overtake_2', 'overtake_3', 'overtake_4'], [70] * 8, True),
     'pit': (['pit_1'], [800], True),
+    # win, overtake, radio, load, welcome and nod frames come from inbetween.py; these names are the source poses
+    # and the palette input, so they stay even where a pose is no longer shown.
     'radio': (['radio_1', 'radio_2'], [220, 220], True),
-    'load': (['load_1', 'load_2'], [170, 170], True),
-    'welcome': (['welcome_2', 'master'], [420, 220], True),
-    'nod': (['nod_1', 'nod_2'], [300, 300], True),
+    'load': (['load_1', 'load_2'], [90] * 8, True),
+    'welcome': (['welcome_2', 'master'], [110] * 6, True),
+    'nod': (['nod_1', 'nod_2'], [110] * 6, True),
     'point': (['point_1'], [800], True),
 }
-AIRBORNE = {'win_jump': 22, 'overtake_4': 6}
+AIRBORNE = {'win_jump': 22}
+RUN_BOB = {'overtake_1': 0, 'overtake_2': 0, 'overtake_3': 0, 'overtake_4': 0, 'overtake_a': 0, 'overtake_b': 0}
+RUN_ONLY = ['overtake_a', 'overtake_b']  # kept out of the palette input so the other actions stay byte-identical
+HOLD_HEAD = {'radio_1', 'radio_2', 'load_1', 'load_2', 'welcome_2', 'master', 'idle_blink'}
 
 
 def source(name):
@@ -42,29 +50,46 @@ def bbox(im):
     return im.getchannel('A').point(lambda v: 255 if v > 128 else 0).getbbox()
 
 
+def helmet(im):
+    """Center and box of the largest red area: the helmet, used to register frames."""
+    a = np.asarray(im).astype(np.int16)
+    red = (a[..., 0] > 150) & (a[..., 1] < 70) & (a[..., 2] < 70) & (a[..., 3] > 128)
+    lab, n = ndimage.label(red)
+    if n == 0:
+        return im.width / 2, im.height / 3, None
+    big = 1 + int(np.argmax(ndimage.sum(red, lab, range(1, n + 1))))
+    ys, xs = np.nonzero(lab == big)
+    return float(xs.mean()), float(ys.mean()), (xs.min(), ys.min(), xs.max(), ys.max())
+
+
 def main():
     master = key(source('master'))
     mb = bbox(master)
     scale = GRID_H / (mb[3] - mb[1])
 
     names = sorted({n for frames, _, _ in ACTIONS.values() for n in frames})
-    small = {}
-    for n in names:
+    def shrink(n):
         im = key(source(n))
-        b = bbox(im)
-        crop = im.crop(b)
+        crop = im.crop(bbox(im))
         w, h = max(1, round(crop.width * scale)), max(1, round(crop.height * scale))
-        small[n] = crop.resize((w, h), Image.BOX)
+        return crop.resize((w, h), Image.BOX)
+
+    small = {n: shrink(n) for n in names}
 
     # One palette for every frame, chosen from all opaque pixels.
     px = np.concatenate([np.asarray(s)[np.asarray(s)[..., 3] > 128][:, :3] for s in small.values()])
     sheet = Image.fromarray(px.reshape(-1, 1, 3), 'RGB')
     pal = sheet.quantize(colors=COLORS, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
 
+    for n in RUN_ONLY:
+        small[n] = shrink(n)
+
     out = HERE / 'frames'
     out.mkdir(exist_ok=True)
     for f in out.glob('*.png'):
         f.unlink()
+
+    anchor = helmet(small['master'])
 
     def finish(n):
         s = small[n]
@@ -72,25 +97,35 @@ def main():
         alpha = s.getchannel('A').point(lambda v: 255 if v > 128 else 0)
         rgb.putalpha(alpha)
         c = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
-        x = (CANVAS[0] - s.width) // 2
+        hx, hy, _ = helmet(s)
+        x = round(CANVAS[0] / 2 - hx)
         y = BASE_Y - s.height - AIRBORNE.get(n, 0)
-        c.paste(rgb, (x, max(0, y)), rgb)
+        if n in RUN_BOB:
+            # One fixed head line for the whole run so only the legs and arms move.
+            x = round(CANVAS[0] / 2 - hx + 8)
+            y = round(62 - hy) + RUN_BOB[n]
+        elif n in HOLD_HEAD:
+            y = round(BASE_Y - anchor[1] - (small['master'].height - anchor[1]) * 1 + (anchor[1] - hy))
+        c.paste(rgb, (x, y), rgb)
         return c
 
-    done = {n: finish(n) for n in names}
+    done = {n: finish(n) for n in names + RUN_ONLY}
+    made = inbetween.build(done)
     meta = {}
+    shown = []
     for action, (frames, ms, loop) in ACTIONS.items():
         files = []
-        for i, n in enumerate(frames):
+        images = made.get(action) or [done[n] for n in frames]
+        for i, im in enumerate(images):
             name = f'rabbit_{action}_{i:02d}.png'
-            done[n].save(out / name)
+            im.save(out / name)
             files.append(name)
+        shown.append(images[min(1, len(images) - 1)])
         meta[action.upper()] = {'frames': files, 'durations_ms': ms, 'loop': loop}
     (HERE / 'frames.json').write_text(json.dumps(meta, indent=1), encoding='utf8')
 
-    row = [done[ACTIONS[a][0][min(1, len(ACTIONS[a][0]) - 1)]] for a in ACTIONS]
-    sheet = Image.new('RGBA', (CANVAS[0] * len(row), CANVAS[1]), (13, 15, 19, 255))
-    for i, c in enumerate(row):
+    sheet = Image.new('RGBA', (CANVAS[0] * len(shown), CANVAS[1]), (13, 15, 19, 255))
+    for i, c in enumerate(shown):
         sheet.paste(c, (i * CANVAS[0], 0), c)
     sheet.resize((sheet.width * 2, sheet.height * 2), Image.NEAREST).save(HERE / 'consistency.png')
 

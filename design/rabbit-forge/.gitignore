@@ -5,3 +5,5 @@ __pycache__/
 .forge/
 master/job.json
 master/prompt.txt
+align.jpg
+inbetween.jpg
