@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.widget.TextView
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.data.DemoData
@@ -34,8 +35,7 @@ internal fun MainActivity.showResultWin() {
     val t = realTrip
     val score = (t?.trip?.score ?: DemoData.trips.first { it.date == day }.score).roundToInt()
     b.tvScore.text = "$score"
-    // 기울임이 글자 칸 밖으로 나오는 만큼 넓히고, 너비를 고정해 카운트 중에 다시 재지 않게 한다. 100점도 들어간다.
-    b.tvScore.layoutParams.width = b.tvScore.paint.measureText("$score").roundToInt() + dp(52)
+    fixScoreWidth(b.tvScore)
     b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
     b.tvStreak.text = "연속 ${if (t != null) repository.getStreak(t.trip.date) else DemoData.streakAt(day)}일"
 
@@ -51,9 +51,7 @@ internal fun MainActivity.showResultWin() {
         before = move?.first
         after = move?.second
         rows = s.neighbors.map { timingRow(it, it.name == "나", nameSuffix = if (it.name == "나") " $change" else "") }
-        val above = s.neighbors.firstOrNull { it.rank == (s.rank ?: 0) - 1 }
-        val gap = above?.let { LeagueCalculator.round1(it.avg - s.average!!) } ?: 0.0
-        b.tvTowerNote.text = if (s.rank == null) "첫 주행을 마치면 순위가 나와요" else if (gap > 0.0) "앞 순위까지 ${gap}점" else ""
+        b.tvTowerNote.text = towerNote(s)
         b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
         b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
         b.tvRankChange.text = rankDelta(before, after, change)
@@ -96,8 +94,13 @@ private fun rankDelta(before: Int?, after: Int?, fallback: String): String {
     return if (up > 0) "▲ $up 오늘 ${up}명을 제쳤어요" else fallback
 }
 
+/** 기울임이 글자 칸 밖으로 나오는 만큼 넓히고, 너비를 고정해 카운트 중에 다시 재지 않게 한다. 100점도 들어간다. */
+internal fun MainActivity.fixScoreWidth(score: TextView) {
+    score.layoutParams.width = score.paint.measureText(score.text.toString()).roundToInt() + dp(52)
+}
+
 /** 상단 체커 띠. 6dp 칸을 되풀이한다. */
-private fun MainActivity.checkerTile(): Drawable {
+internal fun MainActivity.checkerTile(): Drawable {
     val cell = dp(6)
     val tile = Bitmap.createBitmap(cell * 2, cell * 2, Bitmap.Config.ARGB_8888)
     val dark = Paint().apply { color = color(R.color.ink) }

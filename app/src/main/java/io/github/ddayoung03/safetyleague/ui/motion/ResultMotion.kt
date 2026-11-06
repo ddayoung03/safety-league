@@ -7,23 +7,24 @@ import android.text.Spannable
 import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.Interpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.TextView
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
+import io.github.ddayoung03.safetyleague.databinding.ViewResultLowBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewResultWinBinding
 import io.github.ddayoung03.safetyleague.ui.MainActivity
 import io.github.ddayoung03.safetyleague.ui.TimingRow
-import io.github.ddayoung03.safetyleague.ui.avgText
 import io.github.ddayoung03.safetyleague.ui.dp
 import io.github.ddayoung03.safetyleague.ui.showFlagLoader
 
-/** 결과 화면 연출의 크기. BIG은 막 끝난 이긴 날에만 쓴다. */
+/** 결과 화면 연출의 크기. BIG은 막 끝난 이긴 날, QUICK은 3km 미만과 다시 연 아쉬운 날에 쓴다. */
 enum class ResultIntro { BIG, CALM, QUICK, NONE }
 
 fun resultIntro(eligible: Boolean, win: Boolean, justFinished: Boolean, animations: Boolean): ResultIntro = when {
     !animations -> ResultIntro.NONE
-    !eligible -> ResultIntro.QUICK
+    !eligible || (!win && !justFinished) -> ResultIntro.QUICK
     win && justFinished -> ResultIntro.BIG
     else -> ResultIntro.CALM
 }
@@ -67,6 +68,31 @@ class MotionSequence(
     fun endAt(ms: Long) = at(ms) { stop(); handle.done(); finish() }
 }
 
+/** 화면을 누르면 건너뛰는 순서기. 숨은 버튼은 터치를 받지 않고, 나타난 뒤부터 자기 클릭을 받는다. */
+private fun MainActivity.skippableSequence(root: View, settle: () -> Unit): MotionSequence {
+    val seq = MotionSequence(motion, { r, ms -> root.postDelayed(r, ms) }, { root.removeCallbacks(it) }) {
+        root.setOnClickListener(null)
+        root.isClickable = false
+        settle()
+    }
+    root.setOnClickListener { motion.finishAll() }
+    return seq
+}
+
+private fun View.settleShown() {
+    animate().cancel()
+    visibility = View.VISIBLE
+    alpha = 1f
+    translationX = 0f; translationY = 0f
+    scaleX = 1f; scaleY = 1f
+}
+
+private fun springTo(v: View, property: DynamicAnimation.ViewProperty, to: Float) = SpringAnimation(v, property, to).apply {
+    spring.stiffness = SPRING_STIFFNESS
+    spring.dampingRatio = SPRING_DAMPING
+    start()
+}
+
 /**
  * 이긴 날 화면의 등장. 뷰에는 이미 최종 값이 들어 있고, 연출은 보이는 모습만 바꾼다.
  * 화면을 누르거나 화면이 바뀌면 motion.finishAll()이 settle()로 최종 상태를 맞춘다.
@@ -88,25 +114,16 @@ internal fun MainActivity.playResultWin(
     fun settle() {
         springs.forEach { it.cancel() }
         waves.forEach { it.cancel() }
-        b.root.setOnClickListener(null)
-        b.root.isClickable = false
         b.hold.animate().cancel()
         b.hold.visibility = View.GONE
         b.startLights.lit = 0
         b.speedLines.stop()
-        for (v in staged) {
-            v.animate().cancel()
-            v.visibility = View.VISIBLE
-            v.alpha = 1f
-            v.translationX = 0f; v.translationY = 0f
-            v.scaleX = 1f; v.scaleY = 1f
-        }
+        staged.forEach { it.settleShown() }
         b.progressFill.animate().cancel()
         b.progressFill.scaleX = progress
         for (row in rows) {
             row.view.translationY = 0f
             row.rank.text = "P${row.data.rank}"
-            row.avg.text = avgText(row.data.avg)
             row.tag?.alpha = 1f
         }
         b.wave.animate().cancel()
@@ -114,12 +131,12 @@ internal fun MainActivity.playResultWin(
         b.tvRadioMessage.text = message
     }
 
-    fun pop(v: View, fromX: Float = 0f, fromY: Float = 0f) {
+    fun pop(v: View, fromX: Float = 0f, fromY: Float = 0f, curve: Interpolator = OvershootInterpolator(1.5f)) {
         v.visibility = View.VISIBLE
         v.alpha = 0f
         v.translationX = fromX; v.translationY = fromY
         v.animate().alpha(1f).translationX(0f).translationY(0f).setDuration(MotionTokens.SLOW)
-            .setInterpolator(OvershootInterpolator(1.5f)).start()
+            .setInterpolator(curve).start()
     }
 
     fun grow(v: View, to: Float = 1f, ms: Long = MotionTokens.SLOW) {
@@ -128,17 +145,11 @@ internal fun MainActivity.playResultWin(
         v.animate().scaleX(to).setDuration(ms).setInterpolator(DecelerateInterpolator(2f)).start()
     }
 
-    fun spring(v: View, property: DynamicAnimation.ViewProperty, to: Float) = SpringAnimation(v, property, to).apply {
-        spring.stiffness = SPRING_STIFFNESS
-        spring.dampingRatio = SPRING_DAMPING
-        springs += this
-        start()
-    }
+    fun spring(v: View, property: DynamicAnimation.ViewProperty, to: Float) = springTo(v, property, to).also { springs += it }
 
-    val seq = MotionSequence(motion, { r, ms -> b.root.postDelayed(r, ms) }, { b.root.removeCallbacks(it) }, ::settle)
+    val seq = skippableSequence(b.root, ::settle)
     staged.forEach { it.visibility = View.INVISIBLE }
     b.hold.visibility = View.VISIBLE
-    b.root.setOnClickListener { motion.finishAll() } // 숨은 버튼은 터치를 받지 않고, 나타난 뒤부터 자기 클릭을 받는다
     showFlagLoader()
 
     // 1. 신호등이 켜지고, 로딩이 끝나는 순간 꺼진다
@@ -173,9 +184,8 @@ internal fun MainActivity.playResultWin(
             }
             rows[me].view.translationY = tops[me + n] - tops[me]
             rows[me].rank.text = "P${ranks.first() + 1}"
-            rows[me].avg.text = avgText(rows[me + n].data.avg - 0.1)
         }
-        pop(b.tower, fromX = dp(60).toFloat())
+        pop(b.tower, fromX = dp(60).toFloat(), curve = DecelerateInterpolator(2f))
     }
 
     // 4. 내 줄 추월: 한 칸씩 올라가며 순위 숫자도 바뀐다. 내 줄은 스프링 하나의 목표만 옮겨 움직임이 끊기지 않는다.
@@ -190,7 +200,6 @@ internal fun MainActivity.playResultWin(
             val target = tops[slot] - tops[me]
             mySpring?.animateToFinalPosition(target) ?: run { mySpring = spring(rows[me].view, DynamicAnimation.TRANSLATION_Y, target) }
             rows[me].rank.text = "P$rank"
-            rows[me].avg.text = avgText(if (slot == me) rows[me].data.avg else passed.data.avg + 0.1)
         }
     }
     t += maxOf(ranks.size, 1) * MotionTokens.OVERTAKE_STEP + MotionTokens.BASE
@@ -229,6 +238,51 @@ internal fun MainActivity.playResultWin(
     seq.at(t) { pop(b.btnLeague, fromX = buttonFromX) }
     seq.at(t + MotionTokens.STAGGER * 2) { pop(b.btnReplay, fromX = buttonFromX) }
     seq.endAt(t + MotionTokens.STAGGER * 2 + MotionTokens.SLOW)
+}
+
+/**
+ * 아쉬운 날 화면의 등장. 신호등도 속도선도 없이 점수가 차분히 오르고, 피트 보드가 한 번 올라온 뒤 나머지가 조용히 나타난다.
+ * 뷰에는 이미 최종 값이 들어 있고, 화면을 누르면 settle()이 최종 상태를 맞춘다.
+ */
+internal fun MainActivity.playResultLow(b: ViewResultLowBinding, intro: ResultIntro, rows: List<TimingRow>, score: Int) {
+    if (intro == ResultIntro.NONE) return
+    if (intro != ResultIntro.CALM) { ScreenTransition.enter(binding.screenContainer, motion, MotionTokens.BASE); return }
+
+    val board = listOf(b.crew, b.pitBoard)
+    val info = (listOf(b.layoutSeasonHeader) + rows.map { it.view } + listOf(b.tvTowerNote, b.statsBlock, b.buttons, b.tvDemoNote))
+        .filter { it.visibility == View.VISIBLE }
+    val springs = mutableListOf<SpringAnimation>()
+
+    fun settle() {
+        springs.forEach { it.cancel() }
+        (board + info).forEach { it.settleShown() }
+    }
+
+    val seq = skippableSequence(b.root, ::settle)
+    (board + info).forEach { it.visibility = View.INVISIBLE }
+    showFlagLoader(MotionTokens.COUNT)
+    b.tvScore.countUp(score, MotionTokens.COUNT, motion)
+
+    var t = MotionTokens.COUNT
+    seq.at(t) {
+        for (v in board) {
+            v.visibility = View.VISIBLE
+            v.alpha = 0f
+            v.translationY = dp(36).toFloat()
+            v.animate().alpha(1f).setDuration(MotionTokens.BASE).start()
+            springs += springTo(v, DynamicAnimation.TRANSLATION_Y, 0f)
+        }
+    }
+    t += MotionTokens.SLOW
+    for (v in info) {
+        seq.at(t) {
+            v.visibility = View.VISIBLE
+            v.alpha = 0f
+            v.animate().alpha(1f).setDuration(MotionTokens.SLOW).setInterpolator(DecelerateInterpolator()).start()
+        }
+        t += MotionTokens.STAGGER
+    }
+    seq.endAt(t + MotionTokens.SLOW)
 }
 
 private fun startWave(b: ViewResultWinBinding): List<ValueAnimator> = List(b.wave.childCount) { i ->

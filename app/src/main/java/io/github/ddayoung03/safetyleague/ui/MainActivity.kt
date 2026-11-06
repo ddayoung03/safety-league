@@ -300,7 +300,7 @@ class MainActivity : AppCompatActivity() {
         }
         resultJustFinished = false
         applySkew(binding.screenContainer)
-        if (!restricted && target != Screen.WIN) ScreenTransition.enter(binding.screenContainer, motion) // WIN은 playResultWin이 맡는다
+        if (!restricted && target != Screen.WIN && target != Screen.LOW) ScreenTransition.enter(binding.screenContainer, motion) // 결과 화면은 playResultWin·playResultLow가 맡는다
         if (target == Screen.WIN || target == Screen.LOW) {
             binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
                 crew.post {

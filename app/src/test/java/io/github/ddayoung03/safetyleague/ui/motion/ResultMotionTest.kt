@@ -13,6 +13,7 @@ class ResultMotionTest {
         assertEquals(CALM, resultIntro(true, true, false, true))
         assertEquals(CALM, resultIntro(true, false, true, true))
         assertEquals(QUICK, resultIntro(false, false, true, true))
+        assertEquals(QUICK, resultIntro(true, false, false, true)) // 리플레이에서 돌아온 아쉬운 날은 카운트 없이
         assertEquals(NONE, resultIntro(true, true, true, false))
     }
 

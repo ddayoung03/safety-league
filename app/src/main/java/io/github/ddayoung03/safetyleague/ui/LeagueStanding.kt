@@ -35,11 +35,18 @@ internal fun MainActivity.promotionText(s: SeasonStanding): String = when {
     else -> "승급까지 ${s.stepsToPromotion}계단 · ${s.pointsToPromotion}점"
 }
 
-internal fun MainActivity.realRows(container: LinearLayout, s: SeasonStanding, change: String = "", size: RowSize = rowWin) {
+/** 결과 카드 순위표 아래 한 줄. 앞 순위가 없으면 빈 글자. */
+internal fun towerNote(s: SeasonStanding): String {
+    val above = s.neighbors.firstOrNull { it.rank == (s.rank ?: 0) - 1 }
+    val gap = above?.let { LeagueCalculator.round1(it.avg - s.average!!) } ?: 0.0
+    return if (s.rank == null) "첫 주행을 마치면 순위가 나와요" else if (gap > 0.0) "앞 순위까지 ${gap}점" else ""
+}
+
+internal fun MainActivity.realRows(container: LinearLayout, s: SeasonStanding) {
     container.removeAllViews()
     if (s.rank == null) { container.addView(note("첫 주행을 마치면 순위가 나와요")); return }
     for (r in s.neighbors) {
-        container.addView(towerRow(r, r.name == "나", nameSuffix = if (r.name == "나") " $change" else "", size = size))
+        container.addView(towerRow(r, r.name == "나"))
         val gap = LeagueCalculator.round1(r.avg - s.average!!)
         if (r.rank == s.rank - 1 && gap > 0.0) container.addView(note("앞 순위까지 ${gap}점"))
     }
