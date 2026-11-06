@@ -27,7 +27,7 @@
   - `calculator/`, `collector/`, `data/DemoData.kt`, `model/`, `repository/`
 
 ## 테스트
-- 단위 테스트: `app/src/test/java/...`. 날씨는 `weather/WeatherStateTest`, 등장 연출은 `ui/view/CrewEntranceTest`.
+- 단위 테스트: `app/src/test/java/...`. 날씨는 `weather/WeatherStateTest`, 등장 연출은 `ui/view/CrewEntranceTest`, 리플레이 경로 진행은 `ui/view/RouteProgressTest`.
 - 작은 UI 수정은 묶어서 묶음 끝에 `.\gradlew.bat testDebugUnitTest assembleDebug -q`를 한 번 돌린다. 로직을 바꿨으면 그 항목에서 바로 돌린다.
 - 시안 테스트: `node --test mockups/test/demo-data.test.js mockups/test/export.test.js mockups/test/render.test.js`
 

@@ -72,7 +72,7 @@ internal fun View.motionSequence(scope: MotionScope, finish: () -> Unit) =
     MotionSequence(scope, { r, ms -> postDelayed(r, ms) }, { removeCallbacks(it) }, finish)
 
 /** 화면을 누르면 건너뛰는 순서기. 숨은 버튼은 터치를 받지 않고, 나타난 뒤부터 자기 클릭을 받는다. */
-private fun MainActivity.skippableSequence(root: View, settle: () -> Unit): MotionSequence {
+internal fun MainActivity.skippableSequence(root: View, settle: () -> Unit): MotionSequence {
     val seq = root.motionSequence(motion) {
         root.setOnClickListener(null)
         root.isClickable = false
@@ -307,6 +307,6 @@ private fun startWave(b: ViewResultWinBinding): List<ValueAnimator> = List(b.wav
 }
 
 private const val LIGHT_COUNT = 5
-private const val SPRING_STIFFNESS = 300f
-private const val SPRING_DAMPING = 0.7f
+internal const val SPRING_STIFFNESS = 300f
+internal const val SPRING_DAMPING = 0.7f
 private val WAVE_DELAYS = longArrayOf(0, 3, 6, 2)
