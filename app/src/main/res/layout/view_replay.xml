@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 시안 D 리플레이. 이 파일의 기본 상태가 최종 상태다. 경로 그리기와 사건 등장은 ReplayScreen이 맡는다. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/asphalt">
+    android:background="@drawable/bg_result">
 
-    <!-- 상단 회색 연석 띠 -->
-    <io.github.ddayoung03.safetyleague.ui.view.KerbView
+    <View
+        android:id="@+id/checker_strip"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_gravity="top"
-        android:alpha="0.4" />
+        android:layout_height="12dp" />
 
     <!-- 상단 헤더 -->
     <LinearLayout
@@ -25,10 +24,11 @@
             android:contentDescription="결과로 돌아가기"
             android:layout_width="wrap_content"
             android:layout_height="76dp"
-            android:background="@color/cell"
+            android:background="@color/ink_glow"
             android:clickable="true"
             android:focusable="true"
-            android:paddingHorizontal="24dp">
+            android:paddingHorizontal="24dp"
+            android:tag="skew">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="결과로"
-                    android:textColor="@color/white"
+                    android:textColor="@color/ink_text"
                     android:textSize="24sp" />
             </LinearLayout>
         </FrameLayout>
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:text="레이스 리플레이"
-            android:textColor="@color/white"
+            android:textColor="@color/ink_text"
             android:textSize="34sp" />
 
         <TextView
@@ -67,7 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:text="6:08 ~ 6:42 · 22.1km"
-            android:textColor="@color/grey"
+            android:textColor="@color/ink_muted"
             android:textSize="24sp" />
 
         <View
@@ -80,14 +80,14 @@
             android:layout_height="wrap_content"
             android:id="@+id/tv_demo_note"
             android:text="다른 날의 예시"
-            android:textColor="@color/grey"
+            android:textColor="@color/ink_muted"
             android:textSize="24sp" />
     </LinearLayout>
 
     <!-- 왼쪽 대형 서킷 뷰 -->
     <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
         android:id="@+id/route_replay_view"
-        android:layout_width="760dp"
+        android:layout_width="668dp"
         android:layout_height="456dp"
         android:layout_gravity="start|top"
         android:layout_marginStart="30dp"
@@ -108,10 +108,11 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:text="주행 사건 기록 (시간순)"
-            android:textColor="@color/grey"
+            android:textColor="@color/ink_muted"
             android:textSize="24sp" />
 
         <ScrollView
+            android:id="@+id/scroll_events"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -126,25 +127,20 @@
     <!-- 하단 피트 보드 띠 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="84dp"
         android:layout_gravity="bottom"
         android:layout_marginBottom="40dp"
         android:layout_marginHorizontal="64dp"
-        android:tag="skew"
         android:background="@drawable/pit_panel"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="28dp"
-        android:paddingVertical="10dp">
-        <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView
-            android:layout_width="64dp" android:layout_height="64dp" android:layout_marginEnd="18dp" />
+        android:paddingHorizontal="28dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="1"
             android:text="다음 주행 작전"
-            android:textColor="@color/asphalt"
+            android:textColor="@color/ink"
             android:textSize="24sp" />
 
         <TextView
@@ -153,8 +149,17 @@
             android:layout_marginStart="24dp"
             android:id="@+id/tv_replay_tip"
             android:text="차선 바꿀 때 깜빡이부터 켜기"
-            android:textColor="@color/asphalt"
+            android:textColor="@color/ink"
             android:textSize="30sp" />
     </LinearLayout>
+
+    <!-- 토끼 자리. 경로와 사건 목록 사이에서 피트 보드 띠 위에 선다. 띠와 겹치지 않는다. -->
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView
+        android:id="@+id/rabbit"
+        android:layout_width="180dp"
+        android:layout_height="245dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="660dp"
+        android:layout_marginBottom="124dp" />
 
 </FrameLayout>

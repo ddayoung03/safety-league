@@ -3,10 +3,10 @@
     <style name="Theme.SafetyLeague" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/yellow</item>
         <item name="colorPrimaryVariant">@color/yellow</item>
-        <item name="colorOnPrimary">@color/asphalt</item>
-        <item name="android:windowBackground">@color/asphalt</item>
-        <item name="android:statusBarColor">@color/asphalt_deep</item>
-        <item name="android:navigationBarColor">@color/asphalt_deep</item>
+        <item name="colorOnPrimary">@color/ink</item>
+        <item name="android:windowBackground">@color/ink</item>
+        <item name="android:statusBarColor">@color/ink</item>
+        <item name="android:navigationBarColor">@color/ink</item>
         <!-- 시안 글꼴: 한글 Pretendard 700, 숫자는 NumberText 스타일의 Saira Condensed -->
         <item name="android:fontFamily">@font/pretendard_bold</item>
         <item name="fontFamily">@font/pretendard_bold</item>
@@ -25,7 +25,7 @@
         <item name="android:minHeight">76dp</item>
         <item name="android:minWidth">76dp</item>
         <item name="android:textSize">24sp</item>
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/ink_text</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
     </style>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>세이프티 리그 방향 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@1,800;1,900&display=swap">
+<style>
+:root{--spring:cubic-bezier(.2,1.35,.35,1);--out:cubic-bezier(.16,1,.3,1);--yellow:#FFC52E;--red:#D42232}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0A0B0E;color:#EDEDE8;font-family:Pretendard,sans-serif;overflow:hidden}
+.bar{height:64px;display:flex;align-items:center;gap:10px;padding:0 20px;font-weight:700}
+.bar .title{margin-right:auto;font-size:15px;color:#9AA0AA}
+.tab{height:42px;padding:0 18px;border-radius:12px;border:1px solid #2B2F37;background:#15171C;color:#C9CCD2;font:700 15px Pretendard;cursor:pointer;transition:background .18s,color .18s,transform .12s}
+.tab:active{transform:scale(.96)}
+.tab.on{background:var(--yellow);border-color:var(--yellow);color:#14161A}
+.tab.play{background:#232730;color:#fff}
+#wrap{position:absolute;left:0;right:0;top:64px;bottom:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;overflow:hidden;flex:none;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.6);user-select:none}
+.abs{position:absolute}
+.btn{position:absolute;border:0;cursor:pointer;font:800 22px Pretendard;transition:transform .12s var(--out),filter .12s}
+.btn:active{transform:translateY(3px) scale(.97)}
+.num{font-family:'Saira Condensed',sans-serif;font-style:italic;font-weight:900}
+
+/* 체커기 로딩 */
+#loader{position:absolute;right:34px;bottom:28px;display:flex;align-items:center;gap:14px;z-index:40;transition:opacity .25s,transform .35s var(--out)}
+#loader.off{opacity:0;transform:translateY(14px) scale(.9)}
+#loader span{font-size:18px;font-weight:700}
+#hold{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:30;transition:opacity .3s}
+#hold.off{opacity:0;pointer-events:none}
+#hold b{font-size:40px}#hold i{font-style:normal;font-size:20px;opacity:.7}
+
+/* 캐릭터 */
+.ch{position:absolute;transform-origin:50% 100%}
+.ch .head{transform-box:fill-box;transform-origin:50% 90%;animation:bob 3.2s ease-in-out infinite}
+.ch .eyes{transform-box:fill-box;transform-origin:50% 50%;animation:blink 4.2s infinite}
+.ch .arm{transform-box:fill-box;transform-origin:15% 85%;animation:wave 1.5s ease-in-out infinite}
+.ch .body{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2.5deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes wave{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(14deg)}}
+@keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
+
+/* 순위 줄 공통 */
+.tower{position:absolute}
+.r{position:absolute;left:0;right:0;display:flex;align-items:center;transition:transform .42s var(--spring),background .25s,color .25s}
+.r .p{width:92px}.r .n{flex:1}.r .s{width:70px;text-align:right}
+
+/* 리그 전환 */
+#league{position:absolute;inset:0;z-index:50;clip-path:circle(0 at var(--ox,80%) var(--oy,85%));transition:clip-path .55s cubic-bezier(.7,0,.2,1);padding:44px 60px;pointer-events:none}
+#league.on{clip-path:circle(150% at var(--ox,80%) var(--oy,85%));pointer-events:auto}
+#league h2{margin:0 0 20px;font-size:38px}
+#league .lr{height:58px;display:flex;align-items:center;padding:0 22px;margin-bottom:8px;font-size:23px;font-weight:700;opacity:0;transform:translateX(44px)}
+#league.on .lr{animation:lin .42s var(--out) forwards;animation-delay:calc(var(--i)*38ms + 220ms)}
+@keyframes lin{to{opacity:1;transform:none}}
+#league .lr .p{width:100px}#league .lr .n{flex:1}
+#back{position:absolute;right:60px;top:44px;height:52px;padding:0 24px;font-size:19px}
+
+/* A 그랑프리 로비 */
+.A{background:radial-gradient(900px 560px at 30% 25%,#2C3A8C 0,#141A46 55%,#0B0E2A 100%);color:#fff}
+.A .stripes{position:absolute;inset:-40%;background:repeating-linear-gradient(115deg,transparent 0 90px,rgba(255,255,255,.028) 90px 150px);animation:drift 7s linear infinite}
+@keyframes drift{to{transform:translateX(240px)}}
+.A .sweep{position:absolute;top:-30%;bottom:-30%;width:300px;left:-420px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);transform:skewX(-18deg)}
+.A .score{left:60px;top:92px;font-size:270px;line-height:.92;background:linear-gradient(180deg,#FFF6CF 8%,#FFC52E 52%,#E88A12 92%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 12px 0 #5B2B06) drop-shadow(0 24px 34px rgba(0,0,0,.5));padding-right:30px}
+.A .lab{left:66px;top:48px;font-size:25px;font-weight:800;color:#C8D2FF}
+.A .ring{left:190px;top:210px;width:40px;height:40px;border:7px solid #FFE27E;border-radius:50%;opacity:0}
+.A .chip{position:absolute;height:60px;padding:0 22px;display:flex;align-items:center;gap:10px;font-size:25px;font-weight:800;border-radius:14px;background:linear-gradient(180deg,#34438F,#232E6E);box-shadow:0 5px 0 #121848}
+.A .chip.up{background:linear-gradient(180deg,#FF4B58,#C8102E);box-shadow:0 5px 0 #6E0717}
+.A .tower{left:760px;top:60px;width:470px;height:430px;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border-radius:22px;border:1px solid rgba(255,255,255,.14);padding:0}
+.A .tower h4{position:absolute;left:24px;top:16px;margin:0;font-size:20px;color:#C8D2FF}
+.A .r{height:56px;margin:0 14px;padding:0 16px;font-size:21px;font-weight:700;border-radius:12px;background:rgba(255,255,255,.06)}
+.A .r .p{font-size:30px;color:#AEB9EE}.A .r .s{font-size:27px}
+.A .r.me{background:linear-gradient(90deg,#FFE27E,#FFC52E);color:#20160A;box-shadow:0 0 34px rgba(255,197,46,.6);z-index:3}
+.A .r.me .p{color:#20160A}
+.A .btn.pri{right:50px;bottom:92px;width:270px;height:78px;border-radius:18px;background:linear-gradient(180deg,#FFE27E,#FFC52E);color:#20160A;box-shadow:0 7px 0 #B06E0A}
+.A .btn.sec{right:336px;bottom:92px;width:168px;height:78px;border-radius:18px;background:linear-gradient(180deg,#3A4AA0,#28347C);color:#fff;box-shadow:0 7px 0 #141A4E}
+.A #league{background:linear-gradient(180deg,#1B2462,#0D1236);color:#fff}
+.A #league .lr{background:rgba(255,255,255,.07);border-radius:12px}.A #league .lr.me{background:#FFC52E;color:#20160A}
+.A #back{background:#FFC52E;color:#20160A;border-radius:14px}
+
+/* B 프리미엄 텔레메트리 */
+.B{background:radial-gradient(760px 520px at 12% 0%,#1B1F27 0,#0D0F13 62%);color:#F4F4F1}
+.B .lab{left:72px;top:68px;font-size:22px;font-weight:600;color:#8A909B}
+.B .score{left:66px;top:104px;font-family:Pretendard;font-weight:800;font-size:216px;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+.B .unit{left:330px;top:232px;font-size:44px;font-weight:700;color:#8A909B}
+.B .delta{left:74px;top:342px;font-size:27px;font-weight:700;color:var(--yellow)}
+.B .pl{left:74px;top:404px;width:470px}
+.B .pl .t{display:flex;justify-content:space-between;font-size:19px;font-weight:600;color:#8A909B;margin-bottom:12px}
+.B .pl .track{height:8px;border-radius:8px;background:#22262E;overflow:hidden}
+.B .pl .fill{height:100%;width:0;border-radius:8px;background:var(--yellow);transition:width 1.1s var(--out)}
+.B .radio{left:74px;bottom:66px;height:76px;display:flex;align-items:center;gap:14px;padding:0 24px 0 8px;border-radius:40px;background:#181B21;font-size:21px;font-weight:600}
+.B .tower{left:690px;top:66px;width:530px;height:400px}
+.B .tower h4{margin:0;font-size:20px;font-weight:600;color:#8A909B}
+.B .r{height:58px;font-size:22px;font-weight:600;border-bottom:1px solid #1E2128;color:#C4C8CF}
+.B .r .p{font-weight:700;color:#6F7581;font-variant-numeric:tabular-nums}.B .r .s{font-variant-numeric:tabular-nums}
+.B .r.me{color:#fff;font-weight:800}.B .r.me .p{color:var(--yellow)}.B .r.me .s{color:var(--yellow)}
+.B .btn.pri{right:60px;bottom:66px;width:330px;height:76px;border-radius:18px;background:var(--yellow);color:#14161A}
+.B .btn.sec{right:404px;bottom:66px;width:180px;height:76px;border-radius:18px;background:#1D2027;color:#fff}
+.B #league{background:#0D0F13;color:#fff}
+.B #league .lr{border-bottom:1px solid #1E2128}.B #league .lr.me{color:var(--yellow)}
+.B #back{background:#1D2027;color:#fff;border-radius:14px}
+
+/* C 팀 크루 */
+.C{background:#FFF6DD;color:#2A2118}
+.C .road{position:absolute;left:0;right:0;bottom:0;height:150px;background:#FFDf8A}
+.C .road:before{content:'';position:absolute;left:0;right:0;top:0;height:14px;background:repeating-linear-gradient(90deg,#2A2118 0 28px,#fff 28px 56px);animation:slide 1.2s linear infinite}
+@keyframes slide{to{background-position:56px 0}}
+.C .bub{left:60px;top:50px;padding:20px 28px;background:#fff;border:4px solid #2A2118;border-radius:26px;font-size:30px;font-weight:800;box-shadow:0 6px 0 #2A2118;transform-origin:30% 110%}
+.C .card{left:520px;top:46px;width:716px;height:500px;background:#fff;border:4px solid #2A2118;border-radius:34px;box-shadow:0 10px 0 #2A2118}
+.C .score{left:44px;top:22px;font-weight:900;font-size:136px;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.C .unit{left:220px;top:92px;font-size:38px;font-weight:900}
+.C .xp{left:320px;top:40px;width:352px}
+.C .xp .t{font-size:21px;font-weight:800;margin-bottom:10px}
+.C .xp .track{height:30px;border:4px solid #2A2118;border-radius:18px;background:#FFEFC2;overflow:hidden}
+.C .xp .fill{height:100%;width:0;background:repeating-linear-gradient(115deg,#FFC52E 0 16px,#FFB100 16px 32px);transition:width 1.1s var(--spring)}
+.C .xp .m{font-size:19px;font-weight:700;margin-top:10px;color:#7A6A52}
+.C .tower{left:30px;top:170px;width:656px;height:310px}
+.C .r{height:48px;padding:0 18px;font-size:21px;font-weight:800;border-radius:14px;color:#5F5242}
+.C .r .p{color:#A6957C}.C .r.me{background:#FFC52E;border:4px solid #2A2118;color:#2A2118;height:54px;z-index:3}.C .r.me .p{color:#2A2118}
+.C .btn{border:4px solid #2A2118;border-radius:20px;color:#2A2118}
+.C .btn.pri{right:44px;bottom:42px;width:330px;height:76px;background:#FFC52E;box-shadow:0 7px 0 #2A2118}
+.C .btn.sec{right:392px;bottom:42px;width:170px;height:76px;background:#fff;box-shadow:0 7px 0 #2A2118}
+.C #league{background:#FFF6DD;color:#2A2118}
+.C #league .lr{background:#fff;border:3px solid #2A2118;border-radius:16px}.C #league .lr.me{background:#FFC52E}
+.C #back{background:#fff}
+.star{position:absolute;width:26px;height:26px;background:#FFC52E;clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 98%,50% 76%,20% 98%,30% 60%,0 38%,38% 36%)}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:20}
+@media (prefers-reduced-motion:reduce){.ch *,.A .stripes,.C .road:before{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="title">같은 순간(주차 후 결과)을 세 방향으로 · 버튼 눌러 보세요</div>
+  <button class="tab" data-choice="a" onclick="pick('A',this)">A 그랑프리 로비</button>
+  <button class="tab" data-choice="b" onclick="pick('B',this)">B 프리미엄 텔레메트리</button>
+  <button class="tab" data-choice="c" onclick="pick('C',this)">C 팀 크루</button>
+  <button class="tab play" onclick="run()">다시 재생</button>
+</div>
+<div id="wrap"><div id="stage"></div></div>
+<script>
+const $=(s,r=document)=>r.querySelector(s), stage=$('#stage');
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const wait=ms=>new Promise(r=>timers.push(setTimeout(r,reduce?Math.min(ms,60):ms)));
+let timers=[],raf=[],cur='A',token=0;
+const rows=[['조용한퇴근',89.9],['주말여행러',89.6],['부드러운출근길',89.3],['깜빡이장인',89.1],['해운대드라이버',88.9],['나',88.6]];
+
+function helmet(v,size){
+ const line=v==='C'?'stroke="#2A2118" stroke-width="7" stroke-linejoin="round"':'';
+ const y=v==='C'?'#FFC52E':'url(#hy)', suit=v==='C'?'#F7F2E6':'url(#hs)';
+ return `<svg class="ch-svg" width="${size}" height="${size*1.2}" viewBox="0 0 200 240" aria-hidden="true">
+ <defs><linearGradient id="hy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE98F"/><stop offset=".55" stop-color="#FFC52E"/><stop offset="1" stop-color="#E5920F"/></linearGradient>
+ <linearGradient id="hs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EEF0F6"/><stop offset="1" stop-color="#A9B0C2"/></linearGradient></defs>
+ <g class="body"><path d="M52 236c-3-38 10-74 48-74s51 36 48 74z" fill="${suit}" ${line}/><path d="M86 164h28l-5 72H91z" fill="#D42232"/></g>
+ <g class="arm"><path d="M142 186c14-8 26-22 32-40" fill="none" stroke="${v==='C'?'#2A2118':'#C9CEDB'}" stroke-width="${v==='C'?26:20}" stroke-linecap="round"/><path d="M142 186c14-8 26-22 32-40" fill="none" stroke="#F7F2E6" stroke-width="${v==='C'?13:0}" stroke-linecap="round"/><circle cx="176" cy="140" r="14" fill="#FFC52E" ${line}/></g>
+ <g class="head"><path d="M28 98C28 44 66 16 104 16c48 0 74 38 72 88-1 34-22 58-58 58H62C40 162 28 134 28 98z" fill="${y}" ${line}/>
+ <path d="M84 17c12-2 28-2 38 1l-3 46H87z" fill="#D42232"/>
+ <rect x="48" y="66" width="122" height="58" rx="26" fill="#14161C" ${line}/>
+ <path d="M60 78c20-8 60-9 88-3" stroke="#fff" stroke-opacity=".18" stroke-width="7" fill="none" stroke-linecap="round"/>
+ <g class="eyes" fill="none" stroke="#FFD24A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M72 104l14-14 14 14"/><path d="M122 104l14-14 14 14"/></g>
+ <path d="M60 142h44" stroke="#14161C" stroke-opacity=".5" stroke-width="7" stroke-linecap="round"/></g></svg>`;
+}
+
+function tower(h,step){return `<div class="tower">${h?`<h4>11월 시즌 순위</h4>`:''}<div class="rows" style="position:absolute;left:0;right:0;top:${h?(cur==='A'?54:44):0}px">`+
+ rows.map(([n,s],i)=>`<div class="r${n==='나'?' me':''}" data-i="${i}" style="transform:translateY(${i*step}px)"><span class="p num">P${123+i}</span><span class="n">${n}</span><span class="s num">${s.toFixed(1)}</span></div>`).join('')+`</div></div>`;}
+
+const V={
+A:()=>`<div class="stripes"></div><div class="sweep"></div>
+ <div class="abs lab">아이오닉 5 리그 · 오늘의 레이스</div><div class="abs score num" id="sc">0</div><div class="abs ring"></div>
+ <div class="chip up" style="left:64px;top:372px" id="c1">▲ 3 추월</div><div class="chip" style="left:234px;top:372px" id="c2">연속 13일</div><div class="chip" style="left:416px;top:372px" id="c3">18.4km</div>
+ <div class="ch" id="ch" style="left:500px;top:424px">${helmet('A',250)}</div>
+ ${tower(1,62)}<button class="btn sec" id="lg">리그</button><button class="btn pri" id="rp">리플레이 보기 ▶</button>`,
+B:()=>`<div class="abs lab">아이오닉 5 리그 · 11월 9일</div><div class="abs score" id="sc">0</div><div class="abs unit">점</div>
+ <div class="abs delta" id="c1">오늘 3명을 제쳤어요</div>
+ <div class="abs pl" id="c2"><div class="t"><span>승급 라인까지</span><span>6계단</span></div><div class="track"><div class="fill"></div></div></div>
+ <div class="abs radio" id="c3"><div style="width:64px;height:64px;overflow:hidden;position:relative"><div class="ch" style="left:2px;top:0">${helmet('B',60)}</div></div><span id="ty"></span></div>
+ ${tower(1,58)}<button class="btn sec" id="lg">리그 순위</button><button class="btn pri" id="rp">리플레이 보기</button>`,
+C:()=>`<div class="road"></div><div class="abs bub" id="c1">오늘 3명 제쳤어요!</div>
+ <div class="ch" id="ch" style="left:110px;top:190px">${helmet('C',330)}</div>
+ <div class="abs card" id="c2"><div class="abs score" id="sc">0</div><div class="abs unit">점</div>
+ <div class="abs xp"><div class="t">승급 라인까지 6계단</div><div class="track"><div class="fill"></div></div><div class="m">연속 13일 · 18.4km</div></div>${tower(0,50)}</div>
+ <button class="btn sec" id="lg">리그</button><button class="btn pri" id="rp">리플레이 보기</button>`};
+
+function league(){return `<div id="league"><h2>11월 시즌 · 골드 리그</h2><button class="btn" id="back">결과로</button>`+
+ [...rows.slice(0,2),['나',89.4],...rows.slice(2,5),['승급 도전자',88.7]].map(([n,s],i)=>`<div class="lr${n==='나'?' me':''}" style="--i:${i}"><span class="p num">P${123+i}</span><span class="n">${n}</span><span class="num">${s.toFixed(1)}</span></div>`).join('')+`</div>`;}
+
+function flag(c,dark){const g=c.getContext('2d'),W=c.width,H=c.height,cols=12,rw=8,cw=(W-16)/cols,chh=(H-34)/rw;let id;
+ const f=t=>{t/=1000;g.clearRect(0,0,W,H);g.fillStyle=dark?'#E8E8E2':'#2A2118';g.fillRect(4,4,5,H-6);
+  const d=(x)=>(x/(W-16))*11*Math.sin(x*.055-t*6.2)+(x/(W-16))*3*Math.sin(x*.12-t*9);
+  for(let i=0;i<cols;i++){const x0=i*cw,x1=x0+cw,y0=d(x0),y1=d(x1),sh=.72+.28*Math.cos(x0*.055-t*6.2);
+   for(let j=0;j<rw;j++){const a=(i+j)%2===0,v=a?255*sh:34*(2-sh);g.fillStyle=`rgb(${v|0},${v|0},${(v*.97)|0})`;
+    g.beginPath();g.moveTo(9+x0,12+y0+j*chh);g.lineTo(9+x1+.6,12+y1+j*chh);g.lineTo(9+x1+.6,12+y1+(j+1)*chh+.6);g.lineTo(9+x0,12+y0+(j+1)*chh+.6);g.fill();}}
+  id=requestAnimationFrame(f);raf[0]=id;};id=requestAnimationFrame(f);raf[0]=id;}
+
+function count(el,to,ms){return new Promise(res=>{if(reduce){el.textContent=to;return res();}const s=performance.now();
+ const f=n=>{const p=Math.max(0,Math.min(1,(n-s)/ms)),e=1-Math.pow(1-p,4);el.textContent=Math.round(to*e);p<1?raf[1]=requestAnimationFrame(f):res();};raf[1]=requestAnimationFrame(f);});}
+const pop=(el,d=0,from='scale(.6)')=>el&&el.animate([{opacity:0,transform:from},{opacity:1,transform:'none'}],{duration:reduce?1:460,delay:reduce?0:d,fill:'backwards',easing:'cubic-bezier(.2,1.5,.35,1)'});
+
+async function overtake(step){const me=$('.r.me');const all=[...stage.querySelectorAll('.r')];
+ for(let k=0;k<3;k++){const my=5-k,other=all[my-1];await wait(300);
+  me.style.transform=`translateY(${(my-1)*step}px)`;other.style.transform=`translateY(${my*step}px)`;
+  me.querySelector('.p').textContent='P'+(122+my);other.querySelector('.p').textContent='P'+(123+my);
+  me.querySelector('.s').textContent=(88.9+.17*(k+1)).toFixed(1);
+  me.animate([{filter:'brightness(1.5)'},{filter:'brightness(1)'}],{duration:320});
+  [all[my],all[my-1]]=[all[my-1],all[my]];}
+ me.querySelector('.s').textContent='89.4';}
+
+function burst(x,y,n=90){if(reduce)return;const c=$('#fx'),g=c.getContext('2d'),col=['#FFC52E','#FFFFFF','#FF4B58','#7FD4FF'];
+ const ps=[...Array(n)].map(()=>{const a=Math.random()*6.28,v=4+Math.random()*11;return{x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-5,r:Math.random()*6.28,s:5+Math.random()*8,c:col[Math.random()*4|0]}});
+ const t0=performance.now();const f=n2=>{const a=1-(n2-t0)/1700;g.clearRect(0,0,1280,720);if(a<=0)return;
+  ps.forEach(p=>{p.vy+=.3;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=.2;g.save();g.globalAlpha=Math.min(1,a*2);g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.fillRect(-p.s/2,-p.s/3,p.s,p.s/1.6);g.restore();});
+  raf[2]=requestAnimationFrame(f);};raf[2]=requestAnimationFrame(f);}
+
+async function run(){const my=++token;timers.forEach(clearTimeout);timers=[];raf.forEach(cancelAnimationFrame);
+ const dark=cur!=='C';stage.className=cur;
+ stage.innerHTML=V[cur]()+league()+`<canvas id="fx" width="1280" height="720"></canvas>
+  <div id="hold"><b>주차 완료</b><i>오늘의 레이스를 집계하고 있어요</i></div>
+  <div id="loader"><canvas id="fl" width="118" height="92"></canvas><span>기록 집계 중</span></div>`;
+ const reveal=[...stage.children].filter(e=>!['fx','hold','loader','league'].includes(e.id)&&!e.matches('.stripes,.sweep,.road'));
+ reveal.forEach(e=>e.style.visibility='hidden');
+ flag($('#fl'),dark);
+ const step=cur==='A'?62:cur==='B'?58:50;
+ const lg=$('#league'),b=$('#lg');
+ b.onclick=()=>{const r=b.getBoundingClientRect(),s=stage.getBoundingClientRect();lg.style.setProperty('--ox',((r.left+r.width/2-s.left)/s.width*100)+'%');lg.style.setProperty('--oy',((r.top+r.height/2-s.top)/s.height*100)+'%');lg.classList.add('on');};
+ $('#back').onclick=()=>lg.classList.remove('on');
+ $('#rp').onclick=e=>e.currentTarget.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:260});
+ await wait(1900);if(my!==token)return;
+ $('#hold').classList.add('off');$('#loader').classList.add('off');
+ reveal.forEach(e=>e.style.visibility='');
+ const sc=$('#sc'),ch=$('#ch');
+ if(cur==='A'){
+  for(const id of ['c1','c2','c3','lg','rp'])$('#'+id).style.opacity=0;$('.tower').style.opacity=0;ch.style.opacity=0;
+  $('.sweep').animate([{left:'-420px'},{left:'1500px'}],{duration:900,easing:'cubic-bezier(.5,0,.2,1)'});
+  await count(sc,92,1150);if(my!==token)return;
+  sc.animate([{transform:'scale(1.16)'},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.2,1.6,.35,1)'});
+  $('.ring').animate([{opacity:.9,transform:'scale(1)'},{opacity:0,transform:'scale(11)'}],{duration:640,easing:'ease-out'});
+  stage.animate([{transform:'translate(0,0)'},{transform:'translate(-5px,3px)'},{transform:'translate(4px,-3px)'},{transform:'translate(0,0)'}],{duration:220});
+  burst(250,240,110);
+  ch.style.opacity=1;ch.animate([{opacity:0,transform:'translateY(170px) scale(.8)'},{opacity:1,transform:'none'}],{duration:560,easing:'cubic-bezier(.2,1.5,.35,1)'});
+  await wait(180);const t=$('.tower');t.style.opacity=1;t.animate([{opacity:0,transform:'translateX(90px)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.16,1,.3,1)'});
+  await overtake(step);if(my!==token)return;
+  ['c1','c2','c3'].forEach((id,i)=>{const e=$('#'+id);e.style.opacity=1;pop(e,i*90,'translateY(24px) scale(.8)');});
+  await wait(260);['lg','rp'].forEach((id,i)=>{const e=$('#'+id);e.style.opacity=1;pop(e,i*80,'translateY(30px)');});
+ }
+ if(cur==='B'){
+  const ids=['c1','c2','c3','lg','rp'];ids.forEach(i=>$('#'+i).style.opacity=0);$('.tower').style.opacity=0;
+  await count(sc,92,950);if(my!==token)return;
+  const t=$('.tower');t.style.opacity=1;t.animate([{opacity:0,transform:'translateY(18px)'},{opacity:1,transform:'none'}],{duration:440,easing:'cubic-bezier(.16,1,.3,1)'});
+  await overtake(step);if(my!==token)return;
+  ['c1','c2'].forEach((id,i)=>{const e=$('#'+id);e.style.opacity=1;pop(e,i*90,'translateY(14px)');});
+  await wait(180);$('.pl .fill').style.width='78%';
+  const r=$('#c3');r.style.opacity=1;pop(r,120,'translateY(14px)');await wait(260);
+  const msg='안전하게 완주했어요. 다음도 함께해요',ty=$('#ty');for(let i=1;i<=msg.length;i++){if(my!==token)return;ty.textContent=msg.slice(0,i);await wait(24);}
+  ['lg','rp'].forEach((id,i)=>{const e=$('#'+id);e.style.opacity=1;pop(e,i*70,'translateY(16px)');});
+ }
+ if(cur==='C'){
+  ['c1','lg','rp'].forEach(i=>$('#'+i).style.opacity=0);
+  ch.animate([{transform:'translateY(320px)'},{transform:'translateY(-30px) scaleY(1.05)',offset:.7},{transform:'none'}],{duration:620,easing:'ease-out'});
+  pop($('#c2'),120,'translateY(40px) scale(.94)');await wait(420);
+  await count(sc,92,850);if(my!==token)return;
+  sc.animate([{transform:'scale(1.22)'},{transform:'scale(1)'}],{duration:380,easing:'cubic-bezier(.2,1.8,.35,1)'});
+  ch.animate([{transform:'none'},{transform:'translateY(-46px) rotate(-4deg)'},{transform:'none'},{transform:'translateY(-22px) rotate(3deg)'},{transform:'none'}],{duration:760,easing:'ease-out'});
+  burst(180,320,70);
+  for(let i=0;i<7;i++){const s=document.createElement('i');s.className='star';s.style.left=(120+Math.random()*280)+'px';s.style.top=(240+Math.random()*80)+'px';stage.appendChild(s);
+   s.animate([{opacity:1,transform:'scale(.2)'},{opacity:0,transform:`translate(${(i-3)*62}px,${-170-Math.random()*70}px) scale(1.4) rotate(160deg)`}],{duration:900,delay:i*30,easing:'cubic-bezier(.16,1,.3,1)',fill:'forwards'});}
+  const bub=$('#c1');bub.style.opacity=1;pop(bub,120,'scale(.3)');
+  await overtake(step);if(my!==token)return;
+  $('.xp .fill').style.width='78%';await wait(420);
+  ['lg','rp'].forEach((id,i)=>{const e=$('#'+id);e.style.opacity=1;pop(e,i*80,'translateY(26px)');});
+ }
+}
+function pick(v,el){cur=v;document.querySelectorAll('.tab[data-choice]').forEach(t=>t.classList.toggle('on',t===el));
+ try{window.brainstorm&&window.brainstorm.send({type:'click',choice:v,text:el.textContent});}catch(e){}
+ run();}
+function fit(){const s=Math.min((innerWidth-24)/1280,(innerHeight-88)/720);stage.style.transform=`scale(${s})`;}
+addEventListener('resize',fit);fit();
+const start=(location.hash.slice(1)||'A').toUpperCase();pick(start,document.querySelector(`.tab[data-choice="${start.toLowerCase()}"]`));
+</script>
+</body>
+</html>

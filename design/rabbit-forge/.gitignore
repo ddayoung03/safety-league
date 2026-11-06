@@ -1,0 +1,9 @@
+poses/
+check1.jpg
+poses-sheet.jpg
+__pycache__/
+.forge/
+master/job.json
+master/prompt.txt
+align.jpg
+inbetween.jpg

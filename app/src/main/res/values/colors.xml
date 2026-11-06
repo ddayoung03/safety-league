@@ -1,47 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Safety League Design Tokens -->
-    <color name="asphalt">#24272C</color>
-    <color name="asphalt_deep">#1B1E23</color>
-    <color name="cell">#2E3238</color>
-    <color name="white">#F2F1EC</color>
-    <color name="grey">#A3A9B2</color>
+    <color name="ink">#0D0F13</color>
+    <color name="ink_glow">#1C2028</color>
+    <color name="track_empty">#262B35</color>
+    <color name="ink_text">#F4F4F1</color>
+    <color name="ink_muted">#8A909B</color>
+    <color name="signal_red">#E8202F</color>
     <color name="yellow">#FFC52E</color>
-    <color name="red">#D42232</color>
-    <color name="gold">#E3B24A</color>
-    <color name="bronze">#D6A478</color>
-
-    <!-- Standard Aliases -->
-    <color name="colorPrimary">#FFC52E</color>
-    <color name="colorOnPrimary">#24272C</color>
-    <color name="colorBackground">#24272C</color>
-    <color name="colorSurface">#2E3238</color>
-    <color name="colorOnSurface">#F2F1EC</color>
     <color name="icon_background">#24272C</color>
-    <color name="asphalt_light">#30343B</color>
-    <color name="asphalt_shadow">#1B1E22</color>
-    <color name="track_empty">#2B2F35</color>
-    <color name="track_qualifying">#5C5A4E</color>
-    <color name="flame_orange">#FF7800</color>
-    <color name="flame_glow">#FFA014</color>
-    <color name="line">#1AFFFFFF</color>
-    <color name="glass_top">#17FFFFFF</color>
-    <color name="glass_bottom">#06FFFFFF</color>
     <color name="shadow">#59000000</color>
-    <color name="metal_top">#FFFFFF</color>
-    <color name="metal_upper">#ECEAE3</color>
-    <color name="metal_edge">#A9A7A0</color>
-    <color name="metal_bottom">#F5F4EF</color>
-    <color name="dull_top">#C9CDD3</color>
-    <color name="dull_upper">#9EA4AC</color>
-    <color name="dull_edge">#6F757E</color>
-    <color name="dull_bottom">#B4B9C0</color>
-    <color name="yellow_light">#FFDB6E</color>
-    <color name="yellow_dark">#F2B312</color>
-    <color name="white_bottom">#E4E2DB</color>
-    <color name="beam">#12FFC52E</color>
-    <color name="bar_rest">#3A3E45</color>
-    <color name="bar_normal">#4A4F57</color>
     <color name="clear">#00000000</color>
     <color name="weather_rain">#8FA6BB</color>
     <color name="weather_snow">#D2DBE3</color>

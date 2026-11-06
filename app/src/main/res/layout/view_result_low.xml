@@ -1,26 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 아쉬운 날 결과 카드. 시안 mockups/result-low.html 좌표(1280×720dp 캔버스) 그대로. 빨강 없음. -->
+<!-- 아쉬운 날 결과 카드. 이긴 날과 같은 시안 D 가족이고 더 조용하다. 빨강·신호등·속도선 없음.
+     이 파일의 기본 상태가 최종 상태다. 연출은 ResultMotion이 잠시 숨겼다 되돌린다. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/asphalt"
+    android:background="@drawable/bg_result"
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <!-- 회색 연석 띠 (위 얇게, 아래 굵게) -->
-    <io.github.ddayoung03.safetyleague.ui.view.KerbView
-        android:id="@+id/kerb_top"
+    <View
+        android:id="@+id/checker_strip"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_gravity="top"
-        android:alpha="0.5" />
-
-    <io.github.ddayoung03.safetyleague.ui.view.KerbView
-        android:id="@+id/kerb_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="18dp"
-        android:layout_gravity="bottom"
-        android:alpha="0.9" />
+        android:layout_height="12dp"
+        android:alpha="0.35" />
 
     <!-- 주행 경로 배경 흐림 -->
     <io.github.ddayoung03.safetyleague.ui.view.CircuitRouteView
@@ -34,78 +26,78 @@
         android:id="@+id/tv_top_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="60dp"
         android:text="아이오닉 5 리그 · 오늘의 레이스 종료"
-        android:textColor="@color/grey"
-        android:textSize="30sp" />
+        android:textColor="@color/ink_muted"
+        android:textSize="22sp" />
 
-    <!-- 비 모션 (점수 뒤) -->
-    <io.github.ddayoung03.safetyleague.ui.view.RainScoreView
-        android:id="@+id/rain_score_view"
-        android:layout_width="620dp"
-        android:layout_height="320dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="80dp" />
-
+    <!-- 글꼴의 윗여백이 커서 상자는 위로 올라가 있다. 기준선은 위에서 363dp. 너비는 fixScoreWidth가 숫자에 맞춘다. -->
     <LinearLayout
+        android:id="@+id/score_block"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="78dp"
-        android:gravity="bottom"
+        android:layout_marginStart="62dp"
+        android:layout_marginTop="66dp"
         android:orientation="horizontal">
 
-        <io.github.ddayoung03.safetyleague.ui.view.MetalTextView
+        <TextView
             android:id="@+id/tv_score"
+            style="@style/NumberText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0.82"
             android:includeFontPadding="false"
-            android:letterSpacing="-0.035"
+            android:maxLines="1"
             android:text="64"
-            android:textColor="@color/grey"
-            android:textSize="300sp"
-            android:fontFamily="@font/saira_condensed"
-            android:textStyle="italic"
-            android:shadowColor="#01000000"
-            android:shadowRadius="68"
-            android:paddingEnd="68dp" />
+            android:textColor="@color/ink_text"
+            android:textSize="262sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="90dp"
-            android:layout_marginStart="-20dp"
+            android:layout_marginStart="-44dp"
             android:text="점"
-            android:textColor="@color/grey"
-            android:textSize="72sp" />
+            android:textColor="@color/ink_muted"
+            android:textSize="44sp" />
     </LinearLayout>
 
-    <FrameLayout android:id="@+id/crew" android:layout_width="221dp" android:layout_height="380dp" android:layout_marginStart="436dp" android:layout_marginTop="70dp">
-        <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:paddingTop="32dp"
-            android:src="@drawable/crew_pit_board" android:scaleType="fitCenter" android:importantForAccessibility="no" />
-        <TextView android:id="@+id/tv_pit_word" android:layout_width="169dp" android:layout_height="77dp"
-            android:layout_marginStart="26dp" android:layout_marginTop="210dp" android:gravity="center"
-            android:text="@string/pit_signal" android:fontFamily="@font/pretendard_black" android:textSize="34sp" android:textColor="@color/asphalt_deep" />
-    </FrameLayout>
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="268dp" android:layout_height="368dp" android:layout_marginStart="420dp" android:layout_marginTop="82dp" />
 
-    <!-- 피트 보드: 다음에 고칠 것 하나 -->
+    <!-- 피트 보드: 다음에 고칠 것 하나. 머리글은 팀 라디오 알약이다. -->
     <LinearLayout
+        android:id="@+id/pit_board"
         android:layout_width="600dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="468dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="460dp"
         android:background="@drawable/pit_panel"
         android:orientation="vertical"
         android:paddingStart="28dp"
-        android:paddingTop="16dp"
+        android:paddingTop="14dp"
         android:paddingEnd="28dp"
         android:paddingBottom="18dp">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
-            <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView android:layout_width="48dp" android:layout_height="48dp" android:layout_marginEnd="10dp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/pit_title" android:textColor="@color/asphalt" android:textSize="24sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:background="@drawable/radio_pill"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="6dp"
+            android:paddingEnd="22dp">
+
+            <io.github.ddayoung03.safetyleague.ui.view.RabbitHeadView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pit_title"
+                android:textColor="@color/ink_text"
+                android:textSize="22sp" />
         </LinearLayout>
 
         <TextView
@@ -115,19 +107,19 @@
             android:layout_marginTop="6dp"
             android:maxLines="1"
             android:text="차선 바꿀 때 깜빡이부터 켜기"
-            android:textColor="@color/asphalt"
+            android:textColor="@color/ink"
             android:textSize="36sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:layout_marginTop="14dp"
-            android:background="@color/asphalt" />
+            android:layout_marginTop="12dp"
+            android:background="@color/ink" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -136,53 +128,52 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="오늘 깜빡이 없이 차선 변경 4회"
-                android:textColor="@color/asphalt"
+                android:textColor="@color/ink"
                 android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/tv_pit_gain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="매너 +9점 가능"
-                android:textColor="@color/asphalt"
+                android:text="매너 +25점 가능"
+                android:textColor="@color/ink"
                 android:textSize="24sp" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 오른쪽: 순위 타워 → 리플레이 보기 → 통계 -->
+    <!-- 오른쪽 순위 타워와 통계 -->
     <LinearLayout
-        android:layout_width="520dp"
-        android:layout_height="match_parent"
+        android:layout_width="530dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginEnd="64dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="60dp"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:orientation="vertical"
-        android:paddingTop="52dp"
-        android:paddingBottom="56dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/layout_season_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
+            android:layout_marginBottom="12dp"
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tv_season_label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:id="@+id/tv_season_label"
                 android:text="11월 시즌 순위"
-                android:textColor="@color/grey"
-                android:textSize="26sp" />
+                android:textColor="@color/ink_muted"
+                android:textSize="20sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="시즌 평균"
-                android:textColor="@color/grey"
-                android:textSize="26sp" />
+                android:textColor="@color/ink_muted"
+                android:textSize="20sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -193,79 +184,23 @@
             android:clipToPadding="false"
             android:orientation="vertical" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="24dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="horizontal">
-
-            <FrameLayout
-                android:id="@+id/btn_league"
-                android:tag="skew"
-                android:layout_width="wrap_content"
-                android:layout_height="76dp"
-                android:layout_marginEnd="16dp"
-                android:background="@color/cell"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingHorizontal="32dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="리그 순위"
-                    android:textColor="@color/white"
-                    android:textSize="26sp" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/btn_replay"
-                android:tag="skew"
-                android:layout_width="wrap_content"
-                android:layout_height="76dp"
-                android:background="@color/white"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingHorizontal="40dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="리플레이 보기"
-                        android:textColor="@color/asphalt"
-                        android:textSize="24sp" />
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginStart="16dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_play" />
-                </LinearLayout>
-            </FrameLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/tv_tower_note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:paddingStart="18dp"
+            android:textColor="@color/yellow"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/stats_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -277,22 +212,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="연속 안전 주행 (70점 이상)"
-                    android:textColor="@color/grey"
-                    android:textSize="24sp" />
+                    android:textColor="@color/ink_muted"
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/tv_streak_change"
+                    style="@style/NumberText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:includeFontPadding="false"
-                    android:text="13일 → 0일"
-                    android:textColor="@color/grey"
-                    android:textSize="48sp"
-                    android:fontFamily="@font/saira_condensed"
-                    android:textStyle="italic"
+                    android:paddingEnd="10dp"
                     android:shadowColor="#01000000"
                     android:shadowRadius="10"
-                    android:paddingEnd="10dp" />
+                    android:text="13일 → 0일"
+                    android:textColor="@color/ink_text"
+                    android:textSize="40sp" />
 
                 <TextView
                     android:id="@+id/tv_streak_hint"
@@ -300,7 +234,7 @@
                     android:layout_height="wrap_content"
                     android:text="다음 주행 70점이면 1일부터 다시"
                     android:textColor="@color/yellow"
-                    android:textSize="24sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -312,24 +246,66 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="주행 거리"
-                    android:textColor="@color/grey"
-                    android:textSize="24sp" />
+                    android:textColor="@color/ink_muted"
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/tv_km"
+                    style="@style/NumberText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:includeFontPadding="false"
-                    android:text="22.1km"
-                    android:textColor="@color/white"
-                    android:textSize="48sp"
-                    android:fontFamily="@font/saira_condensed"
-                    android:textStyle="italic"
+                    android:paddingEnd="10dp"
                     android:shadowColor="#01000000"
                     android:shadowRadius="10"
-                    android:paddingEnd="10dp" />
+                    android:text="22.1km"
+                    android:textColor="@color/ink_text"
+                    android:textSize="40sp" />
             </LinearLayout>
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="60dp"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/btn_league"
+            android:layout_width="180dp"
+            android:layout_height="76dp"
+            android:layout_marginEnd="14dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="리그 순위"
+                android:textColor="@color/ink_text"
+                android:textSize="24sp" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_replay"
+            android:layout_width="330dp"
+            android:layout_height="76dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="리플레이 보기"
+                android:textColor="@color/ink"
+                android:textSize="24sp" />
+        </FrameLayout>
     </LinearLayout>
 
     <TextView
@@ -337,10 +313,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="64dp"
+        android:layout_marginEnd="60dp"
         android:layout_marginBottom="20dp"
         android:text="다른 날의 예시"
-        android:textColor="@color/grey"
-        android:textSize="24sp" />
+        android:textColor="@color/ink_muted"
+        android:textSize="20sp" />
 
 </FrameLayout>

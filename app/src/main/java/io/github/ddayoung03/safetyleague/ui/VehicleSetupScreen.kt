@@ -3,6 +3,7 @@ package io.github.ddayoung03.safetyleague.ui
 import android.view.View
 import android.widget.Button
 import android.widget.GridLayout
+import androidx.core.view.children
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
 import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
@@ -11,8 +12,11 @@ import io.github.ddayoung03.safetyleague.core.model.VehicleCatalog
 import io.github.ddayoung03.safetyleague.core.model.VehicleProfile
 import io.github.ddayoung03.safetyleague.databinding.ViewLeaguePlacementBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewVehicleSelectionBinding
-import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
+import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
+import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
+import io.github.ddayoung03.safetyleague.ui.motion.stagger
 import java.time.LocalDate
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
     if (restricted) return
@@ -25,12 +29,12 @@ internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
 
 internal fun MainActivity.showVehicleSelection() {
     val b = ViewVehicleSelectionBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.root.background = AsphaltDrawable(this)
+    b.rabbit.pose = Pose.WELCOME
     fun addChoice(label: String, action: () -> Unit) {
         val button = Button(this).apply {
             text = label; textSize = 26f; isAllCaps = false
-            setTextColor(color(R.color.white))
-            backgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.cell))
+            setTextColor(color(R.color.ink_text))
+            skewButton(R.color.ink_glow)
             setOnClickListener { if (!restricted) action() }
         }
         b.vehicleGrid.addView(button, GridLayout.LayoutParams().apply {
@@ -47,6 +51,8 @@ internal fun MainActivity.showVehicleSelection() {
         b.customForm.visibility = View.VISIBLE
     }
     if (consentStore.load() != LocationConsent.UNDECIDED) addChoice(getString(R.string.consent_settings)) { show(Screen.CONSENT) }
+    b.btnCustomConfirm.skewButton(R.color.yellow)
+    b.btnVehicleList.skewButton(R.color.ink_glow)
     b.btnVehicleList.setOnClickListener {
         hideKeyboard(); b.customForm.visibility = View.GONE; b.vehicleGrid.visibility = View.VISIBLE
     }
@@ -57,17 +63,22 @@ internal fun MainActivity.showVehicleSelection() {
         if (profile == null) b.nameError.text = "차종 이름을 1~20자로 입력해 주세요"
         else selectVehicle(profile)
     }
+    ScreenTransition.stagger(b.root, b.vehicleGrid.children.toList(), motion, MotionTokens.BASE)
 }
 
 internal fun MainActivity.showPlacement() {
     val b = ViewLeaguePlacementBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.root.background = AsphaltDrawable(this)
+    b.rabbit.pose = Pose.WELCOME
+    b.checkerStrip.background = checkerTile()
+    b.btnStart.background = skew(R.color.yellow)
+    b.btnChangeVehicle.background = skew(R.color.ink_glow)
     val profile = profileStore.load() ?: VehicleProfile("아이오닉 5", Powertrain.EV)
     val now = LocalDate.now()
     b.placementSeason.text = "${now.year}년 ${now.monthValue}월 시즌"
     b.placementModel.text = "${profile.model} 리그"
     b.placementTier.text = "${profile.tier} 단계에 배치되었습니다"
     b.placementRecognition.visibility = if (profile.recognition == "auto") View.VISIBLE else View.GONE
+    listOf(b.btnStart, b.btnChangeVehicle).forEach { it.pressFeedback() }
     b.btnChangeVehicle.setOnClickListener { show(Screen.VEHICLE) }
     b.btnStart.setOnClickListener {
         if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }
@@ -75,4 +86,5 @@ internal fun MainActivity.showPlacement() {
         demoResultWin = null
         repository.latestCompletedTrip.value?.let { showResult(it) } ?: show(Screen.LEAGUE)
     }
+    ScreenTransition.stagger(b.root, b.root.children.drop(1).toList(), motion, MotionTokens.BASE) // 맨 앞 체커 띠는 그대로 둔다
 }

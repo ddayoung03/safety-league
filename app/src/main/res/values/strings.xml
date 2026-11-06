@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">세이프티 리그</string>
-    <string name="app_title">SAFETY LEAGUE</string>
     <string name="weather_button">날씨: %1$s</string>
     <string name="weather_button_sun">날씨: 맑음</string>
     <string name="weather_recording">주행 기록 중 · %1$s</string>
     <string name="weather_recording_sun">주행 기록 중 · 맑음</string>
     <string name="driving_goal">안전하게, 다음 한 칸까지</string>
-    <string name="pit_signal">깜빡이!</string>
     <string name="pit_title">피트 보드 · 다음 주행 작전</string>
-    <string name="radio_title">팀 라디오 · 레이스 엔지니어</string>
     <string name="radio_praise">멋진 레이스였어요!</string>
+    <string name="loader_tally">기록 집계 중</string>
+    <string name="loader_start">준비 중</string>
 </resources>
