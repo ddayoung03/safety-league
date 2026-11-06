@@ -142,35 +142,34 @@ assertEquals(emptyList<Int>(), overtakeRanks(null, 125))
 - [ ] **Step 4: 확인** 테스트 통과. 에뮬레이터에서 92점 각본에 소리가 나고, 연출 중 D단을 넣으면 멈춘다.
 - [ ] **Step 5: 커밋**
 
-### Task 6: 토끼 기준 그림 (사용자 확인 필요)
+### Task 6: 토끼 픽셀 어셋 (사용자 확인 필요)
 
 **Files:**
-- Create: `design/generated/rabbit-*.png`, `design/rabbit/parts/`
+- Create: `design/rabbit/`(정리된 스프라이트, 부위, 미리보기), `design/rabbit/make_sprites.py`
 - Modify: `design/README.md`
 
-- [ ] **Step 1: 기준 그림 생성** Google Flow, ChatGPT로 정면 전신 기준 그림 3~4장을 만든다. 기준: 빨간 헬멧을 뚫고 나온 긴 귀, 노란 레이싱 슈트, 특정 작품을 닮지 않은 독자 디자인. 프롬프트를 `design/README.md`에 적는다.
-- [ ] **Step 2: 사용자 선택** 사용자가 한 장을 고른다. 고르기 전에는 Step 3으로 가지 않는다.
-- [ ] **Step 3: 부위 벡터 제작** 머리, 왼쪽 귀, 오른쪽 귀, 몸, 양팔, 양다리, 표정 4종, 깃발, 보드, 무전기를 SVG로 나눈다. 모든 부위가 같은 좌표계(260×320)를 쓴다.
-- [ ] **Step 4: 사용자 확인** 움직이는 시안으로 보여 주고 품질 승인을 받는다. 부족하면 Rive 재검토를 제안한다.
+- [ ] **Step 1: 격자 정리** `design/generated/rabbit-pixel-sheet-1.png`의 네 포즈를 진짜 픽셀 격자로 줄인다. 팔레트를 제한하고 배경을 투명하게 한다.
+- [ ] **Step 2: 부위와 프레임** 동작 9종(대기, 승리, 추월, 피트 보드, 라디오, 로딩, 맞이, 끄덕임, 가리키기)의 프레임을 만든다. 표정과 귀는 부위로 조합한다.
+- [ ] **Step 3: 움직이는 미리보기** `design/rabbit/preview.html`을 만든다.
+- [ ] **Step 4: 사용자 확인** 움직임 품질 승인을 받는다.
 - [ ] **Step 5: 커밋**
 
 ### Task 7: RabbitView
 
 **Files:**
-- Create: `ui/view/RabbitView.kt`, `ui/view/RabbitPose.kt`, `app/src/main/res/drawable/rabbit_*.xml`
+- Create: `ui/view/RabbitView.kt`, `ui/view/RabbitPose.kt`, `app/src/main/res/drawable-nodpi/rabbit_*.png`
 - Modify: `ui/ResultWinScreen.kt`, `ui/ResultLowScreen.kt`, `ui/view/CrewEntrance.kt`
 - Delete: `res/drawable-nodpi/crew_*.webp`, `ui/view/CrewFaceView.kt`
 - Test: `.../ui/view/RabbitPoseTest.kt`
 
 **Interfaces:**
 - Produces: `enum class Pose { IDLE, WIN, OVERTAKE, PIT, RADIO, LOAD, WELCOME, NOD, POINT }`
-- Produces: `data class PartState(val earL: Float, val earR: Float, val armL: Float, val armR: Float, val legL: Float, val legR: Float, val head: Float, val lift: Float, val face: Face)`
-- Produces: `fun poseState(pose: Pose, timeSec: Float): PartState`
-- Produces: `RabbitView.pose: Pose`, `start()`, `stop()`
+- Produces: `fun frameIndex(pose: Pose, timeMs: Long, frameCount: Int): Int`
+- Produces: `RabbitView.pose: Pose`, `start()`, `stop()`. 정수 배율과 최근접 보간으로 그린다.
 
-- [ ] **Step 1: 테스트** `pitEarsDroop`(earL ≤ -90, earR ≥ 90), `overtakeEarsSweepBack`(둘 다 음수), `winJumps`(lift 최소 < 0), `everyPoseHasFace`, `poseIsPeriodic`.
+- [ ] **Step 1: 테스트** `frameLoopsWithinCount`, `oneShotPoseStopsOnLastFrame`, `zeroTimeIsFirstFrame`, `everyPoseHasFrames`.
 - [ ] **Step 2: 실패 확인**
-- [ ] **Step 3: 구현** 시안의 CSS 동작 값을 옮긴다. `canAnimateCrew`가 거짓이면 움직이지 않는다.
+- [ ] **Step 3: 구현** `canAnimateCrew`가 거짓이면 첫 프레임에서 멈춘다.
 - [ ] **Step 4: 확인** 결과 카드에서 승리와 피트 보드 동작 표시. 주행 중 화면에는 없음.
 - [ ] **Step 5: 커밋**
 

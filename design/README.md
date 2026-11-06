@@ -37,3 +37,5 @@ HTML은 브라우저에서 바로 열린다. 글꼴은 CDN에서 받으므로 �
 |---|---|---|
 | `generated/rabbit-chatgpt-sheet-1.png` | ChatGPT | 어린 토끼 레이서, 빨간 오픈페이스 헬멧, 헬멧을 뚫은 긴 귀, 노란 슈트, 3D 토온, 네 포즈 |
 | `generated/rabbit-flow-1.*` | Google Flow (Nano Banana 2.1) | 같은 설정, 셀 셰이딩 한 포즈 |
+| `generated/rabbit-pixel-sheet-1.png` | ChatGPT | 같은 토끼의 96x96 픽셀 아트, 네 포즈 |
+| `generated/rabbit-flow-video-1.mp4` | Google Flow (Omni 1.1 Flash) | `rabbit-a-jump.png`에서 4초 루프, 깡충 뛰며 깃발 흔들기 |
