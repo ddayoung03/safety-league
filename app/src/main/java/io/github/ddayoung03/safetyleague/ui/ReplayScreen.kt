@@ -32,7 +32,6 @@ internal fun MainActivity.showReplay() {
     b.tvReplayMeta.text = if (t != null) "${t.startTime} ~ ${t.endTime} · ${t.trip.km}km"
     else if (win) "${DemoData.winDayStart} ~ ${DemoData.winDayEnd} · ${DemoData.winDayKm}km"
     else "${DemoData.lowDayStart} ~ ${DemoData.lowDayEnd} · ${DemoData.lowDayKm}km"
-    b.routeReplayView.isBackgroundMode = false
     val routeNote = t?.let { routeNote(it.route) }
     val moved = routeNote == null
     b.routeReplayView.routePoints = if (t == null) DemoData.route else RouteNormalizer.normalize(t.route)

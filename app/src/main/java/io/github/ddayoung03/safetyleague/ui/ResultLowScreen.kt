@@ -3,7 +3,6 @@ package io.github.ddayoung03.safetyleague.ui
 import android.view.View
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
-import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.databinding.ViewResultLowBinding
 import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
@@ -21,7 +20,6 @@ internal fun MainActivity.showResultLow() {
     listOf(b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
     b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
-    b.routeBg.isBackgroundMode = true
     val t = realTrip
     val intro = resultIntro(t?.isEligible ?: true, false, resultJustFinished, animationsEnabled())
     val score = t?.trip?.score?.roundToInt() ?: DemoData.lowDayScore
@@ -30,7 +28,6 @@ internal fun MainActivity.showResultLow() {
     // L3·L6: 연속 기록은 사람 기준(모든 리그의 트립)이고 트립 날짜까지 센다. 전·후가 같은 범위다.
     val streakBefore = if (t != null) LeagueCalculator.streakAt(tripsBefore(t, repository.getAllTrips()), t.trip.date) else DemoData.lowDayStreakBefore
     b.tvStreakChange.text = "${streakBefore}일 → 0일"
-    t?.let { b.routeBg.routePoints = RouteNormalizer.normalize(it.route) }
     b.tvDemoNote.visibility = if (t == null) View.VISIBLE else View.GONE
     if (t != null) {
         b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
