@@ -2,8 +2,19 @@ package io.github.ddayoung03.safetyleague.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.FrameLayout
 import kotlin.math.min
+
+/** 이 뷰 위의 DesignCanvas가 키운 배율. 밖에 있으면 1이다. */
+internal fun View.designScale(): Float {
+    var p = parent
+    while (p != null) {
+        if (p is DesignCanvas) return p.scale
+        p = p.parent
+    }
+    return 1f
+}
 
 /**
  * 화면은 시안과 같은 1280×720dp 캔버스 기준으로 그린다. 실제 창이 더 크면 캔버스를 통째로 키워
@@ -14,7 +25,8 @@ class DesignCanvas @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private val designW = 1280 * resources.displayMetrics.density
     private val designH = 720 * resources.displayMetrics.density
-    private var scale = 1f
+    internal var scale = 1f
+        private set
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)

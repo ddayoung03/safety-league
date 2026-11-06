@@ -18,6 +18,7 @@ import io.github.ddayoung03.safetyleague.ui.MainActivity
 import io.github.ddayoung03.safetyleague.ui.TimingRow
 import io.github.ddayoung03.safetyleague.ui.dp
 import io.github.ddayoung03.safetyleague.ui.showFlagLoader
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 /** 결과 화면 연출의 크기. BIG은 막 끝난 이긴 날, QUICK은 3km 미만과 다시 연 아쉬운 날에 쓴다. */
 enum class ResultIntro { BIG, CALM, QUICK, NONE }
@@ -109,7 +110,7 @@ internal fun MainActivity.playResultWin(
     val me = rows.indexOfFirst { it.data.name == "나" }
     val ranks = if (me < 0) emptyList() else overtakeRanks(before, after, minOf(3, rows.size - 1 - me))
     val staged = listOf(b.checkerStrip, b.tvTopTitle, b.scoreBlock, b.scoreUnderline, b.tvRankChange, b.promotionBlock,
-        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnLeague, b.btnReplay)
+        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnLeague, b.btnReplay, b.rabbit)
     val message = b.tvRadioMessage.text.toString()
     val springs = mutableListOf<SpringAnimation>()
     val waves = mutableListOf<ValueAnimator>()
@@ -132,6 +133,7 @@ internal fun MainActivity.playResultWin(
         b.wave.animate().cancel()
         b.wave.visibility = View.INVISIBLE
         b.tvRadioMessage.text = message
+        b.rabbit.pose = Pose.WIN
     }
 
     fun pop(v: View, fromX: Float = 0f, fromY: Float = 0f, curve: Interpolator = OvershootInterpolator(1.5f)) {
@@ -193,12 +195,16 @@ internal fun MainActivity.playResultWin(
             rows[me].rank.text = "P${ranks.first() + 1}"
         }
         pop(b.tower, fromX = dp(60).toFloat(), curve = DecelerateInterpolator(2f))
+        b.rabbit.visibility = View.VISIBLE
+        b.rabbit.translationY = dp(120).toFloat()
+        spring(b.rabbit, DynamicAnimation.TRANSLATION_Y, 0f)
     }
 
     // 4. 내 줄 추월: 한 칸씩 올라가며 순위 숫자도 바뀐다. 내 줄은 스프링 하나의 목표만 옮겨 움직임이 끊기지 않는다.
     var mySpring: SpringAnimation? = null
     ranks.forEachIndexed { step, rank ->
         seq.at(t + (step + 1) * MotionTokens.OVERTAKE_STEP) {
+            b.rabbit.pose = Pose.OVERTAKE
             val slot = me + ranks.size - step - 1
             val passed = rows[slot + 1]
             spring(passed.view, DynamicAnimation.TRANSLATION_Y, 0f)
@@ -211,6 +217,7 @@ internal fun MainActivity.playResultWin(
         }
     }
     t += maxOf(ranks.size, 1) * MotionTokens.OVERTAKE_STEP + MotionTokens.BASE
+    seq.at(t) { b.rabbit.pose = Pose.WIN }
 
     // 5. 정보 등장
     val infoFromX = -dp(26).toFloat()
@@ -258,7 +265,7 @@ internal fun MainActivity.playResultLow(b: ViewResultLowBinding, intro: ResultIn
     if (intro == ResultIntro.NONE) return
     if (intro != ResultIntro.CALM) { ScreenTransition.enter(binding.screenContainer, motion, MotionTokens.BASE); return }
 
-    val board = listOf(b.crew, b.pitBoard)
+    val board = listOf(b.rabbit, b.pitBoard)
     val info = (listOf(b.layoutSeasonHeader) + rows.map { it.view } + listOf(b.tvTowerNote, b.statsBlock, b.buttons, b.tvDemoNote))
         .filter { it.visibility == View.VISIBLE }
     val springs = mutableListOf<SpringAnimation>()

@@ -83,6 +83,12 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
+        <io.github.ddayoung03.safetyleague.ui.view.RabbitView
+            android:id="@+id/flag_loader_rabbit"
+            android:layout_width="116dp"
+            android:layout_height="150dp"
+            android:layout_marginEnd="12dp" />
+
         <io.github.ddayoung03.safetyleague.ui.view.FlagLoaderView
             android:id="@+id/flag_loader_flag"
             android:layout_width="118dp"

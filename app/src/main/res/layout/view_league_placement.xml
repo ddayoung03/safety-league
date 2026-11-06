@@ -14,8 +14,7 @@
     <TextView android:id="@+id/placement_tier" android:layout_width="1080dp" android:layout_height="80dp"
         android:layout_marginStart="108dp" android:layout_marginTop="236dp" android:textSize="44sp"
         android:textColor="@color/yellow" android:text="브론즈 단계에 배치되었습니다" />
-    <!-- 토끼 자리. 스프라이트가 준비되면 RabbitView가 들어온다 -->
-    <FrameLayout android:id="@+id/rabbit_slot" android:layout_width="128dp" android:layout_height="128dp"
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="128dp" android:layout_height="128dp"
         android:layout_marginStart="72dp" android:layout_marginTop="364dp" />
     <TextView android:layout_width="960dp" android:layout_height="128dp" android:gravity="center_vertical"
         android:layout_marginStart="216dp" android:layout_marginTop="364dp" android:text="첫 레이스를 시작해 볼까요?"

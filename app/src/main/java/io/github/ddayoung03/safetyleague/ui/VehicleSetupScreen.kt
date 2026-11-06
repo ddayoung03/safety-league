@@ -16,6 +16,7 @@ import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
 import io.github.ddayoung03.safetyleague.ui.motion.ScreenTransition
 import io.github.ddayoung03.safetyleague.ui.motion.stagger
 import java.time.LocalDate
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
     if (restricted) return
@@ -28,6 +29,7 @@ internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
 
 internal fun MainActivity.showVehicleSelection() {
     val b = ViewVehicleSelectionBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.WELCOME
     fun addChoice(label: String, action: () -> Unit) {
         val button = Button(this).apply {
             text = label; textSize = 26f; isAllCaps = false
@@ -66,6 +68,7 @@ internal fun MainActivity.showVehicleSelection() {
 
 internal fun MainActivity.showPlacement() {
     val b = ViewLeaguePlacementBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.WELCOME
     b.checkerStrip.background = checkerTile()
     b.btnStart.background = skew(R.color.yellow)
     b.btnChangeVehicle.background = skew(R.color.ink_glow)

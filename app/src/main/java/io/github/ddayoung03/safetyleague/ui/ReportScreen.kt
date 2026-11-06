@@ -19,9 +19,11 @@ import io.github.ddayoung03.safetyleague.ui.motion.settleShown
 import io.github.ddayoung03.safetyleague.ui.motion.skippableSequence
 import java.time.LocalDate
 import kotlin.math.roundToInt
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.showReport() {
     val b = ViewReportBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.NOD
     b.checkerStrip.background = checkerTile()
     if (!demoMode && demoResultWin == null) { showRealReport(b); return }
     val from = LocalDate.parse(DemoData.today).minusDays(6) // 기준일까지 7일: 11.03 ~ 11.09

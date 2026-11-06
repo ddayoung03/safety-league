@@ -19,9 +19,11 @@ import io.github.ddayoung03.safetyleague.ui.motion.settleShown
 import io.github.ddayoung03.safetyleague.ui.motion.skippableSequence
 import io.github.ddayoung03.safetyleague.ui.motion.stagger
 import io.github.ddayoung03.safetyleague.ui.view.replayEventIcon
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.showReplay() {
     val b = ViewReplayBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.RADIO
     b.checkerStrip.background = checkerTile()
     val t = realTrip
     val win = t == null && demoResultWin == true // 시연 92점 카드에서 왔으면 그날(11-09) 리플레이

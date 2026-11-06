@@ -19,7 +19,8 @@
 
 ## 코드
 - `ui/view/`: 직접 그린 View와 Drawable
-  - 결과: `CrewEntrance`(캐릭터 등장), `CrewFaceView`(얼굴), `StartLightsView`(출발 신호등), `SpeedLinesView`(속도선)
+  - 결과: `CrewEntrance`(움직임 허용 판단), `StartLightsView`(출발 신호등), `SpeedLinesView`(속도선)
+  - 토끼: `RabbitPose`(동작표·프레임·들썩임·배율 순수 함수), `RabbitView`(그리기와 동작), `RabbitHeadView`(팀 라디오 얼굴). 그림은 `res/drawable-nodpi/rabbit_*.png`, 원본은 `design/rabbit-forge/`
   - 경로·차트: `CircuitRouteView`, `ReplayEventIcon`, `PositionChartView`
   - 주행: `DrivingTrackView`, `DrivingTrackState`, `WeatherAmbientView`
   - 공용: `DesignCanvas`, `SkewDrawable`, `FlagLoaderView`
@@ -31,7 +32,7 @@
   - `calculator/`, `collector/`, `data/DemoData.kt`, `model/`, `repository/`
 
 ## 테스트
-- 단위 테스트: `app/src/test/java/...`. 날씨는 `weather/WeatherStateTest`, 등장 연출은 `ui/view/CrewEntranceTest`, 리플레이 경로 진행은 `ui/view/RouteProgressTest`, 리포트 순위 선 진행은 `ui/view/PositionChartTest`.
+- 단위 테스트: `app/src/test/java/...`. 날씨는 `weather/WeatherStateTest`, 움직임 허용은 `ui/view/CrewEntranceTest`, 토끼는 `ui/view/RabbitPoseTest`, 리플레이 경로 진행은 `ui/view/RouteProgressTest`, 리포트 순위 선 진행은 `ui/view/PositionChartTest`.
 - 작은 UI 수정은 묶어서 묶음 끝에 `.\gradlew.bat testDebugUnitTest assembleDebug -q`를 한 번 돌린다. 로직을 바꿨으면 그 항목에서 바로 돌린다.
 - 시안 테스트: `node --test mockups/test/demo-data.test.js mockups/test/export.test.js mockups/test/render.test.js`
 

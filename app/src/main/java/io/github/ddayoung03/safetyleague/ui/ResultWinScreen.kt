@@ -15,11 +15,13 @@ import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
 import io.github.ddayoung03.safetyleague.ui.motion.playResultWin
 import io.github.ddayoung03.safetyleague.ui.motion.promotionProgress
 import io.github.ddayoung03.safetyleague.ui.motion.resultIntro
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
 internal fun MainActivity.showResultWin() {
     val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.WIN
     b.checkerStrip.background = checkerTile()
     b.scoreUnderline.background = skew(R.color.yellow)
     b.promotionTrack.background = skew(R.color.ink_glow)

@@ -1,12 +1,13 @@
 package io.github.ddayoung03.safetyleague.ui
 
-import android.animation.ObjectAnimator
 import android.car.Car
 import android.car.drivingstate.CarUxRestrictionsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import io.github.ddayoung03.safetyleague.ui.view.Pose
+import io.github.ddayoung03.safetyleague.ui.view.RabbitView
 import io.github.ddayoung03.safetyleague.ui.view.canAnimateCrew
 import io.github.ddayoung03.safetyleague.ui.motion.MotionScope
 import io.github.ddayoung03.safetyleague.ui.motion.SoundFx
@@ -73,13 +74,13 @@ class MainActivity : AppCompatActivity() {
     internal val weatherGate = WeatherTransitionGate()
     internal var displayedWeather: Weather? = null
     internal var demoWeather = Weather.SUN
-    private var crewAnimator: ObjectAnimator? = null
+    private var rabbit: RabbitView? = null
     private val weatherSource by lazy {
         VehicleWeatherSource(this) { signals ->
             runOnUiThread {
                 weatherSignals = signals
                 if (uxFallback) applyRestriction(isDrivingByMotion(signals))
-                if (!crewMotionAllowed()) stopCrewEntrance()
+                syncRabbits()
                 updateWeather()
             }
         }
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         sound = SoundFx(this) // 불러오는 데 시간이 걸려 첫 연출 전에 미리 만든다
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.flagLoaderRabbit.pose = Pose.LOAD
         binding.root.post { showFlagLoader() }
         repository = TripRepository.getInstance(this)
         setupDemoControls()
@@ -156,6 +158,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        binding.root.post { syncRabbits() } // 수명 주기는 onResume이 끝나야 RESUMED가 된다
         if (screen == Screen.DRIVING) {
             handler.removeCallbacks(drivingTick)
             handler.postDelayed(drivingTick, 5_000)
@@ -164,7 +167,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         motion.finishAll()
-        stopCrewEntrance()
+        syncRabbits(allowed = false)
         handler.removeCallbacks(drivingTick)
         super.onPause()
     }
@@ -213,6 +216,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyRestriction(on: Boolean) {
         if (on == restricted) return
         restricted = on
+        syncRabbits()
         binding.demoBar.visibility = if (!on && demoMode) View.VISIBLE else View.GONE
         if (on) { hideKeyboard(); show(Screen.DRIVING) }
         else if (screen == Screen.DRIVING) {
@@ -289,7 +293,6 @@ class MainActivity : AppCompatActivity() {
     internal fun show(target: Screen, origin: View? = null) {
         if (restricted && target != Screen.DRIVING) return
         if (target != Screen.LEAGUE) leagueTab = LeagueTab.MODEL
-        stopCrewEntrance()
         screen = target
         drivingBinding = null
         displayedWeather = null
@@ -311,23 +314,11 @@ class MainActivity : AppCompatActivity() {
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         resultJustFinished = false
+        rabbit = binding.screenContainer.findViewById(R.id.rabbit)
+        syncRabbits()
         applySkew(binding.screenContainer)
         if (reveal != null) reveal()
         else if (!restricted && target != Screen.WIN && target != Screen.LOW) ScreenTransition.enter(binding.screenContainer, motion) // 결과 화면은 playResultWin·playResultLow가 맡는다
-        if (target == Screen.WIN || target == Screen.LOW) {
-            binding.screenContainer.findViewById<View>(R.id.crew)?.let { crew ->
-                crew.post {
-                    if (crew.isShown && crewMotionAllowed()) {
-                        crewAnimator = ObjectAnimator.ofFloat(crew, View.TRANSLATION_Y, dp(12).toFloat(), 0f).apply {
-                            duration = 280
-                            // Eight position changes in 280ms keep visual motion below 30fps.
-                            interpolator = android.animation.TimeInterpolator { fraction -> (fraction * 8).toInt() / 8f }
-                            start()
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private fun crewMotionAllowed() = canAnimateCrew(weatherSignals.gear, weatherSignals.speedMps,
@@ -337,12 +328,9 @@ class MainActivity : AppCompatActivity() {
     internal fun requestSound() = canPlaySound(weatherSignals.gear, weatherSignals.speedMps,
         lifecycle.currentState == androidx.lifecycle.Lifecycle.State.RESUMED, restricted, focus = true) && sound.requestFocus()
 
-    private fun stopCrewEntrance() {
-        crewAnimator?.let { animation ->
-            animation.cancel()
-            (animation.target as? View)?.translationY = 0f
-        }
-        crewAnimator = null
+    /** 움직여도 되는 동안만 토끼가 돈다. 화면에 없는 토끼는 뷰가 알아서 쉰다. */
+    private fun syncRabbits(allowed: Boolean = crewMotionAllowed()) {
+        for (r in listOf(rabbit, binding.flagLoaderRabbit)) if (allowed) r?.start() else r?.stop()
     }
 
     internal val realTrip get() = shownTrip.takeIf { demoResultWin == null }

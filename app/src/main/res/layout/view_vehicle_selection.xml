@@ -14,8 +14,7 @@
                 android:layout_marginTop="8dp" android:text="같은 차종 운전자끼리 겨뤄요"
                 android:textSize="26sp" android:textColor="@color/ink_muted" />
         </LinearLayout>
-        <!-- 토끼 자리. 손 흔들며 맞이한다. 스프라이트가 준비되면 RabbitView가 들어온다 -->
-        <FrameLayout android:id="@+id/rabbit_slot" android:layout_width="128dp" android:layout_height="128dp" />
+        <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="128dp" android:layout_height="128dp" />
     </LinearLayout>
     <GridLayout android:id="@+id/vehicle_grid" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:columnCount="3" android:layout_marginTop="32dp" />

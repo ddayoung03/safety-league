@@ -9,6 +9,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewResultLowBinding
 import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
 import io.github.ddayoung03.safetyleague.ui.motion.playResultLow
 import io.github.ddayoung03.safetyleague.ui.motion.resultIntro
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -40,7 +41,7 @@ internal fun MainActivity.showResultLow() {
         b.tvScore.text = "–"
         fixScoreWidth(b.tvScore)
         b.tvStreakChange.text = "${streakBefore}일 그대로"
-        b.tvPitWord.text = "다음에!"
+        b.rabbit.pose = Pose.WELCOME
         b.tvPitTip.text = SHORT_TRIP_TIP
         b.tvPitReason.text = "이번 주행 ${t.trip.km}km"
         b.tvPitGain.text = ""
@@ -53,7 +54,8 @@ internal fun MainActivity.showResultLow() {
 
     // 실제 트립은 PitBoard(세부 점수 기준), 시연 64점 카드만 DemoData.lowDayDetail을 쓴다
     val pit = pitBoard(t?.events ?: DemoData.lowDayEvents, if (t == null) DemoData.lowDayDetail else t.trip.detailScore, demo = t == null)
-    b.tvPitWord.text = pit.word ?: when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
+    b.rabbit.pose = Pose.PIT
+    b.rabbit.word = pit.word ?: when { pit.tip.contains("깜빡이") -> "깜빡이!"; pit.tip.contains("멈출") -> "천천히!"; pit.tip.contains("벨트") -> "벨트!"; else -> "부드럽게!" }
     b.tvPitTip.text = pit.tip
     b.tvPitReason.text = pit.reason
     b.tvPitGain.text = pit.gain

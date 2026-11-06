@@ -15,9 +15,11 @@ import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
 import io.github.ddayoung03.safetyleague.ui.motion.motionSequence
 import io.github.ddayoung03.safetyleague.ui.motion.stagger
 import java.time.LocalDate
+import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.showLeague() {
     val b = ViewLeagueBinding.inflate(layoutInflater, binding.screenContainer, true)
+    b.rabbit.pose = Pose.POINT
     val real = !demoMode && demoResultWin == null
     b.checkerStrip.background = checkerTile()
     b.tvToLine.background = skew(R.color.yellow)
