@@ -13,6 +13,6 @@ internal object RabbitFrames {
     val RADIO = RabbitClip(listOf(R.drawable.rabbit_radio_00, R.drawable.rabbit_radio_01), listOf(220, 220), true)
     val LOAD = RabbitClip(listOf(R.drawable.rabbit_load_00, R.drawable.rabbit_load_01, R.drawable.rabbit_load_02, R.drawable.rabbit_load_03, R.drawable.rabbit_load_04, R.drawable.rabbit_load_05, R.drawable.rabbit_load_06, R.drawable.rabbit_load_07), listOf(90, 90, 90, 90, 90, 90, 90, 90), true)
     val WELCOME = RabbitClip(listOf(R.drawable.rabbit_welcome_00, R.drawable.rabbit_welcome_01, R.drawable.rabbit_welcome_02, R.drawable.rabbit_welcome_03, R.drawable.rabbit_welcome_04, R.drawable.rabbit_welcome_05), listOf(110, 110, 110, 110, 110, 110), true)
-    val NOD = RabbitClip(listOf(R.drawable.rabbit_nod_00, R.drawable.rabbit_nod_01, R.drawable.rabbit_nod_02, R.drawable.rabbit_nod_03, R.drawable.rabbit_nod_04, R.drawable.rabbit_nod_05), listOf(110, 110, 110, 110, 110, 110), true)
+    val NOD = RabbitClip(listOf(R.drawable.rabbit_nod_00, R.drawable.rabbit_nod_01, R.drawable.rabbit_nod_02, R.drawable.rabbit_nod_03, R.drawable.rabbit_nod_04, R.drawable.rabbit_nod_05, R.drawable.rabbit_nod_06, R.drawable.rabbit_nod_07), listOf(310, 90, 90, 90, 90, 90, 90, 90), true)
     val POINT = RabbitClip(listOf(R.drawable.rabbit_point_00), listOf(800), true)
 }

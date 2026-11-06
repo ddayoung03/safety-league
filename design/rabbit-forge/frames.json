@@ -133,15 +133,19 @@
    "rabbit_nod_02.png",
    "rabbit_nod_03.png",
    "rabbit_nod_04.png",
-   "rabbit_nod_05.png"
+   "rabbit_nod_05.png",
+   "rabbit_nod_06.png",
+   "rabbit_nod_07.png"
   ],
   "durations_ms": [
-   110,
-   110,
-   110,
-   110,
-   110,
-   110
+   310,
+   90,
+   90,
+   90,
+   90,
+   90,
+   90,
+   90
   ],
   "loop": true
  },

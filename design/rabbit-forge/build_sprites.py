@@ -24,12 +24,12 @@ ACTIONS = {
     'radio': (['radio_1', 'radio_2'], [220, 220], True),
     'load': (['load_1', 'load_2'], [90] * 8, True),
     'welcome': (['welcome_2', 'master'], [110] * 6, True),
-    'nod': (['nod_1', 'nod_2'], [110] * 6, True),
+    'nod': (['nod_1', 'nod_2'], [310] + [90] * 7, True),
     'point': (['point_1'], [800], True),
 }
 AIRBORNE = {'win_jump': 22}
 RUN_BOB = {'overtake_1': 0, 'overtake_2': 0, 'overtake_3': 0, 'overtake_4': 0, 'overtake_a': 0, 'overtake_b': 0}
-RUN_ONLY = ['overtake_a', 'overtake_b']  # kept out of the palette input so the other actions stay byte-identical
+EXTRA = ['overtake_a', 'overtake_b', 'nod_h']  # kept out of the palette input so the other actions stay byte-identical
 HOLD_HEAD = {'radio_1', 'radio_2', 'load_1', 'load_2', 'welcome_2', 'master', 'idle_blink'}
 
 
@@ -81,7 +81,7 @@ def main():
     sheet = Image.fromarray(px.reshape(-1, 1, 3), 'RGB')
     pal = sheet.quantize(colors=COLORS, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
 
-    for n in RUN_ONLY:
+    for n in EXTRA:
         small[n] = shrink(n)
 
     out = HERE / 'frames'
@@ -109,7 +109,7 @@ def main():
         c.paste(rgb, (x, y), rgb)
         return c
 
-    done = {n: finish(n) for n in names + RUN_ONLY}
+    done = {n: finish(n) for n in names + EXTRA}
     made = inbetween.build(done)
     meta = {}
     shown = []

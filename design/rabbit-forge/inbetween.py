@@ -35,13 +35,15 @@ WAVE_RANGE = (6, -18)
 WAVE_POSES = [0, 1, 2, 3, 2, 1]
 HEAD_ZONE = (62, 104)  # x from, y up to: the hand passes behind the helmet, never over it
 
-# NOD: the head bows, it does not slide. nod_1 is the drawn bow; moved onto nod_2's body it only ever covers the
-# neck and collar, so the rest pose stays the highest frame and no longer neck can appear.
+# NOD: the head tips, it does not slide. Rest is nod_2, half is nod_h, full is nod_1, all drawn poses laid on nod_2's
+# body. Quarter has no usable drawing, so it is the rest head foreshortened row by row: crown taller, face lower,
+# chin down onto the neck. Every head only covers the neck and collar, so rest stays the highest frame.
+NOD_X = -31           # whole-pixel shift that lands the drawn poses' belt and legs on nod_2's
 NOD_REST_ROW = 101    # last head row of nod_2
-NOD_BOW_ROW = 105     # last head row of nod_1 once registered
-NOD_BOW_X = -31       # whole-pixel shift that lands nod_1's belt and legs on nod_2's
-NOD_HALF = 2          # the half-way frame sits this many pixels above the full bow
-NOD_LIFT = [None, NOD_HALF, 0, 0, NOD_HALF, None]  # None is the rest pose
+NOD_DRAWN_ROW = {'nod_h': 104, 'nod_1': 105}
+NOD_HALF_DROP = 1     # puts nod_h's crown on the rest crown row
+NOD_EAR_LAG = 4       # pixels the rest ears sit low on the quarter frame coming back up
+NOD_TIP = ((62, 80, 103), (62, 76, 101))  # quarter: output rows, then the rest rows they come from
 
 # WIN: whole-pixel path through the three approved poses. Each row: pose, rise, ears, flag, squash.
 # Ears and flag trail the jump by pixels; squash sinks everything above WIN_WAIST into the legs.
@@ -222,8 +224,20 @@ def nod_frames(done):
     rest = pack(done['nod_2'])
     body = rest.copy()
     body[:NOD_REST_ROW + 1] = 0
-    bow = rows(np.roll(pack(done['nod_1']), NOD_BOW_X, 1), NOD_BOW_ROW)
-    return [unpack(rest if lift is None else over(body, shift(bow, -lift))) for lift in NOD_LIFT]
+
+    def drawn(n):
+        return rows(np.roll(pack(done[n]), NOD_X, 1), NOD_DRAWN_ROW[n])
+
+    half = shift(drawn('nod_h'), NOD_HALF_DROP)
+    full = drawn('nod_1')
+    out = np.arange(NOD_TIP[0][0], NOD_TIP[0][-1] + 1)
+    tipped = rows(rest, NOD_TIP[0][0] - 1)
+    tipped[out] = rest[np.interp(out, *NOD_TIP).round().astype(int)]
+    # Ears run one frame behind the head: still up on the way down, still low on the way back up.
+    ears = rows(rest, NOD_TIP[0][0] - 1)
+    back = over(shift(ears, NOD_EAR_LAG), np.where(ears != 0, 0, tipped))
+    heads = [None, tipped, half, full, full, half, back, None]
+    return [unpack(rest if h is None else over(body, h)) for h in heads]
 
 
 def win_frames(done):
