@@ -129,7 +129,6 @@ class RabbitView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         const val TICK_MS = 33L
         const val FRAME_W = 192
         const val FRAME_H = 176
-        const val FEET_ROW = 168
         // rabbit_pit_00의 빈 판: x 65~98, y 114~129
         const val BOARD_W = 34
         const val BOARD_H = 16

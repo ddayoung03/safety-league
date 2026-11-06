@@ -192,10 +192,10 @@
     <!-- 왼쪽 정보와 순위 타워 사이 빈 칸. 팀 라디오 위에 서고, 시안 높이 720dp에서도 정보와 겹치지 않는다. -->
     <io.github.ddayoung03.safetyleague.ui.view.RabbitView
         android:id="@+id/rabbit"
-        android:layout_width="176dp"
-        android:layout_height="235dp"
+        android:layout_width="180dp"
+        android:layout_height="245dp"
         android:layout_gravity="bottom|start"
-        android:layout_marginStart="517dp"
+        android:layout_marginStart="515dp"
         android:layout_marginBottom="140dp" />
 
     <!-- 오른쪽 순위 타워 -->

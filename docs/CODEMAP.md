@@ -21,6 +21,7 @@
 - `ui/view/`: 직접 그린 View와 Drawable
   - 결과: `CrewEntrance`(움직임 허용 판단), `StartLightsView`(출발 신호등), `SpeedLinesView`(속도선)
   - 토끼: `RabbitPose`(동작표·프레임·들썩임·배율 순수 함수), `RabbitView`(그리기와 동작), `RabbitHeadView`(팀 라디오 얼굴). 그림은 `res/drawable-nodpi/rabbit_*.png`, 원본은 `design/rabbit-forge/`
+  - 토끼 그림을 바꾼 뒤: `python design/rabbit-forge/sync_app.py`가 그림과 `RabbitFrames.kt`를 다시 만든다
   - 경로·차트: `CircuitRouteView`, `ReplayEventIcon`, `PositionChartView`
   - 주행: `DrivingTrackView`, `DrivingTrackState`, `WeatherAmbientView`
   - 공용: `DesignCanvas`, `SkewDrawable`, `FlagLoaderView`

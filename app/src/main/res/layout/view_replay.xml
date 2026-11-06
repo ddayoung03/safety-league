@@ -153,7 +153,7 @@
             android:textSize="30sp" />
     </LinearLayout>
 
-    <!-- 토끼 자리. 피트 보드 띠 오른쪽 끝에 올라선다. 스프라이트가 준비되면 RabbitView가 들어온다 -->
+    <!-- 토끼 자리. 피트 보드 띠 오른쪽 끝에 올라선다. -->
     <io.github.ddayoung03.safetyleague.ui.view.RabbitView
         android:id="@+id/rabbit"
         android:layout_width="128dp"
