@@ -11,6 +11,7 @@
 | `prototypes/motion-directions.html` | 첫 비교 A·B·C | 참고용 |
 | `prototypes/character-concepts.html` | 레이싱 슈트 캐릭터 후보 4종, 동작 6종 | 토끼 레이서 선택 |
 | `previews/` | 위 시안의 캡처 PNG | 참고용 |
+| `rabbit-forge/` | 확정 토끼 스프라이트(프레임, `frames.json`, 미리보기, 생성 스크립트). `poses/` 원본은 커밋하지 않음 | 사용 중 |
 | `generated/` | 외부 도구로 만든 이미지. 생성할 때 만든다 | 비어 있음 |
 | `sound/make_fx.py` | 결과 연출 효과음 4종(`app/src/main/res/raw/fx_*.wav`)을 파이썬 표준 라이브러리로 합성하는 스크립트. 사인과 잡음, 외부 음원 없음 | 사용 중 |
 
@@ -40,3 +41,4 @@ HTML은 브라우저에서 바로 열린다. 글꼴은 CDN에서 받으므로 �
 | `generated/rabbit-flow-1.*` | Google Flow (Nano Banana 2.1) | 같은 설정, 셀 셰이딩 한 포즈 |
 | `generated/rabbit-pixel-sheet-1.png` | ChatGPT | 같은 토끼의 96x96 픽셀 아트, 네 포즈 |
 | `generated/rabbit-flow-video-1.mp4` | Google Flow (Omni 1.1 Flash) | `rabbit-a-jump.png`에서 4초 루프, 깡충 뛰며 깃발 흔들기 |
+| `rabbit-forge/master/generated.png`, `poses/*` | Codex CLI (agent-sprite-forge `route_media.py`), 피트 보드는 ChatGPT | `rabbit-forge/prompts/` |

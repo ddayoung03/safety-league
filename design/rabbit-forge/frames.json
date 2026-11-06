@@ -1,0 +1,109 @@
+{
+ "IDLE": {
+  "frames": [
+   "rabbit_idle_00.png",
+   "rabbit_idle_01.png",
+   "rabbit_idle_02.png",
+   "rabbit_idle_03.png"
+  ],
+  "durations_ms": [
+   500,
+   500,
+   500,
+   140
+  ],
+  "loop": true
+ },
+ "WIN": {
+  "frames": [
+   "rabbit_win_00.png",
+   "rabbit_win_01.png",
+   "rabbit_win_02.png",
+   "rabbit_win_03.png"
+  ],
+  "durations_ms": [
+   140,
+   220,
+   220,
+   180
+  ],
+  "loop": true
+ },
+ "OVERTAKE": {
+  "frames": [
+   "rabbit_overtake_00.png",
+   "rabbit_overtake_01.png",
+   "rabbit_overtake_02.png",
+   "rabbit_overtake_03.png"
+  ],
+  "durations_ms": [
+   90,
+   90,
+   90,
+   90
+  ],
+  "loop": true
+ },
+ "PIT": {
+  "frames": [
+   "rabbit_pit_00.png"
+  ],
+  "durations_ms": [
+   800
+  ],
+  "loop": true
+ },
+ "RADIO": {
+  "frames": [
+   "rabbit_radio_00.png",
+   "rabbit_radio_01.png"
+  ],
+  "durations_ms": [
+   220,
+   220
+  ],
+  "loop": true
+ },
+ "LOAD": {
+  "frames": [
+   "rabbit_load_00.png",
+   "rabbit_load_01.png"
+  ],
+  "durations_ms": [
+   170,
+   170
+  ],
+  "loop": true
+ },
+ "WELCOME": {
+  "frames": [
+   "rabbit_welcome_00.png",
+   "rabbit_welcome_01.png"
+  ],
+  "durations_ms": [
+   420,
+   220
+  ],
+  "loop": true
+ },
+ "NOD": {
+  "frames": [
+   "rabbit_nod_00.png",
+   "rabbit_nod_01.png"
+  ],
+  "durations_ms": [
+   300,
+   300
+  ],
+  "loop": true
+ },
+ "POINT": {
+  "frames": [
+   "rabbit_point_00.png"
+  ],
+  "durations_ms": [
+   800
+  ],
+  "loop": true
+ }
+}
