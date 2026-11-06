@@ -3,6 +3,8 @@ package io.github.ddayoung03.safetyleague.ui
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
 import kotlin.math.roundToInt
 
+internal const val SHORT_TRIP_TIP = "3km 이상 달리면 기록돼요"
+
 internal data class Pit(val tip: String, val reason: String, val gain: String, val word: String? = null)
 
 internal fun pitBoard(events: List<ReplayEvent>, detail: io.github.ddayoung03.safetyleague.core.model.DetailScore?, demo: Boolean): Pit {

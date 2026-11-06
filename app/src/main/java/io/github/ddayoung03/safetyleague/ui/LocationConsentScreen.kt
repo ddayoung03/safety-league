@@ -1,10 +1,13 @@
 package io.github.ddayoung03.safetyleague.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.collector.LocationConsent
+import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
 import io.github.ddayoung03.safetyleague.databinding.ViewLocationConsentBinding
 import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
 
@@ -33,7 +36,8 @@ fun inflateLocationConsent(
 }
 
 internal fun MainActivity.showLocationConsent() =
-    inflateLocationConsent(layoutInflater, binding.screenContainer, consentStore.load(), { restricted }) { consent ->
+    inflateLocationConsent(layoutInflater, binding.screenContainer, LocationPolicy.effectiveConsent(consentStore.load(),
+        checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED), { restricted }) { consent ->
         consentStore.save(consent)
         // 위치 권한도 기존 권한 창처럼 별도 작업 창에서 묻는다 (MainActivity 위에 띄우면 주행 중 홈 화면이 앱을 가림)
         if (consent == LocationConsent.GRANTED && missingPermissions(this).isNotEmpty()) {

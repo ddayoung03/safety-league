@@ -581,3 +581,12 @@ Pleos 콘솔에서 FusedLocation이 "준비 중"이라 실제 차량에서 못 �
 - 시연 리포트의 순위 차트 요일이 월~일 고정이라 막대(화~월)와 달랐다. `PositionChartView.days`를 바꿀 수 있게 하고 막대와 같은 목록을 넘긴다.
 - 실제 아쉬운 날 카드의 내 줄이 노란색이었다. `realRows`가 줄 크기를 받게 하고 `rowLow`를 넘겨 시연 64점 카드처럼 흰색으로 맞췄다.
 - 확인: `assembleDebug`·`testDebugUnitTest` 통과(146개), 에뮬레이터에서 두 화면 확인, 앱 충돌 0건.
+
+## 2026-11-06 OS 위치 권한 거부 시 경로 기록 차단 (claude/location-permission-fix)
+
+- OS 위치 권한을 거부해도 경로가 기록됐다. `LocationPolicy.sourceOrder`가 동의만 보고, Pleos `FusedLocation`은 OS 권한 없이도 값을 주기 때문이다. `sourceOrder`가 OS 권한도 받게 해 동의와 권한이 모두 있을 때만 위치 출처를 켠다.
+- 동의했어도 OS 권한이 없으면 경로 기록 설정 화면에 「지금은 경로를 기록하지 않아요」로 표시한다(`effectiveConsent`).
+- 리플레이: 경로가 비어 있으면 「경로를 기록하지 않았어요」(`routeNote`), 3km 미만 트립의 작전 문구는 「3km 이상 달리면 기록돼요」.
+- 3km 미만 카드: 순위 머리글과 「다음 주행 70점이면 1일부터 다시」를 숨긴다.
+- 확인: `assembleDebug`·`testDebugUnitTest` 통과(151개, 새 테스트 5개는 수정 전 실패 확인). 에뮬레이터에서 `adb emu geo fix`로 GPS를 움직이며 권한 거부 주행 → 로그 「경로 기록 동의 또는 OS 위치 권한 없음」, 경로 0점. 권한 복원 주행 → `FusedLocation`, 경로 51점. 일반 45점 카드 변화 없음, 앱 충돌 0건.
+- 남은 한계: 권한 창에서 「다시 묻지 않음」을 고르면 앱에서 다시 물을 수 없어 시스템 설정에서 켜야 한다. 앱 안내는 없다.
