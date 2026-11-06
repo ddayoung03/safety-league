@@ -27,33 +27,33 @@ adb forward tcp:8088 tcp:8088    # Virtual Console: http://127.0.0.1:8088/
 
 Virtual Console에서 기어를 D로 놓고 ACCEL로 3km 이상 달린 뒤 P로 바꾸면 결과 카드가 뜹니다. 앱 왼쪽 위 모서리를 길게 누르면 시연 모드가 열립니다.
 
-## 화면 시안
+## 앱 화면
 
 **주행 결과 — 잘 달린 날.** 주차(P단)하면 레이스 종료 화면이 뜹니다. 오늘 제친 운전자와 승급 라인까지 남은 거리가 보입니다.
 
-![주행 결과, 잘 달린 날](mockups/png/1-result-win.png)
+![주행 결과, 잘 달린 날](design/submission/1-result-win.png)
 
 **주행 결과 — 아쉬운 날.** 감점을 나열하지 않고, 다음 주행에서 고칠 것 하나만 "피트 보드"로 보여 줍니다.
 
-![주행 결과, 아쉬운 날](mockups/png/2-result-low.png)
+![주행 결과, 아쉬운 날](design/submission/2-result-low.png)
 
 **레이스 리플레이.** 결과 카드에서 "리플레이 보기"를 누르면, 오늘 달린 경로 위에 급제동·급가속·깜빡이 누락 지점을 시간순으로 보여 줍니다. 경로는 내 화면에만 보입니다.
 
-![레이스 리플레이](mockups/png/3-replay.png)
+![레이스 리플레이](design/submission/3-replay.png)
 
 **리그 순위.** 월간 시즌, 같은 티어 안에서 상위 30% 승급·하위 30% 강등. 안전운전으로 아낀 돈과 리그 전체가 줄인 급제동도 함께 보여 줍니다.
 
-![리그 순위](mockups/png/4-league.png)
+![리그 순위](design/submission/4-league.png)
 
 **주행 중.** 점수·순위는 숨기고(CarUxRestrictions), 기록이 쌓이는 트랙만 보여 줍니다. 3km 미만 트립은 점수에서 제외됩니다.
 
-![주행 중](mockups/png/5-driving.png)
+![주행 중](design/submission/5-driving.png)
 
 **주간 리포트.** 이번 주 점수 변화와, 요일별 순위 변화를 F1 포지션 차트처럼 보여 줍니다.
 
-![주간 리포트](mockups/png/6-report.png)
+![주간 리포트](design/submission/6-report.png)
 
-시안의 운전자와 숫자는 모두 시연용 가상 데이터입니다. 소스: [`mockups/`](mockups/) (HTML, `node mockups/export.js`로 PNG 생성, `node --test "mockups/test/*.test.js"`로 검사).
+Pleos Connect 에뮬레이터에서 찍은 실제 앱 화면입니다. 운전자와 숫자는 모두 시연용 가상 데이터입니다. 움직임 시안은 [`design/prototypes/`](design/prototypes/), 초기 정지 시안은 [`mockups/`](mockups/)에 있습니다.
 
 ## 점수 구성 (100점)
 | 항목 | 배점 | 기준 |

@@ -10,6 +10,7 @@
 | `prototypes/motion-hybrid.html` | 결과 화면 B·D·E 비교, 움직임 포함 | D 타이밍 타워 선택 |
 | `prototypes/motion-directions.html` | 첫 비교 A·B·C | 참고용 |
 | `prototypes/character-concepts.html` | 레이싱 슈트 캐릭터 후보 4종, 동작 6종 | 토끼 레이서 선택 |
+| `submission/` | 제출용 앱 화면 캡처 6장 | 제출용 |
 | `previews/` | 위 시안의 캡처 PNG | 참고용 |
 | `rabbit-forge/` | 확정 토끼 스프라이트(프레임, `frames.json`, 미리보기, 생성 스크립트). `poses/` 원본은 커밋하지 않음 | 사용 중 |
 | `generated/` | 외부 도구로 만든 이미지. 생성할 때 만든다 | 비어 있음 |
