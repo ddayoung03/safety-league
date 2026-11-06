@@ -45,8 +45,6 @@
     <color name="yellow_dark">#F2B312</color>
     <color name="white_bottom">#E4E2DB</color>
     <color name="beam">#12FFC52E</color>
-    <color name="bar_rest">#3A3E45</color>
-    <color name="bar_normal">#4A4F57</color>
     <color name="clear">#00000000</color>
     <color name="weather_rain">#8FA6BB</color>
     <color name="weather_snow">#D2DBE3</color>

@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 시안 D 주간 리포트. 이 파일의 기본 상태가 최종 상태다. 막대·순위 선·평균 카운트는 ReportScreen이 맡는다. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/asphalt">
+    android:background="@drawable/bg_result">
 
-    <!-- 상단 연석 띠 -->
-    <io.github.ddayoung03.safetyleague.ui.view.KerbView
+    <View
+        android:id="@+id/checker_strip"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_gravity="top"
-        android:alpha="0.5" />
-
-    <!-- 하단 연석 띠 -->
-    <io.github.ddayoung03.safetyleague.ui.view.KerbView
-        android:layout_width="match_parent"
-        android:layout_height="18dp"
-        android:layout_gravity="bottom"
-        android:alpha="0.9" />
+        android:layout_height="12dp" />
 
     <!-- 상단 헤더 -->
     <LinearLayout
@@ -25,21 +17,22 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="64dp"
-        android:paddingTop="40dp">
+        android:paddingTop="24dp">
 
         <TextView
             android:id="@+id/btn_report_back"
             android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:layout_marginEnd="20dp"
-            android:background="@color/cell"
+            android:background="@color/ink_glow"
             android:clickable="true"
             android:contentDescription="리그로 돌아가기"
             android:focusable="true"
             android:gravity="center"
             android:paddingHorizontal="24dp"
+            android:tag="skew"
             android:text="리그"
-            android:textColor="@color/white"
+            android:textColor="@color/ink_text"
             android:textSize="24sp"
             android:visibility="gone" />
 
@@ -48,7 +41,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/tv_report_title"
             android:text="11월 2주차 리포트"
-            android:textColor="@color/white"
+            android:textColor="@color/ink_text"
             android:textSize="34sp" />
 
         <TextView
@@ -57,7 +50,7 @@
             android:layout_marginStart="16dp"
             android:id="@+id/tv_report_range"
             android:text="11.03 ~ 11.09 · 주행 6일"
-            android:textColor="@color/grey"
+            android:textColor="@color/ink_muted"
             android:textSize="24sp" />
     </LinearLayout>
 
@@ -67,15 +60,15 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingStart="64dp"
-        android:paddingTop="118dp"
+        android:paddingTop="112dp"
         android:paddingBottom="130dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="이번 주 평균 점수"
-            android:textColor="@color/grey"
-            android:textSize="24sp" />
+            android:textColor="@color/ink_muted"
+            android:textSize="22sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -83,32 +76,32 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <io.github.ddayoung03.safetyleague.ui.view.MetalTextView
+            <!-- 줄 높이는 글자 크기의 1.574배다. 720dp 캔버스에서 막대가 피트 보드에 닿지 않는 크기 -->
+            <TextView
+                style="@style/NumberText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_week_avg"
                 android:text="88.8"
-                android:textColor="@color/white"
-                android:textSize="150sp"
+                android:textColor="@color/ink_text"
+                android:textSize="116sp"
                 android:includeFontPadding="false"
                 android:letterSpacing="-0.03"
-                android:fontFamily="@font/saira_condensed"
-                android:textStyle="italic"
                 android:shadowColor="#01000000"
-                android:shadowRadius="30"
-                android:paddingEnd="30dp" />
+                android:shadowRadius="24"
+                android:paddingEnd="24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
                 android:tag="skew"
-        android:background="@color/yellow"
+                android:background="@color/yellow"
                 android:paddingHorizontal="18dp"
                 android:paddingVertical="6dp"
                 android:id="@+id/tv_week_change"
                 android:text="지난주보다 +3.1"
-                android:textColor="@color/asphalt"
+                android:textColor="@color/ink"
                 android:textSize="30sp"
                 android:maxLines="1" />
         </LinearLayout>
@@ -118,8 +111,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/tv_last_week"
             android:text="지난주 85.7점"
-            android:textColor="@color/grey"
-            android:textSize="24sp" />
+            android:textColor="@color/ink_muted"
+            android:textSize="22sp" />
 
         <View
             android:layout_width="0dp"
@@ -142,8 +135,8 @@
         android:layout_gravity="end"
         android:layout_marginEnd="64dp"
         android:orientation="vertical"
-        android:paddingTop="118dp"
-        android:paddingBottom="130dp">
+        android:paddingTop="112dp"
+        android:paddingBottom="150dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -156,7 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="순위 변동 · 골드 리그"
-                android:textColor="@color/grey"
+                android:textColor="@color/ink_muted"
                 android:textSize="24sp" />
 
             <TextView
@@ -174,37 +167,45 @@
             android:layout_height="match_parent" />
     </LinearLayout>
 
-    <!-- 하단 피트 보드 -->
+    <!-- 하단 피트 보드 띠 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="84dp"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:layout_marginHorizontal="64dp"
-        android:background="@color/cell"
+        android:background="@drawable/pit_panel"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="10dp">
-        <io.github.ddayoung03.safetyleague.ui.view.CrewFaceView
-            android:layout_width="64dp" android:layout_height="64dp" android:layout_marginEnd="18dp" />
+        android:paddingHorizontal="28dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="다음 주 작전"
-            android:textColor="@color/yellow"
+            android:textColor="@color/ink"
             android:textSize="24sp" />
 
+        <!-- 오른쪽 끝은 토끼 자리 -->
         <TextView
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
+            android:layout_marginEnd="120dp"
             android:id="@+id/tv_next_plan"
             android:text="깜빡이 누락만 줄이면 승급 라인까지 6계단, 평균 +0.9점이면 돼요"
-            android:textColor="@color/white"
+            android:textColor="@color/ink"
             android:textSize="26sp" />
     </LinearLayout>
+
+    <!-- 토끼 자리. 피트 보드 띠 오른쪽 끝에서 차트를 보며 끄덕인다. 스프라이트가 준비되면 RabbitView가 들어온다 -->
+    <FrameLayout
+        android:id="@+id/rabbit_slot"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="20dp" />
 
 </FrameLayout>

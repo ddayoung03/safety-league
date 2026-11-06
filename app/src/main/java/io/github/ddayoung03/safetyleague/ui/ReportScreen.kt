@@ -1,20 +1,28 @@
 package io.github.ddayoung03.safetyleague.ui
 
+import android.animation.ValueAnimator
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.LinearLayout
+import androidx.core.view.children
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.WeeklyReportCalculator
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.databinding.ViewReportBinding
-import io.github.ddayoung03.safetyleague.ui.view.AsphaltDrawable
+import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
+import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
+import io.github.ddayoung03.safetyleague.ui.motion.countUp
+import io.github.ddayoung03.safetyleague.ui.motion.settleShown
+import io.github.ddayoung03.safetyleague.ui.motion.skippableSequence
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
 internal fun MainActivity.showReport() {
     val b = ViewReportBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.root.background = AsphaltDrawable(this)
+    b.checkerStrip.background = checkerTile()
     if (!demoMode && demoResultWin == null) { showRealReport(b); return }
     val from = LocalDate.parse(DemoData.today).minusDays(6) // 기준일까지 7일: 11.03 ~ 11.09
     val week = (0..6).map { from.plusDays(it.toLong()).toString() }
@@ -39,6 +47,7 @@ internal fun MainActivity.showReport() {
     b.positionChart.days = days
     b.positionChart.ranks = ranks
     scoreBars(b.layoutScoreBars, scores, days)
+    playReport(b, avg)
 }
 
 /** 실제 모드: 이번 주(월~일) 리그 트립으로 채운다. 트립이 없으면 빈 상태. */
@@ -61,6 +70,54 @@ internal fun MainActivity.showRealReport(b: ViewReportBinding) {
     b.positionChart.visibility = if (move == null) View.INVISIBLE else View.VISIBLE
     b.tvNextPlan.text = WeeklyReportCalculator.nextPlan(r)
     scoreBars(b.layoutScoreBars, r.dailyScores)
+    r.average?.let { playReport(b, it) } // 트립이 없는 주는 빈 상태 그대로 둔다
+}
+
+/**
+ * 막대가 자라고 순위 선이 그려지는 동안 평균이 올라가고, 지난주 비교와 순위 변동이 뒤따른다.
+ * 뷰에는 이미 최종 값이 들어 있고, 화면을 누르거나 화면이 바뀌면 motion.finishAll()이 최종 상태를 맞춘다.
+ */
+private fun MainActivity.playReport(b: ViewReportBinding, average: Double) {
+    if (!animationsEnabled()) return
+    val columns = b.layoutScoreBars.children.map { it as ViewGroup }.toList()
+    val numbers = columns.map { it.getChildAt(0) }
+    val bars = columns.map { it.getChildAt(1) }
+    val late = listOf(b.tvWeekChange, b.tvLastWeek, b.tvRankMove).filter { it.visibility == View.VISIBLE }
+    val draw = ValueAnimator.ofFloat(0f, 1f).setDuration(MotionTokens.COUNT)
+    val seq = skippableSequence(b.root) {
+        draw.cancel()
+        b.positionChart.progress = 1f
+        (numbers + bars + late).forEach { it.settleShown() }
+    }
+    val curve = DecelerateInterpolator(2f)
+    fun pop(v: View) {
+        v.animate().alpha(1f).translationX(0f).setDuration(MotionTokens.BASE).setInterpolator(curve).start()
+    }
+
+    b.positionChart.progress = 0f
+    val fromX = -dp(26).toFloat()
+    for (v in late) { v.alpha = 0f; v.translationX = fromX }
+    // 막대가 자라는 동안 숫자는 막대 머리에 얹혀 함께 올라간다
+    bars.forEachIndexed { i, bar ->
+        val number = numbers[i]
+        bar.scaleY = 0f
+        number.alpha = 0f
+        number.translationY = bar.layoutParams.height.toFloat()
+        seq.at(MotionTokens.BASE + i * MotionTokens.STAGGER) {
+            bar.animate().scaleY(1f).setDuration(MotionTokens.SLOW).setInterpolator(curve).start()
+            number.animate().alpha(1f).translationY(0f).setDuration(MotionTokens.SLOW).setInterpolator(curve).start()
+        }
+    }
+    b.tvWeekAvg.countUp((average * 10).roundToInt(), MotionTokens.COUNT, motion) { "${it / 10}.${it % 10}" }
+
+    draw.addUpdateListener { b.positionChart.progress = it.animatedValue as Float }
+    val lineAt = MotionTokens.BASE * 2
+    seq.at(lineAt) { draw.start() }
+    seq.at(MotionTokens.COUNT) { pop(b.tvWeekChange) }
+    seq.at(MotionTokens.COUNT + MotionTokens.STAGGER) { pop(b.tvLastWeek) }
+    val lineEnd = lineAt + MotionTokens.COUNT
+    seq.at(lineEnd) { pop(b.tvRankMove) }
+    seq.endAt(lineEnd + MotionTokens.BASE)
 }
 
 private val weekdayNames = listOf("월", "화", "수", "목", "금", "토", "일")
@@ -76,13 +133,14 @@ internal fun MainActivity.scoreBars(container: LinearLayout, scores: List<Int?>,
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply { setMargins(dp(7), 0, dp(7), 0) }
         }
         // 칸 230dp = 숫자 약 34 + 막대 최대 150 + 요일 약 34 (막대가 요일을 밀어내지 않게)
-        col.addView(text(s?.toString() ?: "휴식", if (s == null) R.color.grey else R.color.white, number = s != null).apply { gravity = Gravity.CENTER })
+        col.addView(text(s?.toString() ?: "휴식", if (s == null) R.color.ink_muted else R.color.ink_text, number = s != null).apply { gravity = Gravity.CENTER })
+        val barHeight = if (s == null) dp(4) else dp(((s - 60) / 40f * 150).roundToInt().coerceIn(16, 150))
         col.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                if (s == null) dp(4) else dp(((s - 60) / 40f * 150).roundToInt().coerceIn(16, 150)))
-            setBackgroundColor(when { s == null -> color(R.color.bar_rest); s == best -> color(R.color.yellow); else -> color(R.color.bar_normal) })
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, barHeight)
+            pivotY = barHeight.toFloat() // 바닥에서 자란다
+            background = skew(when { s == null -> R.color.ink_glow; s == best -> R.color.yellow; else -> R.color.ink_muted })
         })
-        col.addView(text(day, R.color.grey).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
+        col.addView(text(day, R.color.ink_muted).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
         container.addView(col)
     }
 }
