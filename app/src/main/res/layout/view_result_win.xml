@@ -6,12 +6,6 @@
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <io.github.ddayoung03.safetyleague.ui.view.CheckerFlagView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:alpha="0.85" />
-
     <!-- 상단 얇은 연석 띠 -->
     <io.github.ddayoung03.safetyleague.ui.view.KerbView
         android:layout_width="match_parent"

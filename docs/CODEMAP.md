@@ -19,7 +19,7 @@
   - 결과: `FlameScoreView`(불꽃), `RainScoreView`(비), `MetalTextView`(금속 숫자), `CrewEntrance`(캐릭터 등장), `CrewFaceView`(얼굴)
   - 경로·차트: `CircuitRouteView`, `ReplayEventIcon`, `PositionChartView`
   - 주행: `DrivingTrackView`, `DrivingTrackState`, `WeatherAmbientView`
-  - 공용: `DesignCanvas`, `GlassDrawable`, `SkewDrawable`, `AsphaltDrawable`, `KerbView`, `CheckerFlagView`
+  - 공용: `DesignCanvas`, `GlassDrawable`, `SkewDrawable`, `AsphaltDrawable`, `KerbView`, `FlagLoaderView`
 - `weather/`: `WeatherState`(날씨 판정·움직임 허용 순수 함수), `VehicleWeatherSource`(차량 신호)
 - `service/TripTrackingService.kt`: 주행 백그라운드 수집
 - `core/`: 점수·리그·수집·데이터. **디자인 작업에서는 고치지 않는다.**

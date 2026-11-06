@@ -110,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.post { showFlagLoader() }
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         startTracking()
