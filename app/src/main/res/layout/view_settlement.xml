@@ -65,25 +65,42 @@
             android:textSize="90sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_tier_tag"
+    <LinearLayout
+        android:id="@+id/tier_row"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="398dp"
-        android:background="@color/yellow"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="8dp"
-        android:tag="skew"
-        android:textColor="@color/ink"
-        android:textSize="24sp" />
+        android:layout_marginTop="376dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_tier_belt"
+            android:layout_width="40dp"
+            android:layout_height="88dp"
+            android:layout_marginEnd="14dp"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/tv_tier_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/yellow"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            android:tag="skew"
+            android:textColor="@color/ink"
+            android:textSize="24sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_detail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="458dp"
+        android:layout_marginTop="472dp"
         android:lineSpacingExtra="6dp"
         android:maxWidth="760dp"
         android:textColor="@color/ink_muted"

@@ -331,6 +331,17 @@
     </LinearLayout>
 
     <!-- 토끼 자리. 타워 옆 구석에서 승급 라인을 가리킨다. -->
+    <!-- 지금 티어의 안전벨트. 큰 순위 오른쪽에 둔다 -->
+    <ImageView
+        android:id="@+id/iv_tier_belt"
+        android:layout_width="78dp"
+        android:layout_height="172dp"
+        android:layout_marginStart="490dp"
+        android:layout_marginTop="150dp"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter" />
+
     <io.github.ddayoung03.safetyleague.ui.view.RabbitView
         android:id="@+id/rabbit"
         android:layout_width="180dp"

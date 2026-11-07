@@ -50,6 +50,7 @@ internal fun MainActivity.showLeague() {
         b.tvBrakesCaption.text = DemoData.brakesCaption
     }
     val tier = if (real) myTier else DemoData.league.tier
+    b.ivTierBelt.setImageResource(tierBelt(tier))
     for (cell in b.tierBar.children.map { it as TextView }) {
         cell.background = skew(if (cell.text == tier) R.color.yellow else R.color.ink_glow)
         cell.setTextColor(color(if (cell.text == tier) R.color.ink else R.color.ink_muted))

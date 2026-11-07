@@ -1,0 +1,16 @@
+Pixel art game item icons, matching the crisp chunky pixel-art style, outlines and shading of the attached references (use them ONLY as style references, do NOT draw any rabbit, character, wall or tool).
+
+One image with exactly 5 separate items in a single horizontal row, evenly spaced, each fully inside its own fifth of the image with generous empty margin around it. Nothing touches another item or the image edge.
+
+Every item is the SAME object in the SAME pose, drawn straight on: a car seat belt icon. A short woven webbing strap forms one clean diagonal S-curve loop, ending in a chunky metal seat belt buckle with its latch tongue clicked in. The woven strap shows a fine diagonal weave texture and stitched edges. Bold silhouette that reads at small size.
+
+Left to right, the only difference is color and material:
+1. BRONZE: warm dull copper-brown woven strap, aged bronze buckle with slightly worn matte metal.
+2. SILVER: cool grey woven strap, brushed steel buckle with soft highlights.
+3. GOLD: rich golden yellow satin strap close to #FFC52E, polished gold buckle with warm highlights.
+4. PLATINUM: pale silver-white strap with a faint cool blue tint, mirror-polished platinum buckle, with two or three small four-point sparkle glints on the buckle and strap edge.
+5. DIAMOND: icy cyan and white strap that looks like faceted crystal, clear faceted diamond buckle with bright light-blue reflections, with four or five small four-point sparkle glints around it. This one is the most brilliant of the five.
+
+Background: one completely flat solid magenta color #FF00FF everywhere, with no gradient, no shadow, no floor, no texture.
+No text, no letters, no numbers, no logos, no red anywhere on the items.
+Wide image, 1536x1024.

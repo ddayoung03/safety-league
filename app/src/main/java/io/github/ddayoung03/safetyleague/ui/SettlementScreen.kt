@@ -29,7 +29,8 @@ internal fun MainActivity.showSettlement() {
     b.tvPoints.text = pointsLabel(c.points)
     val tag = tierTag(c)
     b.tvTierTag.text = tag
-    b.tvTierTag.visibility = if (tag == null) View.GONE else View.VISIBLE
+    b.tierRow.visibility = if (tag == null) View.GONE else View.VISIBLE
+    b.ivTierBelt.setImageResource(tierBelt(c.promotedTo ?: c.tier))
     b.tvDetail.text = detailText(c)
     b.btnSettleShop.setOnClickListener {
         if (!demoMode) seasonStore.clearCard()

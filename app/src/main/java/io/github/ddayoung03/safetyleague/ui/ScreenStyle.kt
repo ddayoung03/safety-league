@@ -18,6 +18,15 @@ import io.github.ddayoung03.safetyleague.ui.motion.MotionTokens
 import io.github.ddayoung03.safetyleague.ui.view.SkewDrawable
 import kotlin.math.roundToInt
 
+/** 티어를 나타내는 안전벨트 그림. 모르는 티어는 브론즈로 본다. */
+internal fun tierBelt(tier: String) = when (tier) {
+    "실버" -> R.drawable.tier_belt_silver
+    "골드" -> R.drawable.tier_belt_gold
+    "플래티넘" -> R.drawable.tier_belt_platinum
+    "다이아" -> R.drawable.tier_belt_diamond
+    else -> R.drawable.tier_belt_bronze
+}
+
 internal fun MainActivity.dp(v: Int) = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v.toFloat(), resources.displayMetrics).roundToInt()
 internal fun MainActivity.dp(v: Float) = dp(v.roundToInt())
 internal fun MainActivity.color(id: Int) = ContextCompat.getColor(this, id)
