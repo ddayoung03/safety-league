@@ -48,6 +48,8 @@
             android:maxLines="1"
             android:paddingEnd="20dp"
             android:textColor="@color/ink_text"
+            android:shadowColor="#01000000"
+            android:shadowRadius="40"
             android:textSize="190sp" />
 
         <TextView
@@ -58,6 +60,8 @@
             android:paddingEnd="36dp"
             android:text="P"
             android:textColor="@color/yellow"
+            android:shadowColor="#01000000"
+            android:shadowRadius="24"
             android:textSize="90sp" />
     </LinearLayout>
 
