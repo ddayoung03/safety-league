@@ -112,6 +112,8 @@
                     android:includeFontPadding="false"
                     android:paddingEnd="12dp"
                     android:textColor="@color/ink_text"
+                    android:shadowColor="#01000000"
+                    android:shadowRadius="16"
                     android:textSize="68sp" />
 
                 <TextView
@@ -122,6 +124,8 @@
                     android:includeFontPadding="false"
                     android:paddingEnd="8dp"
                     android:textColor="@color/ink_muted"
+                    android:shadowColor="#01000000"
+                    android:shadowRadius="10"
                     android:textSize="34sp" />
             </LinearLayout>
 
@@ -254,6 +258,8 @@
             android:layout_marginTop="8dp"
             android:paddingEnd="28dp"
             android:textColor="@color/yellow"
+            android:shadowColor="#01000000"
+            android:shadowRadius="16"
             android:textSize="72sp" />
 
         <TextView

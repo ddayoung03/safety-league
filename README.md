@@ -54,6 +54,18 @@ Virtual Console에서 기어를 D로 놓고 ACCEL로 3km 이상 달린 뒤 P로 
 
 ![주간 리포트](design/submission/6-report.png)
 
+**시즌 정산.** 시즌이 끝나면 달린 거리, 평균 점수, 티어로 포인트를 정산해 시상대 화면으로 보여 줍니다.
+
+![시즌 정산](design/submission/7-settlement.png)
+
+**토끼 피트샵.** 받고 싶은 쿠폰을 목표로 정하면 게이지가 차고, 모은 포인트를 쿠폰으로 교환합니다.
+
+![포인트 상점](design/submission/8-shop.png)
+
+**쿠폰함.** 교환한 쿠폰의 유효기간과 바코드를 보여 줍니다. 상품과 쿠폰은 시연용이며 실제로 발급되지 않습니다.
+
+![쿠폰함](design/submission/9-coupons.png)
+
 Pleos Connect 에뮬레이터에서 찍은 실제 앱 화면입니다. 운전자와 숫자는 모두 시연용 가상 데이터입니다. 움직임 시안은 [`design/prototypes/`](design/prototypes/), 초기 정지 시안은 [`mockups/`](mockups/)에 있습니다.
 
 ## 점수 구성 (100점)
