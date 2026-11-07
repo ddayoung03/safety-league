@@ -1,6 +1,8 @@
 package io.github.ddayoung03.safetyleague.core.repository
 
 import android.content.Context
+import android.util.AtomicFile
+import android.util.Log
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.Point2D
@@ -47,17 +49,26 @@ class TripRepository private constructor(private val file: File) {
 
     fun getStreak(untilDate: String): Int = TripQueries.streak(realTrips, untilDate)
 
+    /** 쓰는 중에 시동이 꺼져도 이전 기록이 남도록 임시 파일에 쓴 뒤 바꿔치기한다. 저장 실패로 앱이 죽지 않게 한다. */
     private fun persist() {
         val arr = JSONArray()
         realTrips.forEach { arr.put(toJson(it)) }
-        file.writeText(arr.toString())
+        val store = AtomicFile(file)
+        val out = runCatching { store.startWrite() }.getOrElse { Log.w(TAG, "트립 저장 실패", it); return }
+        runCatching { out.write(arr.toString().toByteArray()); store.finishWrite(out) }
+            .onFailure { store.failWrite(out); Log.w(TAG, "트립 저장 실패", it) }
     }
 
     private fun load() {
-        if (!file.exists()) return
+        val store = AtomicFile(file)
         runCatching {
-            val arr = JSONArray(file.readText())
+            val arr = JSONArray(String(store.readFully()))
             for (i in 0 until arr.length()) realTrips += fromJson(arr.getJSONObject(i))
+        }.onFailure {
+            if (it is java.io.FileNotFoundException) return
+            // 깨진 파일을 다음 저장이 덮어쓰기 전에 남겨 둔다
+            Log.w(TAG, "트립 파일을 읽지 못함", it)
+            runCatching { file.copyTo(File(file.parent, "trips.broken.json"), overwrite = true) }
         }
     }
 
@@ -86,6 +97,8 @@ class TripRepository private constructor(private val file: File) {
     }
 
     companion object {
+        private const val TAG = "TripRepository"
+
         @Volatile
         private var instance: TripRepository? = null
 

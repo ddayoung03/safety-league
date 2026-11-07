@@ -31,6 +31,8 @@ class RabbitView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     var word: String? = null
         set(value) {
             field = value
+            // 글꼴이 2.6MB라 말판이 필요한 화면에서만 불러온다
+            if (value != null && wordPaint.typeface == null) wordPaint.typeface = ResourcesCompat.getFont(context, R.font.pretendard_black)
             fitWord()
             invalidate()
         }
@@ -40,7 +42,6 @@ class RabbitView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private val wordPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = context.getColor(R.color.yellow)
         textAlign = Paint.Align.CENTER
-        typeface = ResourcesCompat.getFont(context, R.font.pretendard_black)
     }
     private val dst = RectF()
     private var cell = 1f

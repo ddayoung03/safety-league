@@ -180,10 +180,10 @@ class VehicleWeatherSource(private val context: Context, private val changed: (W
     fun stop() {
         active = false
         generation++
-        vehicle?.release()
+        runCatching { vehicle?.release() }
         vehicle = null
         runCatching { manager?.unregisterCallback(callback) }
-        car?.disconnect()
+        runCatching { car?.disconnect() }
         manager = null
         car = null
     }

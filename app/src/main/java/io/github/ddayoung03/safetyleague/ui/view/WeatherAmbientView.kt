@@ -52,6 +52,7 @@ class WeatherAmbientView @JvmOverloads constructor(context: Context, attrs: Attr
     fun setState(value: Weather, allowMotion: Boolean, transition: Boolean) {
         val changed = value != weather
         if (still && !allowMotion) freeze()
+        if (!changed && still == allowMotion) return // 속도 신호마다 정지 그림을 다시 그리지 않는다
         still = allowMotion
         if (changed) {
             weather = value

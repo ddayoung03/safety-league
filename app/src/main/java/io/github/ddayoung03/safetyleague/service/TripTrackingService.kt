@@ -92,7 +92,11 @@ class TripTrackingService : Service() {
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (canLocate) ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         } else 0
-        ServiceCompat.startForeground(this, TRACKING_ID, trackingNotification(), type)
+        // 프로세스가 뒤에서 되살아나면 location 타입이 거부될 수 있다(API 34). 그래도 수집은 이어 간다.
+        runCatching { ServiceCompat.startForeground(this, TRACKING_ID, trackingNotification(), type) }.onFailure {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceCompat.startForeground(this, TRACKING_ID,
+                trackingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        }
         if (!mockRunning) signals.post { pleos.syncLocation() } // 위치 동의가 바뀌었으면 반영
         return START_STICKY
     }
@@ -119,6 +123,7 @@ class TripTrackingService : Service() {
     }
 
     private val mockRunning get() = mock.isRunning
+    val demoRunning get() = mockRunning
 
     private fun showResultNotification() {
         val open = PendingIntent.getActivity(

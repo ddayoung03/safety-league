@@ -24,15 +24,17 @@ internal fun MainActivity.updateWeather() {
     val changed = displayedWeather != null && displayedWeather != weather
     val transition = changed && weatherGate.allow(android.os.SystemClock.uptimeMillis())
     displayedWeather = weather
-    b.tvWeatherStatus.text = getString(R.string.weather_recording, weather.label)
+    val status = getString(R.string.weather_recording, weather.label)
+    if (b.tvWeatherStatus.text != status) b.tvWeatherStatus.text = status
     b.weatherAmbient.setState(weather, isAmbientMotionAllowed(weatherSignals.speedMps, weatherSignals.gear), transition)
 }
 
 internal fun MainActivity.updateDrivingProgress() {
     val b = drivingBinding ?: return
     val s = service
-    val real = s?.isTracking == true && demoResultWin == null
-    val doneKm = if (real) s!!.currentTripKm else 11.2
+    // 가짜 거리는 시연 때만 쓴다. 실제 운전자에게는 트립이 잡히기 전이어도 0km로 보인다.
+    val real = demoResultWin == null && (s?.isTracking == true || !demoMode)
+    val doneKm = if (real) s?.currentTripKm ?: 0.0 else 11.2
     val destKm: Double? = if (real) null else DemoData.winDayKm // 내비 목적지가 없으면 null
     drivingKmShown = doneKm.toInt()
     b.tvProgress.text = if (destKm != null) "${LeagueCalculator.round1(doneKm)} / ${destKm}km · 해운대까지" else "${LeagueCalculator.round1(doneKm)}km 기록됨"

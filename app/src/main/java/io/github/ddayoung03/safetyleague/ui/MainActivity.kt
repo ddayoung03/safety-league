@@ -23,6 +23,7 @@ import android.os.Looper
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import io.github.ddayoung03.safetyleague.core.collector.VehicleProfileReader
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -108,6 +109,7 @@ class MainActivity : AppCompatActivity() {
                 s.onResult = { trip -> runOnUiThread { onTripResult(trip) } }
             }
             updateSdkStatus()
+            syncWithTrip()
         }
         override fun onServiceDisconnected(name: ComponentName?) { service = null }
     }
@@ -122,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         sound = SoundFx(this) // 불러오는 데 시간이 걸려 첫 연출 전에 미리 만든다
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, backHandler)
         binding.flagLoaderRabbit.pose = Pose.LOAD
         binding.root.post { showFlagLoader(text = R.string.loader_start) }
         repository = TripRepository.getInstance(this)
@@ -137,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         if (!handleResultIntent(intent)) {
             if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
             val latest = repository.latestCompletedTrip.value
-            if (latest != null && !settled && seasonStore.card() == null) showResult(latest) else show(Screen.LEAGUE)
+            if (latest != null && !settled && seasonStore.card() == null && isUnseen(latest)) showResult(latest) else show(Screen.LEAGUE)
         }
     }
 
@@ -158,6 +161,8 @@ class MainActivity : AppCompatActivity() {
         bindService(Intent(this, TripTrackingService::class.java), connection, Context.BIND_AUTO_CREATE)
         connectUxRestrictions()
         weatherSource.start()
+        // 앱을 켜 둔 채 달이 바뀔 수 있다. 정산이 되면 리그로 가는 길에서 시상대가 뜬다.
+        if (::repository.isInitialized && seasonStore.settleIfNeeded(repository)) show(Screen.LEAGUE)
     }
 
     override fun onResume() {
@@ -241,7 +246,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupDemoControls() {
         binding.demoHotspot.setOnLongClickListener {
-            if (restricted) return@setOnLongClickListener true
+            if (restricted || service?.demoRunning == true) return@setOnLongClickListener true
             demoMode = !demoMode
             if (demoMode) demoWallet = DemoData.startWallet()
             if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.LEAGUE) }
@@ -268,6 +273,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun runDemo(win: Boolean) {
         val s = service ?: return
+        if (s.isTracking) return // 진행 중인 실제 트립을 각본이 끊지 않게 한다
         demoResultWin = win
         show(Screen.DRIVING)
         s.runDemo(win)
@@ -286,12 +292,50 @@ class MainActivity : AppCompatActivity() {
         else showResult(trip)
     }
 
+    // ---------- 복귀 ----------
+
+    private val seenPrefs by lazy { getSharedPreferences("result_seen", Context.MODE_PRIVATE) }
+    private fun tripKey(t: CompletedTrip) = "${t.trip.date} ${t.startTime} ${t.endTime}"
+    private fun isUnseen(t: CompletedTrip) = seenPrefs.getString("trip", null) != tripKey(t)
+    private fun markSeen(t: CompletedTrip) { seenPrefs.edit().putString("trip", tripKey(t)).apply() }
+
+    /** 서비스에 다시 붙었을 때 화면을 트립 상태에 맞춘다. 첫 설정 화면과 시상대는 건드리지 않는다. */
+    private fun syncWithTrip() {
+        if (screen in listOf(Screen.VEHICLE, Screen.PLACEMENT, Screen.CONSENT, Screen.SETTLEMENT)) return
+        val latest = repository.latestCompletedTrip.value
+        val unseen = latest != null && !demoMode && isUnseen(latest)
+        when (resumeAction(screen, restricted, service?.isTracking == true, unseen)) {
+            Resume.DRIVING -> show(Screen.DRIVING)
+            Resume.RESULT -> showResult(latest!!)
+            Resume.LEAGUE -> show(Screen.LEAGUE)
+            Resume.STAY -> Unit
+        }
+    }
+
+    private val backHandler = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            val panel = binding.screenContainer.findViewById<View>(R.id.confirm_panel)
+            val target = backTarget(screen, profileStore.load() != null)
+            when {
+                panel?.visibility == View.VISIBLE -> panel.visibility = View.GONE
+                screen == Screen.REPLAY -> realTrip?.let { showResult(it) } ?: show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
+                target != null -> show(target)
+                else -> {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        }
+    }
+
     // ---------- 화면 전환 ----------
 
     internal fun showResult(trip: CompletedTrip) {
         if (profileStore.load() == null) { show(Screen.VEHICLE); return }
         demoResultWin = null
         shownTrip = trip
+        markSeen(trip)
         show(if (trip.trip.score >= 70.0) Screen.WIN else Screen.LOW)
     }
 

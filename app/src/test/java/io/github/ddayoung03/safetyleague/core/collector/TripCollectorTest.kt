@@ -73,6 +73,19 @@ class TripCollectorTest {
     }
 
     @Test
+    fun reversingIsNotHardBrakingOrAcceleration() {
+        val c = collector()
+        c.depart(1_000)
+        c.onGearChanged(GearState.REVERSE, 2_000)
+        c.onSpeedChanged(-2f, 3_000)
+        c.onSpeedChanged(-2f, 3_600)
+        c.onSpeedChanged(0f, 4_200)
+        c.onOdometerChanged(105.0, 5_000)
+        c.onGearChanged(GearState.PARK, 5_000)
+        assertTrue(trips.single().events.isEmpty())
+    }
+
+    @Test
     fun oneSustainedHardAccelerationCountsOnce() {
         val c = collector()
         c.depart(1_000, speed = 1f)

@@ -319,7 +319,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="60dp"
         android:layout_marginBottom="20dp"
-        android:text="다른 날의 예시"
+        android:text="시연 예시"
         android:textColor="@color/ink_muted"
         android:textSize="20sp" />
 

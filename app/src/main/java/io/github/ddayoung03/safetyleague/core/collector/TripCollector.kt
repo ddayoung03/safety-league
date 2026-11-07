@@ -111,8 +111,9 @@ class TripCollector(
         if (gear == GearState.PARK && isTracking) finishTrip(timestampMs)
     }
 
-    override fun onSpeedChanged(speedMps: Float, timestampMs: Long) {
-        if (!isTracking && gear != GearState.PARK && speedMps > MOVING_MPS) startTrip(timestampMs, speedMps)
+    override fun onSpeedChanged(signedMps: Float, timestampMs: Long) {
+        if (!isTracking && gear != GearState.PARK && signedMps > MOVING_MPS) startTrip(timestampMs, signedMps)
+        val speedMps = abs(signedMps) // 후진 속도는 음수로 올 수 있다
         if (isTracking && lastSpeedMs > 0L) {
             // 오도미터가 안 움직이는 환경(에뮬레이터)을 위해 속도 × 시간도 쌓아 둔다
             val gap = (timestampMs - lastSpeedMs) / 1000.0
@@ -123,7 +124,7 @@ class TripCollector(
             }
 
             val dt = (timestampMs - anchorMs) / 1000.0
-            if (dt > 3.0) {
+            if (dt > 3.0 || gear == GearState.REVERSE) { // 주차하며 후진하는 것은 급가속·급제동이 아니다
                 anchorSpeed = speedMps; anchorMs = timestampMs
                 inHardAccel = false; inHardBrake = false
             } else if (timestampMs - anchorMs >= ACCEL_WINDOW_MS) {

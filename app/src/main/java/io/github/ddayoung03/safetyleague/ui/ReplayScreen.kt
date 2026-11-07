@@ -34,7 +34,7 @@ internal fun MainActivity.showReplay() {
     else "${DemoData.lowDayStart} ~ ${DemoData.lowDayEnd} · ${DemoData.lowDayKm}km"
     val routeNote = t?.let { routeNote(it.route) }
     val moved = routeNote == null
-    b.routeReplayView.routePoints = if (t == null) DemoData.route else RouteNormalizer.normalize(t.route)
+    b.routeReplayView.routePoints = if (t == null) DemoData.route else RouteNormalizer.normalize(RouteNormalizer.thin(t.route))
     b.routeReplayView.visibility = if (moved) View.VISIBLE else View.INVISIBLE
     if (!moved) b.tvReplayMeta.text = "${t!!.startTime} ~ ${t.endTime} · ${t.trip.km}km · $routeNote"
     // 트립 안에서의 위치 순서. 시각과 같은 순서이고, 자정을 넘긴 트립도 차가 지나는 순서대로 뜬다.
