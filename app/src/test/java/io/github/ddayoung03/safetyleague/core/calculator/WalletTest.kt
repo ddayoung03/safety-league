@@ -61,8 +61,7 @@ class WalletTest {
     }
 
     @Test fun decodeIgnoresIndentAddedByPrefsFile() {
-        assertEquals(Wallet(18), Wallet.decode("18
-    "))
+        assertEquals(Wallet(18), Wallet.decode("18\n    "))
     }
 
     @Test fun decodeBrokenTextGivesEmptyWallet() {
