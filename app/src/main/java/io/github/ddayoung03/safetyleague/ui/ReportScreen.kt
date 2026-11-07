@@ -49,6 +49,9 @@ internal fun MainActivity.showReport() {
     b.positionChart.days = days
     b.positionChart.ranks = ranks
     scoreBars(b.layoutScoreBars, scores, days)
+    b.btnReportBack.visibility = View.VISIBLE
+    b.btnReportBack.pressFeedback()
+    b.btnReportBack.setOnClickListener { show(Screen.LEAGUE) }
     playReport(b, avg)
 }
 

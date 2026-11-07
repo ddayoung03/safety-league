@@ -2,6 +2,7 @@ package io.github.ddayoung03.safetyleague.ui
 
 import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.Coupon
@@ -64,6 +65,7 @@ private fun MainActivity.couponRow(c: Coupon): View {
         background = skew(R.color.ink_glow)
         alpha = if (expired) .55f else 1f
     }
+    row.addView(ImageView(this).apply { setImageResource(shopIcon(c.itemId)) }, LinearLayout.LayoutParams(dp(80), dp(80)).apply { marginEnd = dp(16) })
     val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     words.addView(text(ShopCatalog.item(c.itemId)?.name ?: "쿠폰", R.color.ink_text, 24f))
     words.addView(text(if (expired) "기간 만료" else "${c.expiresOn.format(dayFormat)}까지", R.color.ink_muted, 19f))

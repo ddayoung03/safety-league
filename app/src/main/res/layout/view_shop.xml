@@ -3,7 +3,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/ink">
+    android:background="@drawable/bg_result">
 
     <!-- 왼쪽: 토끼가 카운터 뒤에 서도록 카운터를 나중에 그린다 -->
     <FrameLayout
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="토끼 정비사"
-                android:textColor="@color/ink_muted"
+                android:textColor="@color/ink"
                 android:textSize="19sp" />
 
             <TextView
@@ -157,7 +157,7 @@
         <TextView
             android:id="@+id/btn_shop_back"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
+            android:layout_height="76dp"
             android:clickable="true"
             android:contentDescription="리그로 돌아가기"
             android:focusable="true"
@@ -175,7 +175,7 @@
         <TextView
             android:id="@+id/tv_tab_shop"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
+            android:layout_height="76dp"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
@@ -186,7 +186,7 @@
         <TextView
             android:id="@+id/tv_tab_coupons"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
+            android:layout_height="76dp"
             android:layout_marginStart="8dp"
             android:clickable="true"
             android:focusable="true"

@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_result">
+    android:background="@drawable/bg_glow">
 
     <io.github.ddayoung03.safetyleague.ui.view.WeatherAmbientView
         android:id="@+id/weather_ambient" android:layout_width="match_parent" android:layout_height="match_parent"
@@ -11,11 +11,11 @@
     <ImageView
         android:layout_width="480dp"
         android:layout_height="176dp"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_marginEnd="70dp"
-        android:layout_marginTop="318dp"
-        android:src="@drawable/ic_car_silhouette"
-        android:alpha="0.18"
+        android:layout_marginBottom="236dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/prop_car"
         android:importantForAccessibility="no" />
 
     <!-- 좌상단 주행 기록 중 인디케이터 -->

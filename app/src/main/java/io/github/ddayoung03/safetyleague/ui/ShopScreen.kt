@@ -2,6 +2,7 @@ package io.github.ddayoung03.safetyleague.ui
 
 import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.ShopCatalog
@@ -12,6 +13,12 @@ import io.github.ddayoung03.safetyleague.databinding.ViewShopBinding
 import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal enum class ShopTab { SHOP, COUPONS }
+
+internal fun shopIcon(itemId: String) = when (itemId) {
+    "charge_10k" -> R.drawable.shop_charge
+    "service_10k" -> R.drawable.shop_ticket
+    else -> R.drawable.shop_ticket_gold
+}
 
 /** 시연 리그는 아이오닉 5이므로 시연 상점은 전기차 기준이다. */
 internal val MainActivity.shopPowertrain: Powertrain
@@ -78,15 +85,17 @@ private fun MainActivity.itemRow(item: ShopItem, w: Wallet, target: ShopItem?, b
             else {
                 saveWallet(wallet.withGoal(item.id))
                 paintShop(b, items)
+                b.tvTalk.text = "${item.name}, 목표로 정했어요!"
             }
         }
     }
+    row.addView(ImageView(this).apply { setImageResource(shopIcon(item.id)) }, LinearLayout.LayoutParams(dp(88), dp(88)).apply { marginEnd = dp(18) })
     val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     words.addView(text(item.name, if (mine) R.color.ink else R.color.ink_text, 24f))
     words.addView(text(note, if (mine) R.color.ink else R.color.ink_muted, 19f))
     row.addView(words, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
     val priceColor = if (mine) R.color.ink else if (canBuy) R.color.yellow else R.color.ink_muted
     row.addView(text("${ShopCatalog.points(item.price)}P", priceColor, 36f, number = true))
-    row.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(104)).apply { bottomMargin = dp(12) }
+    row.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(124)).apply { bottomMargin = dp(12) }
     return row
 }

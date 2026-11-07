@@ -98,10 +98,11 @@ private fun MainActivity.paintTabs(b: ViewLeagueBinding) {
 /** 지금 탭의 순위 칸과 줄을 채운다. 탭을 바꿀 때 같은 화면에서 다시 불리므로 보임·숨김을 모두 정한다. */
 private fun MainActivity.bindBoard(b: ViewLeagueBinding, real: Boolean) {
     val model = leagueTab == LeagueTab.MODEL
-    val modelOnly = if (model) View.VISIBLE else View.GONE
+    val modelOnly = if (model) View.VISIBLE else View.INVISIBLE // 자리를 지켜 아래 버튼이 튀지 않게 한다
     b.tierBar.visibility = modelOnly
     b.tvToLine.visibility = modelOnly
-    b.btnLeagueReport.visibility = if (real) modelOnly else View.GONE
+    b.btnLeagueReport.visibility = if (model) View.VISIBLE else View.GONE
+    b.tvBigRank.textSize = 160f
     when {
         !model -> showGroupBoard(b, real)
         real -> showRealBoard(b)
@@ -112,9 +113,10 @@ private fun MainActivity.bindBoard(b: ViewLeagueBinding, real: Boolean) {
 private fun MainActivity.showRealBoard(b: ViewLeagueBinding) {
     val s = standing()
     b.tvRankCaption.text = "내 순위 · $myTier 리그 397명 중"
-    b.tvBigRank.text = s.rank?.let { "P$it" } ?: "–"
+    b.tvBigRank.text = s.rank?.let { "P$it" } ?: "첫 주행 대기"
+    if (s.rank == null) b.tvBigRank.textSize = 72f
     b.tvToLine.text = promotionText(s)
-    if (s.rank == null) b.tvToLine.visibility = View.GONE
+    if (s.rank == null) b.tvToLine.visibility = View.INVISIBLE
     realRows(b.layoutLeagueRows, s)
     // 새 시즌 첫 주행 전까지 지난 시즌 결과를 한 줄로 알린다
     if (s.rank == null) seasonStore.notice()?.let { b.layoutLeagueRows.addView(note(it), 0) }
