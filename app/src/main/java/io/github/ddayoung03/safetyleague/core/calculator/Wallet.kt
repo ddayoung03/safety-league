@@ -33,7 +33,7 @@ data class Wallet(val balance: Int = 0, val goalId: String? = null, val coupons:
     companion object {
         fun decode(text: String?): Wallet = runCatching {
             val lines = text!!.split("\n")
-            Wallet(lines[0].toInt(), lines[1].ifEmpty { null }, lines.drop(2).map {
+            Wallet(lines[0].toInt(), lines[1].trim().ifEmpty { null }, lines.drop(2).map {
                 val (id, itemId, issuedOn) = it.split("|")
                 Coupon(id, itemId, LocalDate.parse(issuedOn))
             })
