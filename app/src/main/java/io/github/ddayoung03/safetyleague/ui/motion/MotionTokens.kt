@@ -12,6 +12,7 @@ object MotionTokens {
     const val COUNT = 1000L
     const val SPEED_LINES = 1100L
     const val OVERTAKE_STEP = 300L
+    const val OVERTAKE_RUN = 2000L
     const val TYPE_STEP = 24L
     const val WAVE_HALF = 350L
     const val REPLAY = 2400L

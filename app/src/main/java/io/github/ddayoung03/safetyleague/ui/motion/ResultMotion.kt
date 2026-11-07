@@ -37,6 +37,13 @@ fun overtakeRanks(before: Int?, after: Int?, max: Int = 3): List<Int> {
 }
 
 /** 점수 글자 크기(sp). 세 자리는 두 자리와 폭이 같게 줄여 오른쪽 끝을 지킨다. */
+/** 토끼는 몇 칸을 오르든 [MotionTokens.OVERTAKE_RUN]만큼 달린다. 칸 사이 간격은 그 시간을 나눈다. */
+fun overtakeGapMs(steps: Int): Long = if (steps == 0) 0L else MotionTokens.OVERTAKE_RUN / steps
+
+/** 착지부터 승리 자세까지. 오른 칸이 없으면 달리지 않는다. */
+fun overtakeTotalMs(steps: Int): Long =
+    MotionTokens.OVERTAKE_STEP + if (steps == 0) MotionTokens.BASE else MotionTokens.OVERTAKE_RUN
+
 fun scoreTextSp(score: Int): Float = if (score >= 100) 190f else 262f
 
 /** 승급 막대는 승급 라인 앞 30계단을 보여 준다. */
@@ -206,7 +213,7 @@ internal fun MainActivity.playResultWin(
     // 4. 내 줄 추월: 한 칸씩 올라가며 순위 숫자도 바뀐다. 내 줄은 스프링 하나의 목표만 옮겨 움직임이 끊기지 않는다.
     var mySpring: SpringAnimation? = null
     ranks.forEachIndexed { step, rank ->
-        seq.at(t + (step + 1) * MotionTokens.OVERTAKE_STEP) {
+        seq.at(t + MotionTokens.OVERTAKE_STEP + step * overtakeGapMs(ranks.size)) {
             b.rabbit.pose = Pose.OVERTAKE
             val slot = me + ranks.size - step - 1
             val passed = rows[slot + 1]
@@ -219,7 +226,7 @@ internal fun MainActivity.playResultWin(
             beep(Fx.OVERTAKE)
         }
     }
-    t += maxOf(ranks.size, 1) * MotionTokens.OVERTAKE_STEP + MotionTokens.BASE
+    t += overtakeTotalMs(ranks.size)
     seq.at(t) { b.rabbit.pose = Pose.WIN }
 
     // 5. 정보 등장

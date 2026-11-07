@@ -18,6 +18,16 @@ class ResultMotionTest {
         assertEquals(NONE, resultIntro(true, true, true, false))
     }
 
+    @Test fun rabbitRunsTwoSecondsHoweverManyRanks() {
+        assertEquals(2000L, MotionTokens.OVERTAKE_RUN)
+        assertEquals(666L, overtakeGapMs(3))
+        assertEquals(1000L, overtakeGapMs(2))
+        assertEquals(2000L, overtakeGapMs(1))
+        assertEquals(MotionTokens.OVERTAKE_STEP + 2000L, overtakeTotalMs(3))
+        assertEquals(MotionTokens.OVERTAKE_STEP + 2000L, overtakeTotalMs(1))
+        assertEquals(MotionTokens.OVERTAKE_STEP + MotionTokens.BASE, overtakeTotalMs(0))
+    }
+
     @Test fun overtakeMovesAtMostThreeRanksUpOnly() {
         assertEquals(listOf(127, 126, 125), overtakeRanks(128, 125))
         assertEquals(listOf(127, 126, 125), overtakeRanks(140, 125))
