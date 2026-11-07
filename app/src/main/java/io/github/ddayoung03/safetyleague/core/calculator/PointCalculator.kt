@@ -17,7 +17,7 @@ data class SeasonPoints(
 
 /** 월 정산 포인트 = 거리 포인트(1km당 1P, 월 1,000km까지) × (1 + 점수 가산) × 티어 배율 */
 object PointCalculator {
-    private const val MAX_KM = 1000.0
+    const val MAX_KM = 1000.0
     private val multipliers = mapOf("브론즈" to 100, "실버" to 120, "골드" to 150, "플래티넘" to 200, "다이아" to 250)
 
     fun bonusPercent(average: Double?): Int = when {

@@ -33,9 +33,12 @@ data class Wallet(val balance: Int = 0, val goalId: String? = null, val coupons:
     companion object {
         fun decode(text: String?): Wallet = runCatching {
             val lines = text!!.split("\n")
-            Wallet(lines[0].toInt(), lines[1].trim().ifEmpty { null }, lines.drop(2).map {
-                val (id, itemId, issuedOn) = it.split("|")
-                Coupon(id, itemId, LocalDate.parse(issuedOn))
+            // 쿠폰 한 줄이 깨져도 잔액은 살린다. 다음 저장이 빈 지갑으로 덮어쓰면 포인트가 영영 사라진다.
+            Wallet(lines[0].toInt(), lines[1].trim().ifEmpty { null }, lines.drop(2).mapNotNull { line ->
+                runCatching {
+                    val (id, itemId, issuedOn) = line.split("|")
+                    Coupon(id, itemId, LocalDate.parse(issuedOn))
+                }.getOrNull()
             })
         }.getOrDefault(Wallet())
     }

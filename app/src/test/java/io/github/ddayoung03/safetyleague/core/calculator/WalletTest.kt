@@ -64,6 +64,14 @@ class WalletTest {
         assertEquals(Wallet(18), Wallet.decode("18\n    "))
     }
 
+    @Test fun decodeKeepsBalanceWhenOneCouponLineIsBroken() {
+        val good = "service_10k-1|service_10k|2026-11-07"
+        val w = Wallet.decode("3420\nservice_50k\n망가진줄\n$good")
+        assertEquals(3420, w.balance)
+        assertEquals("service_50k", w.goalId)
+        assertEquals(listOf("service_10k-1"), w.coupons.map { it.id })
+    }
+
     @Test fun decodeBrokenTextGivesEmptyWallet() {
         assertEquals(Wallet(), Wallet.decode(null))
         assertEquals(Wallet(), Wallet.decode("망가진 값"))

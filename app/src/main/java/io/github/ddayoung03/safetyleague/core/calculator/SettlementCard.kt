@@ -30,7 +30,7 @@ data class SettlementCard(
             val last = parts.last()
             return SettlementCard(
                 if (parts.size > 1) "${parts.size}개 시즌 합산" else "${last.season.monthValue}월 시즌",
-                last.tier, points, balanceBefore + points, parts.sumOf { it.km }.roundToInt(), last.average,
+                last.tier, points, balanceBefore + points, parts.sumOf { minOf(it.km, PointCalculator.MAX_KM) }.roundToInt(), last.average,
                 last.bonusPercent, last.multiplierPercent, parts.size,
                 summary.toTier.takeIf { summary.move == TierMove.PROMOTED }, TierMovement.message(summary)
             )

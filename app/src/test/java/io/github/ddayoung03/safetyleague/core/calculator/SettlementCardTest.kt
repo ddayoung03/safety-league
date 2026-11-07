@@ -36,6 +36,12 @@ class SettlementCardTest {
         assertEquals("2개 시즌 합산", c.seasonLabel)
     }
 
+    @Test fun cardShowsDistanceThatWasCounted() {
+        val c = SettlementCard.of(listOf(Trip("2026-10-05", 95.0, 1200.0)), listOf(result(oct, "다이아", "다이아", TierMove.STAYED)), 0)!!
+        assertEquals(1000, c.km)
+        assertEquals(3750, c.points)
+    }
+
     @Test fun noPointsNoCard() {
         assertNull(SettlementCard.of(emptyList(), listOf(result(oct, "골드", "골드", TierMove.STAYED)), 100))
     }

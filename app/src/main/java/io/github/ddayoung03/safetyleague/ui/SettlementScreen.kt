@@ -2,6 +2,7 @@ package io.github.ddayoung03.safetyleague.ui
 
 import android.view.View
 import io.github.ddayoung03.safetyleague.R
+import io.github.ddayoung03.safetyleague.core.calculator.PointCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.SettlementCard
 import io.github.ddayoung03.safetyleague.core.calculator.ShopCatalog
 import io.github.ddayoung03.safetyleague.core.data.DemoData
@@ -32,6 +33,7 @@ internal fun MainActivity.showSettlement() {
     b.tvDetail.text = detailText(c)
     b.btnSettleShop.setOnClickListener {
         if (!demoMode) seasonStore.clearCard()
+        shopTab = ShopTab.SHOP
         show(Screen.SHOP)
     }
     b.btnSettleLeague.setOnClickListener {
@@ -56,7 +58,8 @@ private fun detailText(c: SettlementCard): String {
     val lines = mutableListOf<String>()
     if (c.seasons == 1) {
         val bonus = if (c.bonusPercent > 0) "평균 ${c.average}점 보너스 +${c.bonusPercent}%" else "다음 달엔 보너스에 도전해 봐요"
-        lines += "${c.km}km 안전하게 달렸어요 · $bonus" + if (c.promotedTo != null) " · ${rate(c)}" else ""
+        val distance = if (c.km >= PointCalculator.MAX_KM) "1,000km까지 인정됐어요" else "${c.km}km 안전하게 달렸어요"
+        lines += "$distance · $bonus" + if (c.promotedTo != null) " · ${rate(c)}" else ""
     }
     if (c.promotedTo == null) lines += c.message
     lines += "내 포인트 ${ShopCatalog.points(c.balance)}P"
