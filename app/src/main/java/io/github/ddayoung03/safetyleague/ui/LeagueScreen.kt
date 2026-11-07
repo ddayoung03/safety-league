@@ -31,6 +31,9 @@ internal fun MainActivity.showLeague() {
     b.btnShop.background = skew(R.color.ink_glow)
     b.btnShop.pressFeedback()
     b.btnShop.setOnClickListener { shopTab = ShopTab.SHOP; show(Screen.SHOP) }
+    b.btnGuide.background = skew(R.color.ink_glow)
+    b.btnGuide.pressFeedback()
+    b.btnGuide.setOnClickListener { show(Screen.GUIDE) }
     if (real) {
         val now = LocalDate.now()
         repository.latestCompletedTrip.value?.let { latest ->

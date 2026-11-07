@@ -29,6 +29,7 @@ import androidx.core.content.res.ResourcesCompat
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.Wallet
 import io.github.ddayoung03.safetyleague.core.data.DemoData
+import io.github.ddayoung03.safetyleague.core.data.GuideCategory
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
 import io.github.ddayoung03.safetyleague.core.repository.LocationConsentStore
@@ -39,7 +40,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
 import io.github.ddayoung03.safetyleague.weather.*
 
-internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP }
+internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP, GUIDE }
 internal enum class LeagueTab { MODEL, REGION, FRIENDS }
 
 /**
@@ -319,6 +320,7 @@ class MainActivity : AppCompatActivity() {
             Screen.CONSENT -> showLocationConsent()
             Screen.SETTLEMENT -> showSettlement()
             Screen.SHOP -> showShop()
+            Screen.GUIDE -> showGuide()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         resultJustFinished = false
@@ -367,5 +369,9 @@ class MainActivity : AppCompatActivity() {
     internal val myRegion = "부산"
     internal var leagueTab = LeagueTab.MODEL
     internal var shopTab = ShopTab.SHOP
+    internal var guideCategory = GuideCategory.DISASTER
+    internal var guideCardId: String? = null
+    /** 차량 신호로 판정한 지금 날씨. 시연은 시연 바의 날씨를 쓴다. */
+    internal val currentWeather get() = if (demoMode) demoWeather else inferWeather(weatherSignals)
     internal val numberFont: Typeface? by lazy { ResourcesCompat.getFont(this, R.font.saira_condensed) }
 }

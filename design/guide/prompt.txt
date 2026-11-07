@@ -1,0 +1,10 @@
+Pixel art game item icons, matching the crisp chunky pixel-art style, dark outlines and shading of the attached references (use them ONLY as style references, do NOT draw any rabbit or seat belt).
+
+One image with exactly 15 separate icons in a neat grid of 5 columns by 3 rows, evenly spaced, each fully inside its own cell with generous empty margin. Nothing touches another icon or the image edge. Every icon is a simple bold object that reads at small size. Use yellow #FFC52E, steel grey, sky blue, white and dark charcoal. No red anywhere. No text, letters or numbers anywhere.
+
+Row 1: 1 cracked road surface with shock lines (earthquake). 2 a car half under flood water with waves. 3 a tunnel arch with a small orange flame inside. 4 a yellow hazard warning triangle next to an open car trunk. 5 a rain cloud with falling blue drops.
+Row 2: 1 a white snowflake over a blue ice patch. 2 grey layered fog bands over a road. 3 a yellow school crossing sign with a simple child silhouette. 4 a road with a curved right-turn arrow. 5 a yellow crescent moon with a small pillow and Z shape made of lines (sleepy).
+Row 3: 1 a car turn signal lamp glowing amber with an arrow. 2 two lanes with a car and a curved lane change arrow. 3 two cars in a row with a double-headed distance arrow between them. 4 a seat with a buckled belt across it. 5 a zebra crosswalk with a simple pedestrian silhouette.
+
+Background: one completely flat solid magenta color #FF00FF everywhere, with no gradient, no shadow, no floor, no texture.
+Square image, 1500x900 proportions if possible, otherwise 1536x1024.
