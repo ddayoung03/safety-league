@@ -49,6 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="-44dp"
+            android:id="@+id/tv_score_unit"
             android:text="점"
             android:textColor="@color/ink_muted"
             android:textSize="44sp" />

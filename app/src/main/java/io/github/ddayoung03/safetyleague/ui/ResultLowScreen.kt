@@ -1,6 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui
 
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.data.DemoData
@@ -36,8 +37,11 @@ internal fun MainActivity.showResultLow() {
     }
     if (t != null && !t.isEligible) {
         // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
-        b.tvScore.text = "–"
-        fixScoreWidth(b.tvScore)
+        b.tvScore.text = "기록 안 됨"
+        b.tvScore.typeface = ResourcesCompat.getFont(this, R.font.pretendard_bold)
+        b.tvScore.textSize = 64f
+        b.tvScore.setPadding(0, dp(150), 0, 0)
+        b.tvScoreUnit.visibility = View.GONE
         b.tvStreakChange.text = "${streakBefore}일 그대로"
         b.rabbit.pose = Pose.WELCOME
         b.tvPitTip.text = SHORT_TRIP_TIP
