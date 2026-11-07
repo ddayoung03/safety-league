@@ -30,6 +30,10 @@ internal fun MainActivity.showSettlement() {
     b.tvTierTag.text = tag
     b.tvTierTag.visibility = if (tag == null) View.GONE else View.VISIBLE
     b.tvDetail.text = detailText(c)
+    b.btnSettleShop.setOnClickListener {
+        if (!demoMode) seasonStore.clearCard()
+        show(Screen.SHOP)
+    }
     b.btnSettleLeague.setOnClickListener {
         if (!demoMode) seasonStore.clearCard()
         show(Screen.LEAGUE)

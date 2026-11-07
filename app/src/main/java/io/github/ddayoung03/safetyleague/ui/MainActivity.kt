@@ -39,7 +39,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
 import io.github.ddayoung03.safetyleague.weather.*
 
-internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT }
+internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP }
 internal enum class LeagueTab { MODEL, REGION, FRIENDS }
 
 /**
@@ -318,6 +318,7 @@ class MainActivity : AppCompatActivity() {
             Screen.PLACEMENT -> showPlacement()
             Screen.CONSENT -> showLocationConsent()
             Screen.SETTLEMENT -> showSettlement()
+            Screen.SHOP -> showShop()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         resultJustFinished = false
@@ -365,5 +366,6 @@ class MainActivity : AppCompatActivity() {
     internal val myModel get() = profileStore.load()?.model ?: "내 차종"
     internal val myRegion = "부산"
     internal var leagueTab = LeagueTab.MODEL
+    internal var shopTab = ShopTab.SHOP
     internal val numberFont: Typeface? by lazy { ResourcesCompat.getFont(this, R.font.saira_condensed) }
 }

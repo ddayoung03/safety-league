@@ -66,7 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="384dp"
+        android:layout_marginTop="398dp"
         android:background="@color/yellow"
         android:paddingHorizontal="24dp"
         android:paddingVertical="8dp"
@@ -79,7 +79,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="446dp"
+        android:layout_marginTop="458dp"
         android:lineSpacingExtra="6dp"
         android:maxWidth="760dp"
         android:textColor="@color/ink_muted"
@@ -105,8 +105,7 @@
             android:paddingHorizontal="40dp"
             android:text="포인트 상점 보기"
             android:textColor="@color/ink"
-            android:textSize="24sp"
-            android:visibility="gone" />
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/btn_settle_league"
