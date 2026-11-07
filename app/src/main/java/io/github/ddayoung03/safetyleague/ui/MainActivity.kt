@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         if (!handleResultIntent(intent)) {
             if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
             val latest = repository.latestCompletedTrip.value
-            if (latest != null && !settled) showResult(latest) else show(Screen.LEAGUE)
+            if (latest != null && !settled && seasonStore.card() == null) showResult(latest) else show(Screen.LEAGUE)
         }
     }
 
