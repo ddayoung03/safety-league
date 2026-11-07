@@ -367,7 +367,7 @@
         android:layout_height="245dp"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="486dp"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="24dp" />
 
     <!-- 오른쪽 전체 순위 타워 -->
     <LinearLayout

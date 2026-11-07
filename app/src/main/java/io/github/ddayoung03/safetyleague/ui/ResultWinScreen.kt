@@ -42,7 +42,7 @@ internal fun MainActivity.showResultWin() {
     b.tvScore.setPadding(0, b.tvScore.paint.fontMetricsInt.ascent - ascent, 0, 0) // 글자가 줄어도 기준선은 그대로
     fixScoreWidth(b.tvScore)
     b.tvKm.text = "${t?.trip?.km ?: DemoData.trips.first { it.date == day }.km}km"
-    b.tvStreak.text = "연속 ${if (t != null) repository.getStreak(t.trip.date) else DemoData.streakAt(day)}일"
+    b.tvStreak.text = "연속 안전 주행 ${if (t != null) repository.getStreak(t.trip.date) else DemoData.streakAt(day)}일"
 
     val rows: List<TimingRow>
     val before: Int?

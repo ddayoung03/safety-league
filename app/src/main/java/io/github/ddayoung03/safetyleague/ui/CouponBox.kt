@@ -50,7 +50,7 @@ internal fun MainActivity.openConfirm(b: ViewShopBinding, item: ShopItem, items:
 
 internal fun MainActivity.addCoupons(b: ViewShopBinding, coupons: List<Coupon>) {
     if (coupons.isEmpty()) {
-        b.layoutItems.addView(text("아직 받은 쿠폰이 없어요", R.color.ink_muted, 24f).apply { setPadding(dp(28), dp(24), 0, 0) })
+        b.layoutItems.addView(text("아직 받은 쿠폰이 없어요. 상점에서 첫 쿠폰을 골라 봐요", R.color.ink_muted, 24f).apply { setPadding(dp(28), dp(24), 0, 0) })
         return
     }
     coupons.asReversed().forEach { b.layoutItems.addView(couponRow(it)) }

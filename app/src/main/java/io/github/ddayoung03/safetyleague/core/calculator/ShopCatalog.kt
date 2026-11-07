@@ -22,7 +22,7 @@ object ShopCatalog {
     fun talk(balance: Int, target: ShopItem?): String = when {
         target == null -> "어서 와요!"
         balance >= target.price -> "${target.name}, 지금 교환할 수 있어요!"
-        else -> "${target.name}까지 ${points(target.price - balance)}P 남았어요."
+        else -> "${target.name}까지 ${points(target.price - balance)}P 남았어요!"
     }
 
     fun points(value: Int): String = String.format(Locale.US, "%,d", value)
