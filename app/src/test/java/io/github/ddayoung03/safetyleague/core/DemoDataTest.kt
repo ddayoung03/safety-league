@@ -243,4 +243,16 @@ class DemoDataTest {
         assertEquals(DayOfWeek.MONDAY, LocalDate.parse(DemoData.today).dayOfWeek) // 마지막 칸 "월"
         assertEquals(85.7, DemoData.average(from.minusDays(7).toString(), from.minusDays(1).toString()), 0.001)
     }
+
+    @Test fun demoSettlementMatchesCalculator() {
+        val c = DemoData.settlementCard
+        assertEquals(io.github.ddayoung03.safetyleague.core.calculator.PointCalculator.points(c.km.toDouble(), c.average, c.tier), c.points)
+        assertEquals("10월 시즌", c.seasonLabel)
+        assertEquals(1248, c.points)
+        val w = DemoData.startWallet()
+        assertEquals(3420, w.balance)
+        assertEquals("service_50k", w.goalId)
+        assertEquals(1, w.coupons.size)
+        assertEquals(w.balance, c.balance)
+    }
 }

@@ -1,12 +1,16 @@
 package io.github.ddayoung03.safetyleague.core.data
 
+import io.github.ddayoung03.safetyleague.core.calculator.Coupon
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
+import io.github.ddayoung03.safetyleague.core.calculator.SettlementCard
+import io.github.ddayoung03.safetyleague.core.calculator.Wallet
 import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.DriverRank
 import io.github.ddayoung03.safetyleague.core.model.League
 import io.github.ddayoung03.safetyleague.core.model.Point2D
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
 import io.github.ddayoung03.safetyleague.core.model.Trip
+import java.time.LocalDate
 
 /**
  * 시연용 가상 운전자 "나"의 데이터.
@@ -18,6 +22,12 @@ import io.github.ddayoung03.safetyleague.core.model.Trip
 object DemoData {
     /** 시연의 "오늘". 92점 트립을 달린 날이자 리그·리포트 기준일. */
     const val today = "2026-11-09"
+
+    /** 시연 정산은 끝난 10월 시즌이다. 진행 중인 11월 리그 화면과 앞뒤가 맞게 평균도 11월과 다르게 둔다. */
+    val settlementCard = SettlementCard("10월 시즌", "골드", 1248, 3420, 640, 86.4, 30, 150, 1, null,
+        "10월 시즌 결과 · 골드 리그를 지켰어요. 이번 달엔 승급권에 도전해 봐요")
+
+    fun startWallet() = Wallet(3420, "service_50k", listOf(Coupon("service_10k-demo", "service_10k", LocalDate.parse(today))))
 
     /** 시연용 아이오닉 5 리그 평균 전비(km/kWh). 가상값. */
     const val leagueAvgEfficiency = 5.8
