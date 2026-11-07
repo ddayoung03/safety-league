@@ -21,7 +21,6 @@ internal fun MainActivity.showShop() {
     val items = ShopCatalog.itemsFor(shopPowertrain)
     wallet.withoutUnavailableGoal(items).let { if (it != wallet) saveWallet(it) }
     val b = ViewShopBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.rabbit.pose = Pose.WELCOME
     b.counterChecker.background = checkerTile()
     b.goalTrack.background = skew(R.color.ink)
     b.goalFill.background = skew(R.color.yellow)
@@ -36,6 +35,7 @@ internal fun MainActivity.showShop() {
 internal fun MainActivity.paintShop(b: ViewShopBinding, items: List<ShopItem>) {
     val w = wallet
     val target = w.target(items)
+    b.rabbit.pose = Pose.WELCOME
     b.tvTalk.text = ShopCatalog.talk(w.balance, target)
     b.tvBalance.text = ShopCatalog.points(w.balance)
     if (target != null) {
@@ -51,6 +51,7 @@ internal fun MainActivity.paintShop(b: ViewShopBinding, items: List<ShopItem>) {
     }
     b.layoutItems.removeAllViews()
     if (shopTab == ShopTab.SHOP) items.forEach { b.layoutItems.addView(itemRow(it, w, target, b, items)) }
+    else addCoupons(b, w.coupons)
 }
 
 private fun MainActivity.itemRow(item: ShopItem, w: Wallet, target: ShopItem?, b: ViewShopBinding, items: List<ShopItem>): View {
@@ -72,8 +73,11 @@ private fun MainActivity.itemRow(item: ShopItem, w: Wallet, target: ShopItem?, b
         contentDescription = "${item.name} ${item.price}포인트 $note"
         pressFeedback()
         setOnClickListener {
-            saveWallet(wallet.withGoal(item.id))
-            paintShop(b, items)
+            if (canBuy) openConfirm(b, item, items)
+            else {
+                saveWallet(wallet.withGoal(item.id))
+                paintShop(b, items)
+            }
         }
     }
     val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
