@@ -42,6 +42,7 @@ internal fun MainActivity.showResultLow() {
         b.tvScore.textSize = 64f
         b.tvScore.setPadding(0, dp(150), 0, 0)
         b.tvScoreUnit.visibility = View.GONE
+        b.pitGroup.translationY = -dp(24).toFloat()
         b.tvStreakChange.text = "${streakBefore}일 그대로"
         b.rabbit.pose = Pose.WELCOME
         b.tvPitTip.text = SHORT_TRIP_TIP

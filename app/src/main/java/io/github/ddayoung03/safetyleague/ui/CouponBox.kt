@@ -41,6 +41,7 @@ internal fun MainActivity.openConfirm(b: ViewShopBinding, item: ShopItem, items:
         shopTab = ShopTab.COUPONS
         paintShop(b, items)
         b.rabbit.pose = Pose.WIN
+        b.rabbit.translationX = dp(32).toFloat() // 깃발을 든 자세는 그림이 왼쪽으로 쏠린다
         b.tvTalk.text = "축하해요! 쿠폰함에 넣었어요"
         if (requestSound()) sound.play(Fx.WIN)
     }

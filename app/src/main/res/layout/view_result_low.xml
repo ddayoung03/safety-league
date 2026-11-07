@@ -57,6 +57,7 @@
 
     <!-- 토끼와 피트 보드는 한 덩어리로 바닥에 붙인다. 보드 아래 끝이 버튼 아래 끝과 맞는다. -->
     <LinearLayout
+        android:id="@+id/pit_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"

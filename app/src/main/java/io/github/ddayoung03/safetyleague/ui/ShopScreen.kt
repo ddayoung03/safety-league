@@ -36,6 +36,7 @@ internal fun MainActivity.paintShop(b: ViewShopBinding, items: List<ShopItem>) {
     val w = wallet
     val target = w.target(items)
     b.rabbit.pose = Pose.WELCOME
+    b.rabbit.translationX = 0f
     b.tvTalk.text = ShopCatalog.talk(w.balance, target)
     b.tvBalance.text = ShopCatalog.points(w.balance)
     if (target != null) {
