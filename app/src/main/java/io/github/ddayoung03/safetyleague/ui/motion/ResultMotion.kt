@@ -40,9 +40,9 @@ fun overtakeRanks(before: Int?, after: Int?, max: Int = 3): List<Int> {
 /** 토끼는 몇 칸을 오르든 [MotionTokens.OVERTAKE_RUN]만큼 달린다. 칸 사이 간격은 그 시간을 나눈다. */
 fun overtakeGapMs(steps: Int): Long = if (steps == 0) 0L else MotionTokens.OVERTAKE_RUN / steps
 
-/** 착지부터 승리 자세까지. 오른 칸이 없으면 달리지 않는다. */
+/** 착지부터 승리 자세까지. 토끼는 착지 순간부터 달린다. 오른 칸이 없으면 달리지 않는다. */
 fun overtakeTotalMs(steps: Int): Long =
-    MotionTokens.OVERTAKE_STEP + if (steps == 0) MotionTokens.BASE else MotionTokens.OVERTAKE_RUN
+    if (steps == 0) MotionTokens.OVERTAKE_STEP + MotionTokens.BASE else MotionTokens.OVERTAKE_RUN
 
 fun scoreTextSp(score: Int): Float = if (score >= 100) 190f else 262f
 
@@ -205,6 +205,7 @@ internal fun MainActivity.playResultWin(
             rows[me].rank.text = "P${ranks.first() + 1}"
         }
         pop(b.tower, fromX = dp(60).toFloat(), curve = DecelerateInterpolator(2f))
+        if (ranks.isNotEmpty()) b.rabbit.pose = Pose.OVERTAKE // 승리 자세가 비치지 않게 처음부터 달린다
         b.rabbit.visibility = View.VISIBLE
         b.rabbit.translationY = dp(120).toFloat()
         spring(b.rabbit, DynamicAnimation.TRANSLATION_Y, 0f)
@@ -214,7 +215,6 @@ internal fun MainActivity.playResultWin(
     var mySpring: SpringAnimation? = null
     ranks.forEachIndexed { step, rank ->
         seq.at(t + MotionTokens.OVERTAKE_STEP + step * overtakeGapMs(ranks.size)) {
-            b.rabbit.pose = Pose.OVERTAKE
             val slot = me + ranks.size - step - 1
             val passed = rows[slot + 1]
             spring(passed.view, DynamicAnimation.TRANSLATION_Y, 0f)

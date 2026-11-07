@@ -23,8 +23,8 @@ class ResultMotionTest {
         assertEquals(666L, overtakeGapMs(3))
         assertEquals(1000L, overtakeGapMs(2))
         assertEquals(2000L, overtakeGapMs(1))
-        assertEquals(MotionTokens.OVERTAKE_STEP + 2000L, overtakeTotalMs(3))
-        assertEquals(MotionTokens.OVERTAKE_STEP + 2000L, overtakeTotalMs(1))
+        assertEquals(2000L, overtakeTotalMs(3))
+        assertEquals(2000L, overtakeTotalMs(1))
         assertEquals(MotionTokens.OVERTAKE_STEP + MotionTokens.BASE, overtakeTotalMs(0))
     }
 
