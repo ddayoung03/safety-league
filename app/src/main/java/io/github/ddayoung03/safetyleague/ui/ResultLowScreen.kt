@@ -38,7 +38,7 @@ internal fun MainActivity.showResultLow() {
     if (t != null && !t.isEligible) {
         // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
         b.tvScore.text = "기록 안 됨"
-        b.tvScore.typeface = ResourcesCompat.getFont(this, R.font.pretendard_bold)
+        b.tvScore.typeface = ResourcesCompat.getFont(this, R.font.sl_sans_bold)
         b.tvScore.textSize = 64f
         b.tvScore.setPadding(0, dp(150), 0, 0)
         b.tvScoreUnit.visibility = View.GONE

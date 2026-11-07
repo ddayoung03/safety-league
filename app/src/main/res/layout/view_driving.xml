@@ -53,7 +53,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendard_black"
+            android:fontFamily="@font/sl_sans_black"
             android:text="오늘의 레이스 진행 중"
             android:textColor="@color/ink_text"
             android:textSize="84sp" />

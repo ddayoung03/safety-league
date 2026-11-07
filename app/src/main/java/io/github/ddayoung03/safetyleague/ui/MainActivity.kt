@@ -130,30 +130,25 @@ class MainActivity : AppCompatActivity() {
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         startTracking()
-        val settled = seasonStore.settleIfNeeded(repository)
+        seasonStore.settleIfNeeded(repository)
         if (profileStore.load() == null) {
             val detected = VehicleProfileReader.read(this)
             if (detected != null) { profileStore.save(detected); show(Screen.PLACEMENT) }
             else show(Screen.VEHICLE)
             return
         }
-        if (!handleResultIntent(intent)) {
-            if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
-            val latest = repository.latestCompletedTrip.value
-            if (latest != null && !settled && seasonStore.card() == null && isUnseen(latest)) showResult(latest) else show(Screen.LEAGUE)
-        }
+        // 주행 중인지는 onStart에서야 안다. 안 본 결과는 서비스에 붙은 뒤 syncWithTrip이 연다.
+        intent.removeExtra(TripTrackingService.EXTRA_SHOW_RESULT_CARD)
+        if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
+        show(Screen.LEAGUE)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleResultIntent(intent)
-    }
-
-    private fun handleResultIntent(i: Intent?): Boolean {
-        if (i?.getBooleanExtra(TripTrackingService.EXTRA_SHOW_RESULT_CARD, false) != true) return false
-        val latest = repository.latestCompletedTrip.value ?: return false
+        if (!intent.getBooleanExtra(TripTrackingService.EXTRA_SHOW_RESULT_CARD, false)) return
+        intent.removeExtra(TripTrackingService.EXTRA_SHOW_RESULT_CARD)
+        val latest = repository.latestCompletedTrip.value?.takeIf(::isUnseen) ?: return
         if (restricted) pendingResult = latest else showResult(latest)
-        return true
     }
 
     override fun onStart() {
@@ -161,8 +156,8 @@ class MainActivity : AppCompatActivity() {
         bindService(Intent(this, TripTrackingService::class.java), connection, Context.BIND_AUTO_CREATE)
         connectUxRestrictions()
         weatherSource.start()
-        // 앱을 켜 둔 채 달이 바뀔 수 있다. 정산이 되면 리그로 가는 길에서 시상대가 뜬다.
-        if (::repository.isInitialized && seasonStore.settleIfNeeded(repository)) show(Screen.LEAGUE)
+        // 앱을 켜 둔 채 달이 바뀔 수 있다. 시상대는 서비스에 붙은 뒤 syncWithTrip이 띄운다.
+        if (::repository.isInitialized) seasonStore.settleIfNeeded(repository)
     }
 
     override fun onResume() {
@@ -234,11 +229,7 @@ class MainActivity : AppCompatActivity() {
             // 이전 트립(latestCompletedTrip)은 열지 않는다. 결과가 나중에 오면 onTripResult가 연다.
             val pending = pendingResult
             pendingResult = null
-            when {
-                pending != null -> onTripResult(pending)
-                service?.isTracking == true -> Unit
-                else -> show(Screen.LEAGUE)
-            }
+            if (pending != null) onTripResult(pending) else syncWithTrip()
         }
     }
 
@@ -296,19 +287,26 @@ class MainActivity : AppCompatActivity() {
 
     private val seenPrefs by lazy { getSharedPreferences("result_seen", Context.MODE_PRIVATE) }
     private fun tripKey(t: CompletedTrip) = "${t.trip.date} ${t.startTime} ${t.endTime}"
-    private fun isUnseen(t: CompletedTrip) = seenPrefs.getString("trip", null) != tripKey(t)
-    private fun markSeen(t: CompletedTrip) { seenPrefs.edit().putString("trip", tripKey(t)).apply() }
+    /** 지난달 트립은 정산으로 끝난 일이라 결과 카드를 다시 열지 않는다. */
+    private fun isUnseen(t: CompletedTrip) = seenPrefs.getString("trip", null) != tripKey(t) &&
+        t.trip.date.startsWith(java.time.YearMonth.now().toString())
+    private fun markSeen(t: CompletedTrip) {
+        seenPrefs.edit().putString("trip", tripKey(t)).apply()
+        getSystemService(android.app.NotificationManager::class.java).cancel(TripTrackingService.RESULT_ID)
+    }
 
     /** 서비스에 다시 붙었을 때 화면을 트립 상태에 맞춘다. 첫 설정 화면과 시상대는 건드리지 않는다. */
     private fun syncWithTrip() {
-        if (screen in listOf(Screen.VEHICLE, Screen.PLACEMENT, Screen.CONSENT, Screen.SETTLEMENT)) return
+        val s = service ?: return // 붙으면 onServiceConnected가 다시 부른다
+        if (demoMode) return
+        if (!s.isTracking && screen in listOf(Screen.VEHICLE, Screen.PLACEMENT, Screen.CONSENT, Screen.SETTLEMENT)) return
         val latest = repository.latestCompletedTrip.value
-        val unseen = latest != null && !demoMode && isUnseen(latest)
-        when (resumeAction(screen, restricted, service?.isTracking == true, unseen)) {
+        val unseen = latest != null && seasonStore.card() == null && isUnseen(latest)
+        when (resumeAction(screen, restricted, s.isTracking, unseen)) {
             Resume.DRIVING -> show(Screen.DRIVING)
             Resume.RESULT -> showResult(latest!!)
             Resume.LEAGUE -> show(Screen.LEAGUE)
-            Resume.STAY -> Unit
+            Resume.STAY -> if (screen == Screen.LEAGUE && !restricted && seasonStore.card() != null) show(Screen.LEAGUE)
         }
     }
 

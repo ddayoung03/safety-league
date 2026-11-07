@@ -10,6 +10,7 @@ Pleos Connect 에뮬레이터에서 동작하는 안드로이드 앱입니다. �
 - 실제 차량 신호 수집: Vehicle State SDK, AAOS CarPropertyManager
 - 트립 점수, 결과 카드, 레이스 리플레이, 주간 리포트, 월간 시즌 정산
 - 시즌 포인트 정산, 토끼 피트샵, 쿠폰함(시연용 쿠폰이며 실제로 발급되지 않습니다)
+- 안전 가이드: 재난 대처, 상황별 주의, 초보 꿀팁(법령과 공공기관 자료 기준, [근거](docs/safety-guide-sources.md))
 - 주행 중 화면 제한(CarUxRestrictions), 경로 기록 동의
 - 점수 계산은 순수 함수로 분리했고 단위 테스트가 있습니다.
 
@@ -65,6 +66,10 @@ Virtual Console에서 기어를 D로 놓고 ACCEL로 3km 이상 달린 뒤 P로 
 **쿠폰함.** 교환한 쿠폰의 유효기간과 바코드를 보여 줍니다. 상품과 쿠폰은 시연용이며 실제로 발급되지 않습니다.
 
 ![쿠폰함](design/submission/9-coupons.png)
+
+**안전 가이드.** 주차 중에 재난 대처와 상황별 주의, 초보 꿀팁을 볼 수 있습니다. 출처를 함께 표시합니다.
+
+![안전 가이드](design/submission/10-guide.png)
 
 Pleos Connect 에뮬레이터에서 찍은 실제 앱 화면입니다. 운전자와 숫자는 모두 시연용 가상 데이터입니다. 움직임 시안은 [`design/prototypes/`](design/prototypes/), 초기 정지 시안은 [`mockups/`](mockups/)에 있습니다.
 

@@ -41,6 +41,7 @@ class TripCollector(
 
     private var gear = GearState.PARK
     private var tripAvgEfficiency = leagueAvgEfficiency
+    internal val doorOpenWhileMovingCount get() = doorOpenWhileMoving
     var isTracking = false
         private set
 
@@ -112,7 +113,7 @@ class TripCollector(
     }
 
     override fun onSpeedChanged(signedMps: Float, timestampMs: Long) {
-        if (!isTracking && gear != GearState.PARK && signedMps > MOVING_MPS) startTrip(timestampMs, signedMps)
+        if (!isTracking && gear != GearState.PARK && gear != GearState.REVERSE && signedMps > MOVING_MPS) startTrip(timestampMs, signedMps)
         val speedMps = abs(signedMps) // 후진 속도는 음수로 올 수 있다
         if (isTracking && lastSpeedMs > 0L) {
             // 오도미터가 안 움직이는 환경(에뮬레이터)을 위해 속도 × 시간도 쌓아 둔다
@@ -196,7 +197,7 @@ class TripCollector(
     }
 
     override fun onDoorChanged(doorOpen: Boolean, timestampMs: Long) {
-        if (isTracking && doorOpen && lastSpeed > MOVING_MPS) doorOpenWhileMoving++
+        if (isTracking && doorOpen && gear != GearState.REVERSE && lastSpeed > MOVING_MPS) doorOpenWhileMoving++
     }
 
     override fun onOdometerChanged(distanceKm: Double, timestampMs: Long) {

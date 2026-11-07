@@ -71,7 +71,7 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:configChanges="uiMode|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|keyboard|keyboardHidden|navigation"
+            android:configChanges="uiMode|orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.SafetyLeague">

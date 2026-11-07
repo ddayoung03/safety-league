@@ -9,7 +9,7 @@
             android:layout_weight="1" android:orientation="vertical">
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="어떤 차로 달리시나요?" android:textSize="52sp" android:textColor="@color/ink_text"
-                android:fontFamily="@font/pretendard_black" />
+                android:fontFamily="@font/sl_sans_black" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" android:text="같은 차종 운전자끼리 겨뤄요"
                 android:textSize="26sp" android:textColor="@color/ink_muted" />

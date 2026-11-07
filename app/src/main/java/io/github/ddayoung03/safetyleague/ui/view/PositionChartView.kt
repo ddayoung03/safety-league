@@ -56,14 +56,14 @@ class PositionChartView @JvmOverloads constructor(
         textAlign = Paint.Align.RIGHT
     }
     private val textPaint = Paint(rankPaint).apply {
-        typeface = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.pretendard_bold)
+        typeface = if (isInEditMode) null else ResourcesCompat.getFont(context, R.font.sl_sans_bold)
         textAlign = Paint.Align.CENTER
     }
 
     private val highlightTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 26f * resources.displayMetrics.scaledDensity
         color = yellowColor
-        if (!isInEditMode) typeface = ResourcesCompat.getFont(context, R.font.pretendard_bold)
+        if (!isInEditMode) typeface = ResourcesCompat.getFont(context, R.font.sl_sans_bold)
         textAlign = Paint.Align.CENTER
     }
 

@@ -73,6 +73,24 @@ class TripCollectorTest {
     }
 
     @Test
+    fun backingUpDoesNotStartATripEvenIfSpeedIsPositive() {
+        val c = collector()
+        c.onGearChanged(GearState.REVERSE, 1_000)
+        c.onSpeedChanged(2f, 2_000)
+        assertFalse(c.isTracking)
+    }
+
+    @Test
+    fun openingADoorWhileReversingIsNotPenalised() {
+        val c = collector()
+        c.depart(1_000)
+        c.onGearChanged(GearState.REVERSE, 2_000)
+        c.onSpeedChanged(-2f, 3_000)
+        c.onDoorChanged(true, 3_500)
+        assertEquals(0, c.doorOpenWhileMovingCount)
+    }
+
+    @Test
     fun reversingIsNotHardBrakingOrAcceleration() {
         val c = collector()
         c.depart(1_000)

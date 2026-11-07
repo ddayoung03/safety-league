@@ -42,6 +42,25 @@ class SafetyGuideTest {
         assertNull(SafetyGuide.suggested(null))
     }
 
+    @Test fun rightTurnObeysItsOwnSignalFirst() {
+        assertTrue(SafetyGuide.cards.first { it.id == "right" }.steps.first().contains("우회전 신호등"))
+    }
+
+    @Test fun floodMovesTheCarBeforeLeavingIt() {
+        val steps = SafetyGuide.cards.first { it.id == "flood" }.steps
+        assertTrue(steps.indexOfFirst { it.contains("옮겨요") } < steps.indexOfFirst { it.contains("대피") })
+    }
+
+    @Test fun unverifiedAdviceStaysOut() {
+        val all = SafetyGuide.cards.flatMap { it.steps }.joinToString()
+        assertFalse(all.contains("나눠서"))
+        assertFalse(all.contains("30m를 가요"))
+    }
+
+    @Test fun laneCardPromisesNoScoreItCannotMeasure() {
+        assertNull(SafetyGuide.cards.first { it.id == "lane" }.score)
+    }
+
     @Test fun legalNumbersMatchSources() {
         val rain = SafetyGuide.cards.first { it.id == "rain" }.steps.joinToString()
         assertTrue(rain.contains("20%"))

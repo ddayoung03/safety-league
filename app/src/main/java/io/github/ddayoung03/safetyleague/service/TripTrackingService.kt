@@ -94,8 +94,8 @@ class TripTrackingService : Service() {
         } else 0
         // 프로세스가 뒤에서 되살아나면 location 타입이 거부될 수 있다(API 34). 그래도 수집은 이어 간다.
         runCatching { ServiceCompat.startForeground(this, TRACKING_ID, trackingNotification(), type) }.onFailure {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceCompat.startForeground(this, TRACKING_ID,
-                trackingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) runCatching { ServiceCompat.startForeground(this, TRACKING_ID,
+                trackingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC) }
         }
         if (!mockRunning) signals.post { pleos.syncLocation() } // 위치 동의가 바뀌었으면 반영
         return START_STICKY

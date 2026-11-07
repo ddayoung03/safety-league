@@ -25,7 +25,7 @@ class DemoBarcodeView @JvmOverloads constructor(context: Context, attrs: Attribu
     private val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = context.getColor(R.color.ink)
         textAlign = Paint.Align.CENTER
-        typeface = ResourcesCompat.getFont(context, R.font.pretendard_bold)
+        typeface = ResourcesCompat.getFont(context, R.font.sl_sans_bold)
     }
 
     override fun onDraw(canvas: Canvas) {

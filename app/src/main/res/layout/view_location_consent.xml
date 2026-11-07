@@ -9,7 +9,7 @@
             android:layout_weight="1" android:orientation="vertical">
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="@string/consent_title" android:textSize="52sp" android:textColor="@color/ink_text"
-                android:fontFamily="@font/pretendard_black" />
+                android:fontFamily="@font/sl_sans_black" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="24dp" android:text="@string/consent_private"
                 android:textSize="30sp" android:textColor="@color/ink_text" />
