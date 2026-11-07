@@ -27,16 +27,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import io.github.ddayoung03.safetyleague.R
+import io.github.ddayoung03.safetyleague.core.calculator.Wallet
+import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
 import io.github.ddayoung03.safetyleague.core.collector.LocationPolicy
 import io.github.ddayoung03.safetyleague.core.repository.LocationConsentStore
+import io.github.ddayoung03.safetyleague.core.repository.PointWalletStore
 import io.github.ddayoung03.safetyleague.core.repository.TripRepository
 import io.github.ddayoung03.safetyleague.databinding.ActivityMainBinding
 import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
 import io.github.ddayoung03.safetyleague.weather.*
 
-internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT }
+internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP }
 internal enum class LeagueTab { MODEL, REGION, FRIENDS }
 
 /**
@@ -133,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         if (!handleResultIntent(intent)) {
             if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
             val latest = repository.latestCompletedTrip.value
-            if (latest != null && !settled) showResult(latest) else show(Screen.LEAGUE)
+            if (latest != null && !settled && seasonStore.card() == null) showResult(latest) else show(Screen.LEAGUE)
         }
     }
 
@@ -239,6 +242,7 @@ class MainActivity : AppCompatActivity() {
         binding.demoHotspot.setOnLongClickListener {
             if (restricted) return@setOnLongClickListener true
             demoMode = !demoMode
+            if (demoMode) demoWallet = DemoData.startWallet()
             if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.LEAGUE) }
             binding.demoBar.visibility = if (demoMode) View.VISIBLE else View.GONE
             updateSdkStatus()
@@ -256,6 +260,7 @@ class MainActivity : AppCompatActivity() {
             demoWeather = Weather.entries[(demoWeather.ordinal + 1) % Weather.entries.size]
             binding.btnWeather.text = getString(R.string.weather_button, demoWeather.label)
         }
+        binding.btnSettlement.setOnClickListener { demoWallet = DemoData.startWallet(); show(Screen.SETTLEMENT) }
         binding.btnSimWin.setOnClickListener { runDemo(true) }
         binding.btnSimLow.setOnClickListener { runDemo(false) }
     }
@@ -290,8 +295,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** [origin]을 주면 그 버튼에서 원이 퍼지며 열린다. 없으면(앱 시작, 뒤로) 보통 전환이다. */
-    internal fun show(target: Screen, origin: View? = null) {
-        if (restricted && target != Screen.DRIVING) return
+    internal fun show(requested: Screen, origin: View? = null) {
+        if (restricted && requested != Screen.DRIVING) return
+        val target = if (redirectToSettlement(requested, seasonStore.card() != null, demoMode)) Screen.SETTLEMENT else requested
         if (target != Screen.LEAGUE) leagueTab = LeagueTab.MODEL
         screen = target
         drivingBinding = null
@@ -311,6 +317,8 @@ class MainActivity : AppCompatActivity() {
             Screen.VEHICLE -> showVehicleSelection()
             Screen.PLACEMENT -> showPlacement()
             Screen.CONSENT -> showLocationConsent()
+            Screen.SETTLEMENT -> showSettlement()
+            Screen.SHOP -> showShop()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         resultJustFinished = false
@@ -345,9 +353,19 @@ class MainActivity : AppCompatActivity() {
 
     internal val profileStore by lazy { io.github.ddayoung03.safetyleague.core.repository.VehicleProfileStore(this) }
     internal val seasonStore by lazy { io.github.ddayoung03.safetyleague.core.repository.SeasonSettlementStore(this) }
+    internal val walletStore by lazy { PointWalletStore(this) }
+    /** 시연 포인트와 쿠폰은 메모리에만 둔다. 다시 켜면 처음으로 돌아가 리허설을 반복할 수 있다. */
+    internal var demoWallet = DemoData.startWallet()
+    internal val wallet: Wallet get() = if (demoMode) demoWallet else walletStore.load()
+    internal fun saveWallet(w: Wallet): Boolean {
+        if (!demoMode) return walletStore.save(w)
+        demoWallet = w
+        return true
+    }
     internal val myTier get() = profileStore.load()?.tier ?: "브론즈"
     internal val myModel get() = profileStore.load()?.model ?: "내 차종"
     internal val myRegion = "부산"
     internal var leagueTab = LeagueTab.MODEL
+    internal var shopTab = ShopTab.SHOP
     internal val numberFont: Typeface? by lazy { ResourcesCompat.getFont(this, R.font.saira_condensed) }
 }

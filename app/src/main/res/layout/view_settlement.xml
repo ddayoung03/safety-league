@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 시즌 정산 시상대. 앱을 열면 전체 화면으로 보상을 크게 보여 준다. 내용은 SettlementScreen이 채운다. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_result"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <View
+        android:id="@+id/checker_strip"
+        android:layout_width="match_parent"
+        android:layout_height="12dp" />
+
+    <TextView
+        android:id="@+id/tv_settle_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="52dp"
+        android:textColor="@color/ink_text"
+        android:textSize="34sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="124dp"
+        android:text="안전운전 보상"
+        android:textColor="@color/ink_muted"
+        android:textSize="24sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="156dp"
+        android:baselineAligned="true"
+        android:clipChildren="false"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_points"
+            style="@style/NumberText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingEnd="20dp"
+            android:textColor="@color/ink_text"
+            android:textSize="190sp" />
+
+        <TextView
+            style="@style/NumberText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:paddingEnd="36dp"
+            android:text="P"
+            android:textColor="@color/yellow"
+            android:textSize="90sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_tier_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="398dp"
+        android:background="@color/yellow"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="8dp"
+        android:tag="skew"
+        android:textColor="@color/ink"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/tv_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="458dp"
+        android:lineSpacingExtra="6dp"
+        android:maxWidth="760dp"
+        android:textColor="@color/ink_muted"
+        android:textSize="23sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="72dp"
+        android:layout_marginBottom="36dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/btn_settle_shop"
+            android:layout_width="wrap_content"
+            android:layout_height="76dp"
+            android:layout_marginEnd="20dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingHorizontal="40dp"
+            android:text="포인트 상점 보기"
+            android:textColor="@color/ink"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/btn_settle_league"
+            android:layout_width="wrap_content"
+            android:layout_height="76dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingHorizontal="40dp"
+            android:text="리그로 가기"
+            android:textColor="@color/ink_text"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView
+        android:id="@+id/rabbit"
+        android:layout_width="360dp"
+        android:layout_height="496dp"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="72dp" />
+</FrameLayout>
