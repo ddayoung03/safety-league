@@ -18,6 +18,37 @@
         <item name="android:textStyle">italic</item>
     </style>
 
+    <!-- 홈 메뉴 칸. 기울인 바탕은 tag=skew로 applySkew가 칠한다 -->
+    <style name="HomeTile">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">150dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@color/ink_glow</item>
+        <item name="android:tag">skew</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">36dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="HomeTileTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/sl_sans_black</item>
+        <item name="android:textColor">@color/ink_text</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+    <style name="HomeTileLine">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/ink_muted</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
     <!-- 시연 모드 바 버튼: Android Automotive 기준 76dp·24sp 이상 -->
     <style name="DemoButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:layout_width">wrap_content</item>

@@ -6,7 +6,6 @@ import androidx.core.view.children
 import io.github.ddayoung03.safetyleague.R
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.SeasonRanking
-import io.github.ddayoung03.safetyleague.core.calculator.ShopCatalog
 import io.github.ddayoung03.safetyleague.core.data.DemoData
 import io.github.ddayoung03.safetyleague.core.data.SeasonDrivers
 import io.github.ddayoung03.safetyleague.databinding.ViewLeagueBinding
@@ -27,13 +26,6 @@ internal fun MainActivity.showLeague() {
     b.tvTabRegion.text = myRegion
     listOf(b.btnLeagueReport, b.btnLeagueBack, b.tvTabModel, b.tvTabRegion, b.tvTabFriends).forEach { it.pressFeedback() }
     b.btnLeagueReport.setOnClickListener { show(Screen.REPORT) }
-    b.btnShop.text = "내 포인트 ${ShopCatalog.points(wallet.balance)}P · 상점"
-    b.btnShop.background = skew(R.color.ink_glow)
-    b.btnShop.pressFeedback()
-    b.btnShop.setOnClickListener { shopTab = ShopTab.SHOP; show(Screen.SHOP) }
-    b.btnGuide.background = skew(R.color.ink_glow)
-    b.btnGuide.pressFeedback()
-    b.btnGuide.setOnClickListener { show(Screen.GUIDE) }
     if (real) {
         val now = LocalDate.now()
         repository.latestCompletedTrip.value?.let { latest ->

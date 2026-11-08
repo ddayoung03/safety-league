@@ -24,11 +24,11 @@
             android:layout_width="wrap_content"
             android:layout_height="76dp"
             android:clickable="true"
-            android:contentDescription="리그로 돌아가기"
+            android:contentDescription="홈으로 돌아가기"
             android:focusable="true"
             android:gravity="center"
             android:paddingHorizontal="28dp"
-            android:text="리그"
+            android:text="홈"
             android:textColor="@color/ink_text"
             android:textSize="24sp" />
 

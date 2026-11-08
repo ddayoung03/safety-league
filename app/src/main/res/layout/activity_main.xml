@@ -28,6 +28,7 @@
             <Button android:id="@+id/tab_result_win" style="@style/DemoButton" android:text="결과(이긴 날)" />
             <Button android:id="@+id/tab_result_low" style="@style/DemoButton" android:text="결과(아쉬운 날)" />
             <Button android:id="@+id/tab_replay" style="@style/DemoButton" android:text="리플레이" />
+            <Button android:id="@+id/tab_home" style="@style/DemoButton" android:text="홈" />
             <Button android:id="@+id/tab_league" style="@style/DemoButton" android:text="리그" />
             <Button android:id="@+id/tab_report" style="@style/DemoButton" android:text="리포트" />
             <Button android:id="@+id/tab_driving" style="@style/DemoButton" android:text="주행 중" />

@@ -136,7 +136,7 @@
             android:focusable="true"
             android:gravity="center"
             android:paddingHorizontal="40dp"
-            android:text="리그로 가기"
+            android:text="홈으로 가기"
             android:textColor="@color/ink_text"
             android:textSize="24sp" />
     </LinearLayout>

@@ -248,6 +248,7 @@ class MainActivity : AppCompatActivity() {
         binding.tabResultWin.setOnClickListener { demoResultWin = true; shownTrip = null; show(Screen.WIN) }
         binding.tabResultLow.setOnClickListener { demoResultWin = false; shownTrip = null; show(Screen.LOW) }
         binding.tabReplay.setOnClickListener { show(Screen.REPLAY) }
+        binding.tabHome.setOnClickListener { show(Screen.HOME) }
         binding.tabLeague.setOnClickListener { show(Screen.LEAGUE) }
         binding.tabPlacement.setOnClickListener { show(Screen.PLACEMENT) }
         binding.tabReport.setOnClickListener { show(Screen.REPORT) }

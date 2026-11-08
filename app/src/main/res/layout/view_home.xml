@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 홈(A안 패독 차고). 왼쪽 토끼와 인사, 오른쪽 시즌 카드와 메뉴 4칸. 값은 HomeScreen이 채운다. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_result"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <View
+        android:id="@+id/checker_strip"
+        android:layout_width="match_parent"
+        android:layout_height="12dp" />
+
+    <TextView
+        android:id="@+id/tv_greeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="56dp"
+        android:layout_marginBottom="445dp"
+        android:background="@drawable/radio_pill"
+        android:backgroundTint="@color/ink_text"
+        android:fontFamily="@font/sl_sans_black"
+        android:maxWidth="420dp"
+        android:paddingHorizontal="28dp"
+        android:paddingVertical="18dp"
+        android:text="어서 와요! 오늘도 안전하게 가 봐요"
+        android:textColor="@color/ink"
+        android:textSize="24sp" />
+
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView
+        android:id="@+id/rabbit"
+        android:layout_width="300dp"
+        android:layout_height="409dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="90dp"
+        android:layout_marginBottom="40dp" />
+
+    <LinearLayout
+        android:layout_width="700dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="64dp"
+        android:clipChildren="false"
+        android:orientation="vertical">
+
+        <!-- 시즌 카드 -->
+        <LinearLayout
+            android:id="@+id/card_season"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/ink_glow"
+            android:orientation="vertical"
+            android:paddingHorizontal="40dp"
+            android:paddingVertical="24dp"
+            android:tag="skew">
+
+            <TextView
+                android:id="@+id/tv_season_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="11월 시즌 · 아이오닉 5 리그"
+                android:textColor="@color/ink_muted"
+                android:textSize="22sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:clipChildren="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_tier_belt"
+                    android:layout_width="64dp"
+                    android:layout_height="112dp"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitCenter" />
+
+                <TextView
+                    android:id="@+id/tv_rank"
+                    style="@style/NumberText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:paddingEnd="20dp"
+                    android:shadowColor="#01000000"
+                    android:shadowRadius="20"
+                    android:text="P125"
+                    android:textColor="@color/yellow"
+                    android:textSize="88sp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_tier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sl_sans_black"
+                        android:text="골드"
+                        android:textColor="@color/ink_text"
+                        android:textSize="30sp" />
+
+                    <TextView
+                        android:id="@+id/tv_promotion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="승급 라인까지 6계단"
+                        android:textColor="@color/ink_muted"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_season_meta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="지난 주행 92점 · 포인트 3,420P · 21일 남음"
+                android:textColor="@color/ink_text"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <!-- 메뉴 4칸 -->
+        <LinearLayout
+            android:id="@+id/menu_row_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <LinearLayout android:id="@+id/tile_league" style="@style/HomeTile" android:contentDescription="리그 순위">
+                <TextView style="@style/HomeTileTitle" android:text="리그 순위" />
+                <TextView android:id="@+id/tv_tile_league" style="@style/HomeTileLine" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/tile_report" style="@style/HomeTile" android:layout_marginStart="20dp" android:contentDescription="주간 리포트">
+                <TextView style="@style/HomeTileTitle" android:text="주간 리포트" />
+                <TextView android:id="@+id/tv_tile_report" style="@style/HomeTileLine" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_row_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <LinearLayout android:id="@+id/tile_shop" style="@style/HomeTile" android:contentDescription="피트샵">
+                <TextView style="@style/HomeTileTitle" android:text="피트샵" />
+                <TextView android:id="@+id/tv_tile_shop" style="@style/HomeTileLine" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/tile_guide" style="@style/HomeTile" android:layout_marginStart="20dp" android:contentDescription="안전 가이드">
+                <TextView style="@style/HomeTileTitle" android:text="안전 가이드" />
+                <TextView android:id="@+id/tv_tile_guide" style="@style/HomeTileLine" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
