@@ -130,10 +130,10 @@ class RabbitView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         const val TICK_MS = 33L
         const val FRAME_W = 192
         const val FRAME_H = 176
-        // rabbit_pit_00의 빈 판: x 65~98, y 114~129
-        const val BOARD_W = 34
-        const val BOARD_H = 16
+        // rabbit_sit_00 무릎 위 빈 판에서 장갑 사이: x 71~93, y 118~132
+        const val BOARD_W = 23
+        const val BOARD_H = 15
         const val BOARD_CENTER_X = 82f
-        const val BOARD_CENTER_Y = 122f
+        const val BOARD_CENTER_Y = 125f
     }
 }

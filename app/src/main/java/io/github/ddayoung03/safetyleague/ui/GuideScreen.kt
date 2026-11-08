@@ -33,7 +33,7 @@ internal fun guideIcon(id: String) = when (id) {
 
 internal fun MainActivity.showGuide() {
     val b = ViewGuideBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.rabbit.pose = Pose.RADIO
+    b.rabbit.pose = Pose.BOOK
     b.checkerStrip.background = checkerTile()
     b.btnGuideBack.background = skew(R.color.ink_glow)
     b.btnGuideBack.pressFeedback()

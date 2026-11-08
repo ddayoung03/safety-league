@@ -21,12 +21,16 @@ enum class Pose(private val clip: RabbitClip, val bobHeight: Int, val bobPeriodM
     IDLE(RabbitFrames.IDLE, 1, 1640, 82),
     WIN(RabbitFrames.WIN, WIN_BOUNCE, RabbitFrames.WIN.durationsMs.sum(), 87), // 한 번 뛸 때 한 번 튄다
     OVERTAKE(RabbitFrames.OVERTAKE, 1, RabbitFrames.OVERTAKE.durationsMs.sum() / 2, 87),
-    PIT(RabbitFrames.PIT, 1, 2000, 82),
+    PIT(RabbitFrames.SIT, 1, 1800, 82), // 아쉬운 날: 타이어에 앉아 피트 보드를 든다
     RADIO(RabbitFrames.RADIO, 1, 880, 79),
     LOAD(RabbitFrames.LOAD, 1, 360, 67),
     WELCOME(RabbitFrames.WELCOME, 1, RabbitFrames.WELCOME.durationsMs.sum(), 76),
     NOD(RabbitFrames.NOD, 1, 1600, 79),
-    POINT(RabbitFrames.POINT, 1, 1200, 120);
+    POINT(RabbitFrames.POINT, 1, 1200, 120),
+    CHEER(RabbitFrames.CHEER, 1, 1660, 72),   // 착지 후 두 발로 서서 만세
+    COUPON(RabbitFrames.COUPON, 1, 1660, 82), // 쿠폰을 두 손으로 내민다
+    BOOK(RabbitFrames.BOOK, 1, 1200, 85),     // 펼친 안내 책을 짚는다
+    CLIP(RabbitFrames.CLIP, 1, 1200, 110);    // 클립보드에 기록을 체크한다
 
     val frames get() = clip.frames
     val durationsMs get() = clip.durationsMs

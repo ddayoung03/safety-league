@@ -120,7 +120,7 @@ internal fun MainActivity.playResultWin(
     val me = rows.indexOfFirst { it.data.name == "나" }
     val ranks = if (me < 0) emptyList() else overtakeRanks(before, after, minOf(3, rows.size - 1 - me))
     val staged = listOf(b.checkerStrip, b.tvTopTitle, b.scoreBlock, b.scoreUnderline, b.tvRankChange, b.promotionBlock,
-        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnLeague, b.btnReplay, b.rabbit)
+        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnLeague, b.btnReplay, b.rabbit, b.rabbitMat)
     val message = b.tvRadioMessage.text.toString()
     val springs = mutableListOf<SpringAnimation>()
     val waves = mutableListOf<ValueAnimator>()
@@ -143,7 +143,7 @@ internal fun MainActivity.playResultWin(
         b.wave.animate().cancel()
         b.wave.visibility = View.INVISIBLE
         b.tvRadioMessage.text = message
-        b.rabbit.pose = Pose.WIN
+        b.rabbit.pose = Pose.CHEER // 뛰고 나면 매트에 내려서 만세
     }
 
     fun pop(v: View, fromX: Float = 0f, fromY: Float = 0f, curve: Interpolator = OvershootInterpolator(1.5f)) {
@@ -206,6 +206,7 @@ internal fun MainActivity.playResultWin(
         }
         pop(b.tower, fromX = dp(60).toFloat(), curve = DecelerateInterpolator(2f))
         if (ranks.isNotEmpty()) b.rabbit.pose = Pose.OVERTAKE // 승리 자세가 비치지 않게 처음부터 달린다
+        pop(b.rabbitMat, fromY = dp(20).toFloat(), curve = DecelerateInterpolator(2f))
         b.rabbit.visibility = View.VISIBLE
         b.rabbit.translationY = dp(120).toFloat()
         spring(b.rabbit, DynamicAnimation.TRANSLATION_Y, 0f)

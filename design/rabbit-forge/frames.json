@@ -64,15 +64,6 @@
   ],
   "loop": true
  },
- "PIT": {
-  "frames": [
-   "rabbit_pit_00.png"
-  ],
-  "durations_ms": [
-   800
-  ],
-  "loop": true
- },
  "RADIO": {
   "frames": [
    "rabbit_radio_00.png",
@@ -155,6 +146,67 @@
   ],
   "durations_ms": [
    800
+  ],
+  "loop": true
+ },
+ "CHEER": {
+  "frames": [
+   "rabbit_cheer_00.png",
+   "rabbit_cheer_01.png",
+   "rabbit_cheer_02.png",
+   "rabbit_cheer_03.png"
+  ],
+  "durations_ms": [
+   500,
+   500,
+   500,
+   160
+  ],
+  "loop": true
+ },
+ "SIT": {
+  "frames": [
+   "rabbit_sit_00.png",
+   "rabbit_sit_01.png"
+  ],
+  "durations_ms": [
+   900,
+   900
+  ],
+  "loop": true
+ },
+ "COUPON": {
+  "frames": [
+   "rabbit_coupon_00.png",
+   "rabbit_coupon_01.png",
+   "rabbit_coupon_02.png",
+   "rabbit_coupon_03.png"
+  ],
+  "durations_ms": [
+   500,
+   500,
+   500,
+   160
+  ],
+  "loop": true
+ },
+ "BOOK": {
+  "frames": [
+   "rabbit_book_00.png"
+  ],
+  "durations_ms": [
+   800
+  ],
+  "loop": true
+ },
+ "CLIP": {
+  "frames": [
+   "rabbit_clip_00.png",
+   "rabbit_clip_01.png"
+  ],
+  "durations_ms": [
+   600,
+   600
   ],
   "loop": true
  }

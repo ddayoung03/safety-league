@@ -26,7 +26,15 @@ ACTIONS = {
     'welcome': (['welcome_2', 'master'], [110] * 6, True),
     'nod': (['nod_1', 'nod_2'], [310] + [90] * 7, True),
     'point': (['point_1'], [800], True),
+    # 2026-11-08 추가 동작. 기존 프레임이 바뀌지 않게 팔레트 입력에서 뺀다(NEW).
+    'cheer': (['cheer_1', 'cheer_1', 'cheer_1', 'cheer_2'], [500, 500, 500, 160], True),
+    'sit': (['sit_1', 'sit_2'], [900, 900], True),
+    'coupon': (['coupon_1', 'coupon_1', 'coupon_1', 'coupon_2'], [500, 500, 500, 160], True),
+    'book': (['book_1'], [800], True),
+    'clip': (['clip_1', 'clip_2'], [600, 600], True),
 }
+NEW = {'cheer_1', 'cheer_2', 'sit_1', 'sit_2', 'coupon_1', 'coupon_2', 'book_1', 'clip_1', 'clip_2'}
+HIDDEN = {'pit'}  # 앉은 자세(sit)로 바뀌었다. pit_1은 팔레트 입력으로만 남긴다.
 AIRBORNE = {'win_jump': 22}
 RUN_BOB = {'overtake_1': 0, 'overtake_2': 0, 'overtake_3': 0, 'overtake_4': 0, 'overtake_a': 0, 'overtake_b': 0}
 EXTRA = ['overtake_a', 'overtake_b', 'nod_h']  # kept out of the palette input so the other actions stay byte-identical
@@ -67,7 +75,7 @@ def main():
     mb = bbox(master)
     scale = GRID_H / (mb[3] - mb[1])
 
-    names = sorted({n for frames, _, _ in ACTIONS.values() for n in frames})
+    names = sorted({n for frames, _, _ in ACTIONS.values() for n in frames} - NEW)
     def shrink(n):
         im = key(source(n))
         crop = im.crop(bbox(im))
@@ -81,7 +89,7 @@ def main():
     sheet = Image.fromarray(px.reshape(-1, 1, 3), 'RGB')
     pal = sheet.quantize(colors=COLORS, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
 
-    for n in EXTRA:
+    for n in EXTRA + sorted(NEW):
         small[n] = shrink(n)
 
     out = HERE / 'frames'
@@ -109,11 +117,13 @@ def main():
         c.paste(rgb, (x, y), rgb)
         return c
 
-    done = {n: finish(n) for n in names + EXTRA}
+    done = {n: finish(n) for n in names + EXTRA + sorted(NEW)}
     made = inbetween.build(done)
     meta = {}
     shown = []
     for action, (frames, ms, loop) in ACTIONS.items():
+        if action in HIDDEN:
+            continue
         files = []
         images = made.get(action) or [done[n] for n in frames]
         for i, im in enumerate(images):
@@ -131,12 +141,12 @@ def main():
 
     cards = ''.join(
         f'<figure><canvas data-a="{a.upper()}" width="{CANVAS[0]}" height="{CANVAS[1]}"></canvas><figcaption>{a}</figcaption></figure>'
-        for a in ACTIONS)
+        for a in ACTIONS if a not in HIDDEN)
     html = '''<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>토끼 동작 미리보기</title><style>
 body{margin:0;background:#0D0F13;color:#F4F4F1;font-family:sans-serif}h1{font-size:18px;margin:16px 24px}
 main{display:flex;flex-wrap:wrap;gap:12px;padding:0 24px 24px}figure{margin:0;text-align:center}
 canvas{width:384px;height:352px;image-rendering:pixelated}figcaption{color:#8A909B;font-size:15px}
-</style></head><body><h1>토끼 레이서 동작 9종 (2배 확대)</h1><main>''' + cards + '''</main><script>
+</style></head><body><h1>토끼 레이서 동작 13종 (2배 확대)</h1><main>''' + cards + '''</main><script>
 const M=''' + json.dumps(meta) + ''';
 document.querySelectorAll('canvas').forEach(c=>{const m=M[c.dataset.a],g=c.getContext('2d');g.imageSmoothingEnabled=false;
 const im=m.frames.map(f=>{const i=new Image();i.src='frames/'+f;return i});let k=0;

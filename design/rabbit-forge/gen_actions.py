@@ -44,6 +44,11 @@ POSES = {
     'nod_2': 'Standing, head lifted slightly up after a nod, ears up, bright smile.',
     'point_1': 'Standing, right arm stretched straight out to the right side pointing with the index finger, looking toward it, smile.',
     'point_2': 'Standing, right arm stretched out to the right pointing a little higher, leaning slightly toward it, smile, ears tilted toward the same side.',
+    'cheer_1': f'Standing firmly with both boots flat on the ground, both arms raised high in a victory cheer, right hand holding {FLAG} up, left fist up, big open smile, ears up.',
+    'sit_1': f'Sitting on one black racing tire with a grey rim that lies flat on the ground, seen from the front, both boots resting on the ground in front of the tire, holding {BOARD} upright on the knees with both hands, both long ears drooping down at the sides, gentle caring smile, eyebrows soft, never angry.',
+    'coupon_1': 'Standing, holding out a white paper coupon ticket with a yellow stripe and notched edges toward the viewer with both hands at chest height, nothing written on it, big friendly smile, ears up.',
+    'book_1': 'Standing, left hand holding an open book with a red cover and white pages at chest height, pages facing the viewer with nothing written on them, right index finger pointing at the open page, looking at the viewer with a friendly smile.',
+    'clip_1': 'Standing, left arm holding a black clipboard with a white sheet of paper at chest height tilted toward the viewer, nothing written on it, right hand holding a short yellow pencil touching the paper, eyes looking down at the clipboard, small satisfied smile.',
 }
 
 
