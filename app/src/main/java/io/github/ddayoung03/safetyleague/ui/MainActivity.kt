@@ -162,6 +162,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (screen == Screen.HOME && !restricted && homeStamp != homeStampNow()) show(Screen.HOME) // 인사말·남은 날이 낡지 않게
         binding.root.post { syncRabbits() } // 수명 주기는 onResume이 끝나야 RESUMED가 된다
         if (screen == Screen.DRIVING) {
             handler.removeCallbacks(drivingTick)
@@ -344,6 +345,7 @@ class MainActivity : AppCompatActivity() {
         if (restricted && requested != Screen.DRIVING) return
         val target = if (redirectToSettlement(requested, seasonStore.card() != null, demoMode)) Screen.SETTLEMENT else requested
         if (target != Screen.LEAGUE) leagueTab = LeagueTab.MODEL
+        if (target in listOf(Screen.WIN, Screen.LOW, Screen.SETTLEMENT)) hideSplash() // 결과 연출과 소리가 덮개 아래에서 돌지 않게
         screen = target
         drivingBinding = null
         displayedWeather = null
@@ -413,6 +415,8 @@ class MainActivity : AppCompatActivity() {
     internal val myModel get() = profileStore.load()?.model ?: "내 차종"
     internal val myRegion = "부산"
     internal var leagueTab = LeagueTab.MODEL
+    /** 홈을 그린 시각(시 단위). 인사말은 시간대, 남은 날은 날짜로 바뀐다. */
+    internal var homeStamp: String? = null
     internal var shopTab = ShopTab.SHOP
     internal var guideCategory = GuideCategory.DISASTER
     internal var guideCardId: String? = null

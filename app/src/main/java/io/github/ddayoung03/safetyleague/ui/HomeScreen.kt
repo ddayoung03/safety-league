@@ -21,10 +21,12 @@ internal fun MainActivity.showHome() {
     val real = !demoMode && demoResultWin == null
     val points = "포인트 ${ShopCatalog.points(wallet.balance)}P"
     val hour = LocalTime.now().hour
+    homeStamp = homeStampNow()
 
     if (real) {
         val now = LocalDate.now()
-        val s = standing()
+        val trips = leagueTrips()
+        val s = standing(trips)
         val latest = repository.latestCompletedTrip.value
         val today = latest?.takeIf { it.isEligible && it.trip.date == now.toString() }?.trip?.score
         b.tvSeasonTitle.text = "${now.monthValue}월 시즌 · $myModel 리그"
@@ -40,7 +42,7 @@ internal fun MainActivity.showHome() {
         b.tvSeasonMeta.text = "$last · $points · ${now.lengthOfMonth() - now.dayOfMonth}일 남음"
         b.tvGreeting.text = homeGreeting(hour, s.rank != null && s.stepsToPromotion == 0, today)
         b.tvTileLeague.text = if (s.rank != null) "${myTier} 리그 ${s.total}명" else promotionText(s)
-        val avg = WeeklyReportCalculator.calculate(leagueTrips(), now, myTier).average
+        val avg = WeeklyReportCalculator.calculate(trips, now, myTier).average
         b.tvTileReport.text = avg?.let { String.format("이번 주 평균 %.1f점", it) } ?: "이번 주 주행 기록 없음"
     } else {
         val l = DemoData.league
@@ -70,3 +72,5 @@ internal fun MainActivity.showHome() {
 
     ScreenTransition.stagger(b.root, listOf(b.tvGreeting, b.cardSeason, b.tileLeague, b.tileReport, b.tileShop, b.tileGuide), motion)
 }
+
+internal fun homeStampNow(): String = "${LocalDate.now()} ${LocalTime.now().hour}"
