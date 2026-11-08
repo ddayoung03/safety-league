@@ -189,14 +189,22 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 점수 오른쪽 빈 칸. 발끝은 승급 줄 바로 위(y 430)이고, 위에서 재므로 화면 높이가 달라도 정보와 겹치지 않는다.
+    <!-- 점수 오른쪽 빈 칸. 발끝은 결승선 매트 위(y 414)이고, 위에서 재므로 화면 높이가 달라도 정보와 겹치지 않는다.
          크기는 배율 1.31에서 3배가 되는 최소 크기다. -->
+    <!-- 토끼가 딛는 결승선 매트. 토끼 발끝(y 414)에 윗면을 맞춰 뛰어도 땅이 보인다. -->
+    <View
+        android:id="@+id/rabbit_mat"
+        android:layout_width="180dp"
+        android:layout_height="10dp"
+        android:layout_marginStart="478dp"
+        android:layout_marginTop="414dp" />
+
     <io.github.ddayoung03.safetyleague.ui.view.RabbitView
         android:id="@+id/rabbit"
         android:layout_width="268dp"
         android:layout_height="368dp"
         android:layout_marginStart="421dp"
-        android:layout_marginTop="62dp" />
+        android:layout_marginTop="46dp" />
 
     <!-- 오른쪽 순위 타워 -->
     <LinearLayout

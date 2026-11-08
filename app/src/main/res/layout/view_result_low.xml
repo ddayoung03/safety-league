@@ -55,7 +55,7 @@
             android:textSize="44sp" />
     </LinearLayout>
 
-    <!-- 토끼와 피트 보드는 한 덩어리로 바닥에 붙인다. 보드 아래 끝이 버튼 아래 끝과 맞는다. -->
+    <!-- 토끼와 피트 보드는 한 덩어리로 바닥에 붙인다. 토끼가 앉은 타이어가 보드 윗면에 닿는다. 보드 아래 끝이 버튼 아래 끝과 맞는다. -->
     <LinearLayout
         android:id="@+id/pit_group"
         android:layout_width="wrap_content"
@@ -67,7 +67,7 @@
         android:clipToPadding="false"
         android:orientation="vertical">
 
-    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="268dp" android:layout_height="368dp" android:layout_marginStart="348dp" android:layout_marginBottom="10dp" />
+    <io.github.ddayoung03.safetyleague.ui.view.RabbitView android:id="@+id/rabbit" android:layout_width="268dp" android:layout_height="368dp" android:layout_marginStart="348dp" android:layout_marginBottom="-3dp" />
 
     <!-- 피트 보드: 다음에 고칠 것 하나. 머리글은 팀 라디오 알약이다. -->
     <LinearLayout

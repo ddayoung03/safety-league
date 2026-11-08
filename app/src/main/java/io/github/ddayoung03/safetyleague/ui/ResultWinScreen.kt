@@ -22,8 +22,9 @@ import kotlin.math.roundToInt
 
 internal fun MainActivity.showResultWin() {
     val b = ViewResultWinBinding.inflate(layoutInflater, binding.screenContainer, true)
-    b.rabbit.pose = Pose.WIN
+    b.rabbit.pose = Pose.CHEER
     b.checkerStrip.background = checkerTile()
+    b.rabbitMat.background = checkerTile()
     b.scoreUnderline.background = skew(R.color.yellow)
     b.promotionTrack.background = skew(R.color.ink_glow)
     b.progressFill.background = skew(R.color.yellow)

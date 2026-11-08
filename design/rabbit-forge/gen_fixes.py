@@ -43,6 +43,11 @@ FIXES = [
     ('nod_q1', 'nod_2+nod_mid', 'exactly halfway between the two images: a slight tilt, ears still tall. Eyes still open.'),
     ('nod_h', 'nod_mid', 'Change only the eyes: both eyes half closed in a gentle friendly smile, soft curved upper lids, no eyelashes, same eye size and spacing. The mouth stays the same.'),
     ('overtake_b', 'overtake_1', 'Passing pose: legs passing under the body, the lead knee raised high, the other leg straight below.'),
+    ('cheer_2', 'cheer_1', 'Change only the eyes: both eyes closed in happy upward curves. The mouth stays open in the same big smile.'),
+    ('sit_2', 'sit_1', 'Change only the ears: both drooping ears swing slightly outward. Eyes, board and tire unchanged.'),
+    ('coupon_2', 'coupon_1', 'Change only the eyes: both eyes closed in happy upward curves.'),
+    ('book_2', 'book_1', 'Change only the pointing right hand: the index finger touches a spot a little lower on the page.'),
+    ('clip_2', 'clip_1', 'Change only the right hand and pencil: moved a little to the right, as if finishing a check mark.'),
 ]
 
 
