@@ -51,7 +51,7 @@ internal fun MainActivity.showReport() {
     scoreBars(b.layoutScoreBars, scores, days)
     b.btnReportBack.visibility = View.VISIBLE
     b.btnReportBack.pressFeedback()
-    b.btnReportBack.setOnClickListener { show(Screen.LEAGUE) }
+    b.btnReportBack.setOnClickListener { show(Screen.HOME) }
     playReport(b, avg)
 }
 
@@ -60,7 +60,7 @@ internal fun MainActivity.showRealReport(b: ViewReportBinding) {
     val r = WeeklyReportCalculator.calculate(leagueTrips(), LocalDate.now(), myTier)
     b.btnReportBack.visibility = View.VISIBLE
     b.btnReportBack.pressFeedback()
-    b.btnReportBack.setOnClickListener { show(Screen.LEAGUE) }
+    b.btnReportBack.setOnClickListener { show(Screen.HOME) }
     b.tvReportTitle.text = WeeklyReportCalculator.title(r.monday)
     b.tvReportRange.text = "${WeeklyReportCalculator.range(r.monday, r.sunday)} · 주행 ${r.drivingDays}일" +
         if (r.km > 0.0) " · ${r.km}km" else ""

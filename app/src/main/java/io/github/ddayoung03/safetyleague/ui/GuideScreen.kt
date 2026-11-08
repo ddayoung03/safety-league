@@ -37,7 +37,7 @@ internal fun MainActivity.showGuide() {
     b.checkerStrip.background = checkerTile()
     b.btnGuideBack.background = skew(R.color.ink_glow)
     b.btnGuideBack.pressFeedback()
-    b.btnGuideBack.setOnClickListener { show(Screen.LEAGUE) }
+    b.btnGuideBack.setOnClickListener { show(Screen.HOME) }
     for (category in GuideCategory.entries) {
         val tab = TextView(this).apply {
             text = category.title

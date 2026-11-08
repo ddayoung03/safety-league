@@ -20,7 +20,7 @@ import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 internal fun MainActivity.selectVehicle(profile: VehicleProfile) {
     if (restricted) return
-    if (demoMode) { show(Screen.LEAGUE); return } // 시연이 실제 프로필과 트립을 바꾸지 않게 한다
+    if (demoMode) { show(Screen.HOME); return } // 시연이 실제 프로필과 트립을 바꾸지 않게 한다
     profileStore.save(profile.copy(tier = myTier))
     repository.assignUnassignedTrips(profile.leagueKey)
     hideKeyboard()
@@ -52,7 +52,7 @@ internal fun MainActivity.showVehicleSelection() {
         b.customForm.visibility = View.VISIBLE
     }
     if (consentStore.load() != LocationConsent.UNDECIDED) addChoice(getString(R.string.consent_settings)) { show(Screen.CONSENT) }
-    if (profileStore.load() != null) addChoice("리그로 돌아가기") { show(Screen.LEAGUE) }
+    if (profileStore.load() != null) addChoice("홈으로 돌아가기") { show(Screen.HOME) }
     b.btnCustomConfirm.skewButton(R.color.yellow)
     b.btnVehicleList.skewButton(R.color.ink_glow)
     b.btnVehicleList.setOnClickListener {
@@ -86,7 +86,7 @@ internal fun MainActivity.showPlacement() {
         if (profileStore.load() == null) { show(Screen.VEHICLE); return@setOnClickListener }
         if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return@setOnClickListener }
         demoResultWin = null
-        show(Screen.LEAGUE)
+        show(Screen.HOME)
     }
     ScreenTransition.stagger(b.root, b.root.children.drop(1).toList(), motion, MotionTokens.BASE) // 맨 앞 체커 띠는 그대로 둔다
 }

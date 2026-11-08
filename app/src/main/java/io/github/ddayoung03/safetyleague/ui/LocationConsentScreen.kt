@@ -45,5 +45,5 @@ internal fun MainActivity.showLocationConsent() =
         }
         startTracking() // 서비스가 동의에 맞춰 위치 수집을 켜거나 끈다
         demoResultWin = null
-        show(Screen.LEAGUE)
+        show(Screen.HOME)
     }

@@ -15,7 +15,7 @@ import io.github.ddayoung03.safetyleague.ui.view.Pose
 
 /** 리그로 가는 길은 모두 show()를 지나므로, 아직 안 본 실제 정산이 있으면 여기서 정산 화면으로 돌린다. */
 internal fun redirectToSettlement(target: Screen, hasCard: Boolean, demoMode: Boolean) =
-    target == Screen.LEAGUE && hasCard && !demoMode
+    (target == Screen.LEAGUE || target == Screen.HOME) && hasCard && !demoMode
 
 internal fun MainActivity.showSettlement() {
     val c = if (demoMode) DemoData.settlementCard else requireNotNull(seasonStore.card())
@@ -39,7 +39,7 @@ internal fun MainActivity.showSettlement() {
     }
     b.btnSettleLeague.setOnClickListener {
         if (!demoMode) seasonStore.clearCard()
-        show(Screen.LEAGUE)
+        show(Screen.HOME)
     }
     if (animationsEnabled()) b.tvPoints.countUp(c.points, MotionTokens.COUNT, motion, ::pointsLabel)
     if (requestSound()) sound.play(Fx.WIN)

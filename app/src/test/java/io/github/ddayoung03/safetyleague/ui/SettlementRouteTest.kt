@@ -11,4 +11,9 @@ class SettlementRouteTest {
         assertFalse(redirectToSettlement(Screen.WIN, hasCard = true, demoMode = false))
         assertFalse(redirectToSettlement(Screen.DRIVING, hasCard = true, demoMode = false))
     }
+
+    @Test fun redirectsHomeWithCard() {
+        assertTrue(redirectToSettlement(Screen.HOME, hasCard = true, demoMode = false))
+        assertFalse(redirectToSettlement(Screen.HOME, hasCard = true, demoMode = true))
+    }
 }

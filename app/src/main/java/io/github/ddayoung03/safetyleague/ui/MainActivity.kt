@@ -41,7 +41,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
 import io.github.ddayoung03.safetyleague.weather.*
 
-internal enum class Screen { WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP, GUIDE }
+internal enum class Screen { HOME, WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP, GUIDE }
 internal enum class LeagueTab { MODEL, REGION, FRIENDS }
 
 /**
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     private var uxFallback = false
     /** 주행 중(제한 중)에 끝난 트립. 제한이 풀리면 이 트립의 결과 카드를 연다. */
     private var pendingResult: CompletedTrip? = null
-    private var screen = Screen.LEAGUE
+    private var screen = Screen.HOME
     internal var demoMode = false
     /** 시연 모드에서 각본 주행을 돌렸으면 결과 카드는 각본 화면(92점/64점)으로 보여 준다. */
     internal var demoResultWin: Boolean? = null
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         // 주행 중인지는 onStart에서야 안다. 안 본 결과는 서비스에 붙은 뒤 syncWithTrip이 연다.
         intent.removeExtra(TripTrackingService.EXTRA_SHOW_RESULT_CARD)
         if (LocationPolicy.shouldAsk(consentStore.load(), restricted, demoMode)) { show(Screen.CONSENT); return }
-        show(Screen.LEAGUE)
+        show(Screen.HOME)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity() {
             if (restricted || service?.demoRunning == true) return@setOnLongClickListener true
             demoMode = !demoMode
             if (demoMode) demoWallet = DemoData.startWallet()
-            if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.LEAGUE) }
+            if (!demoMode) { demoResultWin = null; show(if (profileStore.load() == null) Screen.VEHICLE else Screen.HOME) }
             binding.demoBar.visibility = if (demoMode) View.VISIBLE else View.GONE
             updateSdkStatus()
             true
@@ -305,8 +305,8 @@ class MainActivity : AppCompatActivity() {
         when (resumeAction(screen, restricted, s.isTracking, unseen)) {
             Resume.DRIVING -> show(Screen.DRIVING)
             Resume.RESULT -> showResult(latest!!)
-            Resume.LEAGUE -> show(Screen.LEAGUE)
-            Resume.STAY -> if (screen == Screen.LEAGUE && !restricted && seasonStore.card() != null) show(Screen.LEAGUE)
+            Resume.HOME -> show(Screen.HOME)
+            Resume.STAY -> if ((screen == Screen.LEAGUE || screen == Screen.HOME) && !restricted && seasonStore.card() != null) show(screen)
         }
     }
 
@@ -355,6 +355,7 @@ class MainActivity : AppCompatActivity() {
             Screen.WIN -> showResultWin()
             Screen.LOW -> showResultLow()
             Screen.REPLAY -> showReplay()
+            Screen.HOME -> showHome()
             Screen.LEAGUE -> showLeague()
             Screen.REPORT -> showReport()
             Screen.VEHICLE -> showVehicleSelection()

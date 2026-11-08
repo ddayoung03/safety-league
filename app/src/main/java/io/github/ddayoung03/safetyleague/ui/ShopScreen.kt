@@ -33,7 +33,7 @@ internal fun MainActivity.showShop() {
     b.goalFill.background = skew(R.color.yellow)
     b.btnShopBack.background = skew(R.color.ink_glow)
     listOf(b.btnShopBack, b.tvTabShop, b.tvTabCoupons).forEach { it.pressFeedback() }
-    b.btnShopBack.setOnClickListener { show(Screen.LEAGUE) }
+    b.btnShopBack.setOnClickListener { show(Screen.HOME) }
     b.tvTabShop.setOnClickListener { shopTab = ShopTab.SHOP; paintShop(b, items) }
     b.tvTabCoupons.setOnClickListener { shopTab = ShopTab.COUPONS; paintShop(b, items) }
     paintShop(b, items)
