@@ -17,7 +17,7 @@ import io.github.ddayoung03.safetyleague.ui.motion.animationsEnabled
  */
 internal fun MainActivity.playSplash() {
     val s = binding.splash
-    if (restricted || !animationsEnabled()) { hideSplash(); return }
+    if (!animationsEnabled()) { hideSplash(); return } // 주행 제한은 onStart 뒤에야 알고, applyRestriction이 걷는다
     binding.splashWord.text = SpannableString("SAFETY LEAGUE").apply {
         setSpan(ForegroundColorSpan(color(R.color.yellow)), 7, 13, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
@@ -27,18 +27,22 @@ internal fun MainActivity.playSplash() {
     binding.splashIcon.apply { scaleX = .6f; scaleY = .6f; alpha = 0f }
     binding.splashWord.alpha = 0f
     binding.splashBar.scaleX = 0f
-    // 창이 열리는 시스템 애니메이션 동안은 가려지므로, 창이 포커스를 받은 뒤 시작한다
-    if (s.hasWindowFocus()) runSplash() else s.viewTreeObserver.addOnWindowFocusChangeListener(object : ViewTreeObserver.OnWindowFocusChangeListener {
-        override fun onWindowFocusChanged(hasFocus: Boolean) {
-            if (!hasFocus) return
-            s.post { s.viewTreeObserver.removeOnWindowFocusChangeListener(this) }
-            if (s.visibility == View.VISIBLE) runSplash()
-        }
-    })
+    // 창이 열리는 시스템 애니메이션 동안은 가려지므로, 창이 포커스를 받은 뒤 시작한다.
+    // 차 화면에서 포커스가 끝내 안 올 수 있어 0.5초 뒤에는 그냥 시작한다(빈 화면으로 멈추지 않게).
+    s.tag = null
+    val focus = object : ViewTreeObserver.OnWindowFocusChangeListener {
+        override fun onWindowFocusChanged(hasFocus: Boolean) { if (hasFocus) runSplash() }
+    }
+    s.viewTreeObserver.addOnWindowFocusChangeListener(focus)
+    s.postDelayed({ runSplash() }, 500)
+    if (s.hasWindowFocus()) runSplash()
 }
 
+/** 한 번만 돈다. 포커스와 대체 타이머 중 먼저 온 쪽이 시작한다. */
 private fun MainActivity.runSplash() {
     val s = binding.splash
+    if (s.tag == "started" || s.visibility != View.VISIBLE) return
+    s.tag = "started"
     binding.splashIcon.apply {
         animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(450).setInterpolator(OvershootInterpolator(2.2f)).start()
     }
