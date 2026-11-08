@@ -37,6 +37,10 @@ class ScreenFlowTest {
     }
 
     @Test fun backDoesNothingSpecialOnMainScreens() {
-        for (s in listOf(Screen.HOME, Screen.DRIVING, Screen.WIN, Screen.LOW, Screen.SETTLEMENT)) assertNull(backTarget(s, hasProfile = true))
+        for (s in listOf(Screen.HOME, Screen.DRIVING, Screen.SETTLEMENT)) assertNull(backTarget(s, hasProfile = true))
+    }
+
+    @Test fun resultCardsCloseToHome() {
+        for (s in listOf(Screen.WIN, Screen.LOW)) assertEquals(Screen.HOME, backTarget(s, hasProfile = true))
     }
 }

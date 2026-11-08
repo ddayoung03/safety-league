@@ -16,7 +16,7 @@ internal fun resumeAction(screen: Screen, restricted: Boolean, tracking: Boolean
 
 /** 시스템 뒤로 가기가 갈 화면. null이면 기본 동작(앱을 내림)이다. 리플레이는 온 곳을 알아야 해서 MainActivity가 맡는다. */
 internal fun backTarget(screen: Screen, hasProfile: Boolean): Screen? = when (screen) {
-    Screen.REPORT, Screen.SHOP, Screen.GUIDE, Screen.LEAGUE -> Screen.HOME
+    Screen.REPORT, Screen.SHOP, Screen.GUIDE, Screen.LEAGUE, Screen.WIN, Screen.LOW -> Screen.HOME
     Screen.VEHICLE -> Screen.HOME.takeIf { hasProfile }
     else -> null
 }

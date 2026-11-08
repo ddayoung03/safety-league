@@ -9,5 +9,4 @@
     <string name="pit_title">피트 보드 · 다음 주행 작전</string>
     <string name="radio_praise">멋진 레이스였어요!</string>
     <string name="loader_tally">기록 집계 중</string>
-    <string name="loader_start">준비 중</string>
 </resources>

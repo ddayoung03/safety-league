@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         onBackPressedDispatcher.addCallback(this, backHandler)
         binding.flagLoaderRabbit.pose = Pose.LOAD
-        binding.root.post { showFlagLoader(text = R.string.loader_start) }
+        if (savedInstanceState == null) playSplash() else hideSplash()
         repository = TripRepository.getInstance(this)
         setupDemoControls()
         startTracking()
@@ -170,6 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        hideSplash()
         motion.finishAll()
         syncRabbits(allowed = false)
         handler.removeCallbacks(drivingTick)
@@ -222,7 +223,7 @@ class MainActivity : AppCompatActivity() {
         restricted = on
         syncRabbits()
         binding.demoBar.visibility = if (!on && demoMode) View.VISIBLE else View.GONE
-        if (on) { hideKeyboard(); show(Screen.DRIVING) }
+        if (on) { hideKeyboard(); hideSplash(); show(Screen.DRIVING) }
         else if (screen == Screen.DRIVING) {
             if (profileStore.load() == null) { show(Screen.VEHICLE); return }
             // 이번 주행이 P로 끝났으면 그 결과. 트립이 아직 진행 중이면(신호 대기 등) 주행 중 화면 유지.

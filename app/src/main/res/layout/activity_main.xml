@@ -105,4 +105,58 @@
             android:textColor="@color/ink_muted"
             android:textSize="24sp" />
     </LinearLayout>
+
+    <!-- 시작 연출. 새로 시작할 때만 SplashIntro가 2초 동안 보이고 걷는다. 터치하면 바로 걷힌다. -->
+    <FrameLayout
+        android:id="@+id/splash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/ink"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clipChildren="false"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/splash_icon"
+                android:layout_width="280dp"
+                android:layout_height="280dp"
+                android:importantForAccessibility="no"
+                android:src="@mipmap/ic_launcher_foreground" />
+
+            <TextView
+                android:id="@+id/splash_word"
+                style="@style/NumberText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-40dp"
+                android:letterSpacing="0.12"
+                android:shadowColor="#01000000"
+                android:shadowRadius="20"
+                android:text="SAFETY LEAGUE"
+                android:textColor="@color/ink_text"
+                android:textSize="56sp" />
+
+            <FrameLayout
+                android:layout_width="200dp"
+                android:layout_height="6dp"
+                android:layout_marginTop="24dp"
+                android:background="@color/ink_glow">
+
+                <View
+                    android:id="@+id/splash_bar"
+                    android:layout_width="200dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/yellow"
+                    android:pivotX="0"
+                    android:scaleX="0" />
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
 </FrameLayout>
