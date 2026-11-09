@@ -139,7 +139,8 @@
             android:textColor="@color/ink_muted"
             android:textSize="22sp" />
 
-        <!-- 줄 높이는 글자 크기의 1.574배(252dp)이고 글자는 그 가운데 0.69em만 쓴다. 위아래 여백이 곧 간격이라 상자를 겹치지 않는다 -->
+        <!-- 첫 주행 전에 72sp로 줄여도 252dp를 지켜 티어 바가 올라와 벨트 그림과 겹치지 않게 한다.
+             줄 높이는 글자 크기의 1.574배(252dp)이고 글자는 그 가운데 0.69em만 쓴다. 위아래 여백이 곧 간격이라 상자를 겹치지 않는다 -->
         <TextView
             style="@style/NumberText"
             android:layout_width="wrap_content"
@@ -148,6 +149,8 @@
             android:text="P125"
             android:textColor="@color/ink_text"
             android:textSize="160sp"
+            android:minHeight="252dp"
+            android:gravity="center_vertical"
             android:includeFontPadding="false"
             android:letterSpacing="-0.03"
             android:shadowColor="#01000000"
