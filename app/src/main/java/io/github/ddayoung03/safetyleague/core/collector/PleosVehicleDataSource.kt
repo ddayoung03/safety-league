@@ -81,7 +81,7 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         } catch (e: Exception) {
             fail("Speed", e)
         }
-        startLocation(listener)
+        // 위치는 트립이 시작되면 syncLocation(true)로 켠다
     }
 
     private fun register(v: Vehicle, l: VehicleSignalListener) {
@@ -162,8 +162,9 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         if (!connected) problems += "Speed: 구독 실패 (CAR_SPEED 권한 확인)"
     }
 
-    /** 위치 동의가 바뀌었으면 위치 수집을 켜거나 끈다. 서비스가 onStartCommand마다 부른다. */
-    fun syncLocation() {
+    /** 트립 시작·종료나 위치 동의 변경에 맞춰 위치 수집을 켜거나 끈다. */
+    fun syncLocation(tripActive: Boolean) {
+        this.tripActive = tripActive
         val l = listener ?: return
         val wanted = locationOrder().isNotEmpty()
         // 켜진 출처가 없으면(권한을 막 받았거나 모두 실패) 처음부터 다시 시도한다
@@ -171,8 +172,9 @@ class PleosVehicleDataSource(private val context: Context) : VehicleDataSource {
         else if (!wanted && location != null) { runCatching { location?.stop() }; location = null }
     }
 
+    private var tripActive = false
     private fun locationOrder() = LocationPolicy.sourceOrder(LocationConsentStore(context).load(),
-        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED, tripActive)
 
     private fun startLocation(l: VehicleSignalListener) {
         // 동의나 OS 권한이 없으면 위치 출처를 하나도 켜지 않는다 (점수·리그는 위치 없이 동작)

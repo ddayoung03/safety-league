@@ -196,6 +196,19 @@ class TripCollectorTest {
     }
 
     @Test
+    fun longRouteIsThinnedBeforeSavingButKeepsBothEnds() {
+        // 1초에 한 점씩 2시간 = 7200점. 화면은 300점만 쓰므로 그만큼만 저장한다.
+        val c = collector()
+        c.depart(1_000)
+        for (i in 0 until 7_200) c.onLocationChanged(Point2D(127.0 + i * 1e-5, 37.5), 2_000L + i * 1_000)
+        c.park(8_000_000, 200.0)
+        val route = trips.single().route
+        assertEquals(300, route.size)
+        assertEquals(Point2D(127.0, 37.5), route.first())
+        assertEquals(Point2D(127.0 + 7_199 * 1e-5, 37.5), route.last())
+    }
+
+    @Test
     fun lowDayEventsComeFromSensorsAndCarRoutePositions() {
         val c = collector(streakDays = 13)
         c.depart(1_000, speed = 1f, odometer = 0.0)

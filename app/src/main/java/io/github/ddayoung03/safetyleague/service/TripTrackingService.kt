@@ -76,6 +76,7 @@ class TripTrackingService : Service() {
                 tripLeagueKey = profile?.leagueKey
                 collector.leagueAvgEfficiency = profile?.averageEfficiency ?: DemoData.leagueAvgEfficiency
                 collector.streakDays = repository.getStreak(LocalDate.now().toString())
+                if (!mockRunning) signals.post { pleos.syncLocation(true) }
             },
             onTripCompleted = ::onTripFinished
         )
@@ -97,7 +98,7 @@ class TripTrackingService : Service() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) runCatching { ServiceCompat.startForeground(this, TRACKING_ID,
                 trackingNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC) }
         }
-        if (!mockRunning) signals.post { pleos.syncLocation() } // 위치 동의가 바뀌었으면 반영
+        if (!mockRunning) signals.post { pleos.syncLocation(collector.isTracking) } // 위치 동의가 바뀌었으면 반영
         return START_STICKY
     }
 
@@ -111,6 +112,7 @@ class TripTrackingService : Service() {
     private fun onTripFinished(trip: CompletedTrip) {
         val isDemo = mockRunning
         lastResultWasDemo = isDemo
+        if (!isDemo) signals.post { pleos.syncLocation(false) } // 주차하면 위치를 끈다
         val completed = trip.copy(leagueKey = tripLeagueKey)
         if (!isDemo) repository.saveTrip(completed)
         collector.streakDays = repository.getStreak(LocalDate.now().toString())

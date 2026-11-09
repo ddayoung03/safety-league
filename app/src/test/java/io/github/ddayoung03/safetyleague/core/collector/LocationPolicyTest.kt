@@ -15,18 +15,24 @@ class LocationPolicyTest {
 
     @Test
     fun grantedUsesFusedThenNaviThenLocationManager() {
-        assertEquals(listOf(FUSED, NAVI, OS), LocationPolicy.sourceOrder(GRANTED, osPermission = true))
+        assertEquals(listOf(FUSED, NAVI, OS), LocationPolicy.sourceOrder(GRANTED, osPermission = true, tripActive = true))
     }
 
     @Test
     fun deniedOrUndecidedStartsNoSource() {
-        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(DENIED, osPermission = true))
-        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(UNDECIDED, osPermission = true))
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(DENIED, osPermission = true, tripActive = true))
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(UNDECIDED, osPermission = true, tripActive = true))
+    }
+
+    @Test
+    fun parkedStartsNoSourceEvenWithConsent() {
+        // 주차 중에는 경로가 필요 없으니 위치를 받지 않는다 (배터리·개인정보)
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(GRANTED, osPermission = true, tripActive = false))
     }
 
     @Test
     fun osPermissionDeniedStartsNoSourceEvenWithConsent() {
-        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(GRANTED, osPermission = false))
+        assertEquals(emptyList<LocationProvider>(), LocationPolicy.sourceOrder(GRANTED, osPermission = false, tripActive = true))
     }
 
     @Test

@@ -1,5 +1,6 @@
 package io.github.ddayoung03.safetyleague.core.collector
 
+import io.github.ddayoung03.safetyleague.core.calculator.RouteNormalizer
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.ScoreCalculator
 import io.github.ddayoung03.safetyleague.core.model.CompletedTrip
@@ -240,7 +241,8 @@ class TripCollector(
                 trip = Trip(date, if (eligible) ScoreCalculator.tripScore(detail) else 0.0,
                     if (eligible) LeagueCalculator.round1(km) else kotlin.math.floor(km * 10) / 10, detail),
                 events = events,
-                route = route.toList(),
+                // 리플레이도 300점만 그린다. 다 저장하면 trips.json이 트립마다 커진다.
+                route = RouteNormalizer.thin(route.toList()),
                 startTime = formatTime(startTimeMs),
                 endTime = formatTime(endMs),
                 isEligible = eligible
