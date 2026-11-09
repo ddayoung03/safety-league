@@ -13,11 +13,11 @@ object LocationPolicy {
     val ORDER = listOf(LocationProvider.FUSED, LocationProvider.NAVI, LocationProvider.OS)
 
     /**
-     * 동의했고 OS 위치 권한도 있을 때만 출처를 켠다. 아니면 위치를 아예 받지 않는다(점수·리그는 위치 없이 동작).
-     * FusedLocation·NaviHelper는 OS 권한 없이도 값을 주므로 여기서 함께 막는다.
+     * 동의했고 OS 위치 권한도 있고 트립이 진행 중일 때만 출처를 켠다. 아니면 위치를 아예 받지 않는다(점수·리그는 위치 없이 동작).
+     * FusedLocation·NaviHelper는 OS 권한 없이도 값을 주므로 여기서 함께 막는다. 주차 중에는 경로가 필요 없다.
      */
-    fun sourceOrder(consent: LocationConsent, osPermission: Boolean): List<LocationProvider> =
-        if (consent == LocationConsent.GRANTED && osPermission) ORDER else emptyList()
+    fun sourceOrder(consent: LocationConsent, osPermission: Boolean, tripActive: Boolean): List<LocationProvider> =
+        if (consent == LocationConsent.GRANTED && osPermission && tripActive) ORDER else emptyList()
 
     /** 설정 화면에 보여 줄 상태. 동의했어도 OS 권한이 없으면 기록하지 않는 중이다. */
     fun effectiveConsent(consent: LocationConsent, osPermission: Boolean): LocationConsent =

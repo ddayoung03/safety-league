@@ -8,6 +8,7 @@ import android.car.hardware.property.CarPropertyManager
 import android.content.Context
 import android.util.Log
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import ai.pleos.playground.vehicle.Vehicle
 import ai.pleos.playground.vehicle.constant.area.WindowValue
@@ -26,6 +27,7 @@ class VehicleWeatherSource(private val context: Context, private val changed: (W
     private var vehicle: Vehicle? = null
     private var generation = 0
     private val main = Handler(Looper.getMainLooper())
+    private val pleos = Handler(pleosThread.looper)
     val problems = mutableListOf<String>()
     // Not in the compileSdk 34 car stubs; newer cars may expose it at runtime.
     private val wipersId = runCatching { VehiclePropertyIds::class.java.getField("WINDSHIELD_WIPERS_STATE").getInt(null) }.getOrNull()
@@ -87,7 +89,9 @@ class VehicleWeatherSource(private val context: Context, private val changed: (W
                 changed(signals)
             }
         } }
-        runCatching {
+        // Pleos 지원 여부 확인이 2초쯤 걸려서 메인 스레드에서 하면 앱을 켤 때마다 화면이 멈춘다.
+        // vehicle은 이 스레드에서만 만지고 놓는다.
+        pleos.post { runCatching {
             val v = Vehicle(context).also { vehicle = it; it.initialize() }
             startPleosLight(v, token)
             v.getWiper().checkWiperStateCapabilities({ config, supported ->
@@ -106,7 +110,7 @@ class VehicleWeatherSource(private val context: Context, private val changed: (W
                     }.onFailure { problem("Pleos Wiper: ${it.javaClass.simpleName}") }
                 }
             }, ::failed)
-        }.onFailure { problem("Pleos Wiper: ${it.javaClass.simpleName}") }
+        }.onFailure { e -> main.post { if (active && generation == token) problem("Pleos Wiper: ${e.javaClass.simpleName}") } } }
     }
 
     private fun startPleosLight(v: Vehicle, token: Int) {
@@ -180,11 +184,18 @@ class VehicleWeatherSource(private val context: Context, private val changed: (W
     fun stop() {
         active = false
         generation++
-        runCatching { vehicle?.release() }
-        vehicle = null
+        pleos.post {
+            runCatching { vehicle?.release() }
+            vehicle = null
+        }
         runCatching { manager?.unregisterCallback(callback) }
         runCatching { car?.disconnect() }
         manager = null
         car = null
+    }
+
+    private companion object {
+        // 화면이 다시 만들어질 때마다 스레드가 늘지 않게 하나를 같이 쓴다.
+        val pleosThread by lazy { HandlerThread("vehicle-weather").apply { start() } }
     }
 }
