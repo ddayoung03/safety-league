@@ -1,5 +1,7 @@
 package io.github.ddayoung03.safetyleague.ui
 
+import android.car.Car
+import android.content.pm.PackageManager
 import io.github.ddayoung03.safetyleague.core.calculator.LeagueCalculator
 import io.github.ddayoung03.safetyleague.core.calculator.ShopCatalog
 import io.github.ddayoung03.safetyleague.core.calculator.WeeklyReportCalculator
@@ -40,7 +42,9 @@ internal fun MainActivity.showHome() {
             else -> "지난 주행 ${latest.trip.score.roundToInt()}점"
         }
         b.tvSeasonMeta.text = "$last · $points · ${now.lengthOfMonth() - now.dayOfMonth}일 남음"
-        b.tvGreeting.text = homeGreeting(hour, s.rank != null && s.stepsToPromotion == 0, today)
+        val canRecord = checkSelfPermission(Car.PERMISSION_SPEED) == PackageManager.PERMISSION_GRANTED
+        b.tvGreeting.text = homeGreeting(hour, s.rank != null && s.stepsToPromotion == 0, today, canRecord)
+        if (!canRecord) b.tvGreeting.setOnClickListener { PermissionActivity.askInOwnTask(this, fromHome = true) }
         b.tvTileLeague.text = if (s.rank != null) "${myTier} 리그 ${s.total}명" else promotionText(s)
         val avg = WeeklyReportCalculator.calculate(trips, now, myTier).average
         b.tvTileReport.text = avg?.let { String.format("이번 주 평균 %.1f점", it) } ?: "이번 주 주행 기록 없음"

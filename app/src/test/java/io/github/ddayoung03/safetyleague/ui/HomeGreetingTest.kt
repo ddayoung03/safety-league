@@ -12,6 +12,12 @@ class HomeGreetingTest {
     private val day = "어서 와요! 오늘도 안전하게 가 봐요"
     private val evening = "오늘 하루도 수고했어요. 천천히 가요"
 
+    @Test fun missingSpeedPermissionWinsOverEverything() {
+        // 속도를 못 받으면 트립이 기록되지 않으니 무엇보다 먼저 알린다
+        assertEquals("속도 권한이 없어 주행을 기록할 수 없어요. 눌러서 켜 주세요",
+            homeGreeting(8, inPromotionZone = true, todayScore = 90.0, canRecord = false))
+    }
+
     @Test fun promotionWinsOverEverything() {
         assertEquals(promo, homeGreeting(8, inPromotionZone = true, todayScore = 50.0))
     }
