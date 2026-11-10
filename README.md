@@ -239,6 +239,14 @@ app/src/main/java/io/github/ddayoung03/safetyleague/
 - 숫자 글꼴 [Saira Condensed](https://fonts.google.com/specimen/Saira+Condensed) (SIL OFL 1.1).
 - 차량 데이터: [Pleos Connect SDK](https://document.pleos.ai/).
 
+<br>
+
+## 개발 도구와 AI 활용
+
+- 점수 규칙, 화면 방향, 기능 범위 같은 주요 결정은 개발자가 내리고, 아이디어 정리와 구현은 AI 코딩 도구(Claude Code, Codex)와 함께 했습니다. 커밋의 `Co-Authored-By` 표시는 AI가 함께 작성한 부분입니다.
+- 모든 변경은 단위 테스트와 Pleos Connect 에뮬레이터 실행으로 검증했습니다.
+- 토끼 캐릭터, 배경 등 일부 그림은 AI 이미지 생성 도구로 만든 뒤 다듬었습니다.
+
 <div align="center">
 <br>
 <sub>현대자동차그룹 차량용 앱 개발 공모전 출품작</sub>
