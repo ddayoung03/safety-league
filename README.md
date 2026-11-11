@@ -159,7 +159,13 @@ flowchart LR
 
 ## 시작하기
 
-**필요한 것:** JDK 17, Android SDK 34, [Pleos Connect 에뮬레이터](https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator)
+**바로 설치 (release APK):** [`apk/SafetyLeague_release.apk`](apk/SafetyLeague_release.apk) 또는 [GitHub Release v1.0](https://github.com/ddayoung03/safety-league/releases/tag/v1.0)에서 받아 Pleos Connect 에뮬레이터에 설치합니다.
+
+```bash
+adb install -r apk/SafetyLeague_release.apk
+```
+
+**직접 빌드할 때 필요한 것:** JDK 17, Android SDK 34, [Pleos Connect 에뮬레이터](https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator)
 
 ```bash
 git clone https://github.com/ddayoung03/safety-league.git

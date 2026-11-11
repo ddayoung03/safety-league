@@ -31,3 +31,6 @@ Thumbs.db
 .impeccable/
 design/rabbit/
 design/generated/
+
+# 제출용 release APK는 apk/ 폴더에만 둔다
+!apk/*.apk
