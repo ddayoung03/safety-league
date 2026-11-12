@@ -8,6 +8,7 @@ import io.github.ddayoung03.safetyleague.core.model.DetailScore
 import io.github.ddayoung03.safetyleague.core.model.Point2D
 import io.github.ddayoung03.safetyleague.core.model.ReplayEvent
 import io.github.ddayoung03.safetyleague.core.model.Trip
+import io.github.ddayoung03.safetyleague.core.model.TripStats
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,6 +82,13 @@ class TripRepository private constructor(private val file: File) {
         put("route", JSONArray(c.route.map { JSONArray(listOf(it.x, it.y)) }))
         put("start", c.startTime); put("end", c.endTime); put("eligible", c.isEligible)
         c.leagueKey?.let { put("leagueKey", it) }
+        c.stats?.let { s ->
+            put("stats", JSONObject().put("km", s.km).put("accels", s.hardAccels).put("brakes", s.hardBrakes)
+                .put("lanes", s.laneChanges).put("unindicated", s.unindicatedLaneChanges)
+                .put("eff", s.efficiency?.takeIf { it.isFinite() } ?: JSONObject.NULL).put("avgEff", s.leagueAvgEfficiency)
+                .put("belts", s.allBeltsFastened).put("warningSec", s.unresolvedWarningSeconds)
+                .put("doors", s.doorOpenWhileMoving).put("streak", s.streakDays))
+        }
     }
 
     private fun fromJson(o: JSONObject): CompletedTrip {
@@ -89,10 +97,17 @@ class TripRepository private constructor(private val file: File) {
             .map { ReplayEvent(it.getString("at"), it.getString("kind"), it.getDouble("t")) }
         val route = o.getJSONArray("route").let { a -> (0 until a.length()).map { a.getJSONArray(it) } }
             .map { Point2D(it.getDouble(0), it.getDouble(1)) }
+        val stats = o.optJSONObject("stats")?.let { s ->
+            TripStats(
+                s.getDouble("km"), s.getInt("accels"), s.getInt("brakes"), s.getInt("lanes"), s.getInt("unindicated"),
+                if (s.isNull("eff")) null else s.getDouble("eff"), s.getDouble("avgEff"),
+                s.getBoolean("belts"), s.getLong("warningSec"), s.getInt("doors"), s.getInt("streak")
+            )
+        }
         return CompletedTrip(
             Trip(o.getString("date"), o.getDouble("score"), o.getDouble("km"), d),
             ev, route, o.getString("start"), o.getString("end"), o.getBoolean("eligible"),
-            if (o.has("leagueKey")) o.getString("leagueKey") else null
+            if (o.has("leagueKey")) o.getString("leagueKey") else null, stats
         )
     }
 

@@ -279,10 +279,27 @@
         android:orientation="horizontal">
 
         <FrameLayout
-            android:id="@+id/btn_league"
-            android:layout_width="180dp"
+            android:id="@+id/btn_score"
+            android:layout_width="140dp"
             android:layout_height="76dp"
-            android:layout_marginEnd="14dp"
+            android:layout_marginEnd="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="점수 상세"
+                android:textColor="@color/ink_text"
+                android:textSize="24sp" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_league"
+            android:layout_width="140dp"
+            android:layout_height="76dp"
+            android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true">
 
@@ -297,7 +314,7 @@
 
         <FrameLayout
             android:id="@+id/btn_replay"
-            android:layout_width="330dp"
+            android:layout_width="224dp"
             android:layout_height="76dp"
             android:clickable="true"
             android:focusable="true">

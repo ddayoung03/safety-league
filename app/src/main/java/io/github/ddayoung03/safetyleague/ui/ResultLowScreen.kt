@@ -18,7 +18,9 @@ internal fun MainActivity.showResultLow() {
     b.checkerStrip.background = checkerTile()
     b.btnLeague.background = skew(R.color.ink_glow)
     b.btnReplay.background = skew(R.color.ink_text)
-    listOf(b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
+    b.btnScore.background = skew(R.color.ink_glow)
+    listOf(b.btnScore, b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
+    b.btnScore.setOnClickListener { show(Screen.SCORE, it) }
     b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
     val t = realTrip
@@ -50,6 +52,7 @@ internal fun MainActivity.showResultLow() {
         b.tvPitGain.text = ""
         b.layoutSeasonHeader.visibility = View.GONE
         b.tvStreakHint.visibility = View.GONE
+        b.btnScore.visibility = View.GONE // 집계 제외라 보여 줄 세부 점수가 없다
         playResultLow(b, intro, emptyList(), score)
         return
     }
