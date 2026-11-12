@@ -165,6 +165,8 @@ flowchart LR
 adb install -r apk/SafetyLeague_release.apk
 ```
 
+**테스트 환경:** Pleos Connect 에뮬레이터 v2.1.0 시스템 이미지(API 34, x86_64), 기기 정의 `Pleos_Connect_v2_0`, 화면 규격 2560×1440(160dpi, 가로). 실제 차량 없이 에뮬레이터와 Virtual Console만으로 실행합니다.
+
 **직접 빌드할 때 필요한 것:** JDK 17, Android SDK 34, [Pleos Connect 에뮬레이터](https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator)
 
 ```bash
