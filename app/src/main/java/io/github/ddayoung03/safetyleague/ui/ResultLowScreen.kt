@@ -36,6 +36,7 @@ internal fun MainActivity.showResultLow() {
         b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
         b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
         b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(t.trip.date)}일"
+        if (streakBefore == 0) b.tvStreakHint.text = "다음 주행 70점이면 연속 기록 시작" // 끊긴 기록이 없으면 "다시"가 아니다
     }
     if (t != null && !t.isEligible) {
         // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
