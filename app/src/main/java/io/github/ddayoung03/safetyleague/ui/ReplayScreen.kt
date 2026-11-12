@@ -66,9 +66,7 @@ internal fun MainActivity.showReplay() {
     b.tvReplayTip.text = if (t != null && !t.isEligible) SHORT_TRIP_TIP
     else pitBoard(events, if (t == null && !win) DemoData.lowDayDetail else t?.trip?.detailScore, demo = t == null).tip
     b.btnBack.pressFeedback()
-    b.btnBack.setOnClickListener {
-        if (realTrip != null) showResult(realTrip!!) else show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
-    }
+    b.btnBack.setOnClickListener { backToResult() }
     if (!moved) ScreenTransition.stagger(b.root, items, motion, MotionTokens.BASE)
     else if (animationsEnabled()) playReplay(b, items)
 }

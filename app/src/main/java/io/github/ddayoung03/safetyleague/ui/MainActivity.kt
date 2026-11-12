@@ -41,7 +41,7 @@ import io.github.ddayoung03.safetyleague.databinding.ViewDrivingBinding
 import io.github.ddayoung03.safetyleague.service.TripTrackingService
 import io.github.ddayoung03.safetyleague.weather.*
 
-internal enum class Screen { HOME, WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP, GUIDE }
+internal enum class Screen { HOME, WIN, LOW, REPLAY, LEAGUE, REPORT, DRIVING, VEHICLE, PLACEMENT, CONSENT, SETTLEMENT, SHOP, GUIDE, SCORE }
 internal enum class LeagueTab { MODEL, REGION, FRIENDS }
 
 /**
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
     private val drivingTick = object : Runnable {
         override fun run() {
             if (screen == Screen.DRIVING) {
-                val km = service?.currentTripKm?.toInt() ?: 0
+                val km = ((service?.currentTripKm ?: 0.0) * 10).toInt()
                 if (km != drivingKmShown) updateDrivingProgress() // keep weather phase and transition gate
                 updateWeather()
                 handler.postDelayed(this, 5_000)
@@ -319,7 +319,7 @@ class MainActivity : AppCompatActivity() {
             val target = backTarget(screen, profileStore.load() != null)
             when {
                 panel?.visibility == View.VISIBLE -> panel.visibility = View.GONE
-                screen == Screen.REPLAY -> realTrip?.let { showResult(it) } ?: show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
+                screen == Screen.REPLAY || screen == Screen.SCORE -> backToResult()
                 target != null -> show(target)
                 else -> {
                     isEnabled = false
@@ -339,6 +339,9 @@ class MainActivity : AppCompatActivity() {
         markSeen(trip)
         show(if (trip.trip.score >= 70.0) Screen.WIN else Screen.LOW)
     }
+
+    /** 리플레이·점수 상세에서 온 결과 카드로 돌아간다. */
+    internal fun backToResult() = realTrip?.let { showResult(it) } ?: show(if (demoResultWin == true) Screen.WIN else Screen.LOW)
 
     /** [origin]을 주면 그 버튼에서 원이 퍼지며 열린다. 없으면(앱 시작, 뒤로) 보통 전환이다. */
     internal fun show(requested: Screen, origin: View? = null) {
@@ -368,6 +371,7 @@ class MainActivity : AppCompatActivity() {
             Screen.SETTLEMENT -> showSettlement()
             Screen.SHOP -> showShop()
             Screen.GUIDE -> showGuide()
+            Screen.SCORE -> showScoreDetail()
             Screen.DRIVING -> { showDriving(); handler.postDelayed(drivingTick, 5_000) }
         }
         resultJustFinished = false

@@ -224,12 +224,11 @@ class TripCollector(
         val odoKm = if (startOdometerKm >= 0.0 && currentOdometerKm >= startOdometerKm) currentOdometerKm - startOdometerKm else 0.0
         // 오도미터가 있으면 그것을 믿고, 안 움직이면(에뮬레이터) 속도 적분값을 쓴다
         val km = if (odoKm > 0.0) odoKm else integratedMeters / 1000.0
-        val detail = ScoreCalculator.calculate(
-            TripStats(
-                km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, tripEfficiency(),
-                tripAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
-            )
+        val stats = TripStats(
+            km, hardAccels, hardBrakes, laneChanges, unindicatedLaneChanges, tripEfficiency(),
+            tripAvgEfficiency, allBeltsFastened, unresolvedWarningSeconds, doorOpenWhileMoving, streakDays
         )
+        val detail = ScoreCalculator.calculate(stats)
         val eligible = LeagueCalculator.isEligibleTrip(km)
         val duration = maxOf(1L, endMs - startTimeMs).toDouble()
         val events = rawEvents.map { (t, kind) ->
@@ -245,7 +244,8 @@ class TripCollector(
                 route = RouteNormalizer.thin(route.toList()),
                 startTime = formatTime(startTimeMs),
                 endTime = formatTime(endMs),
-                isEligible = eligible
+                isEligible = eligible,
+                stats = stats
             )
         )
     }

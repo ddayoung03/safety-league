@@ -89,7 +89,9 @@ data class CompletedTrip(
     val startTime: String,
     val endTime: String,
     val isEligible: Boolean,
-    val leagueKey: String? = null
+    val leagueKey: String? = null,
+    /** 점수 상세의 이유 줄에 쓰는 집계값. 이 값을 저장하기 전의 옛 트립은 null */
+    val stats: TripStats? = null
 )
 
 

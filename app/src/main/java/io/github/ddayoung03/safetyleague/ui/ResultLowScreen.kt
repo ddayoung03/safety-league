@@ -18,7 +18,9 @@ internal fun MainActivity.showResultLow() {
     b.checkerStrip.background = checkerTile()
     b.btnLeague.background = skew(R.color.ink_glow)
     b.btnReplay.background = skew(R.color.ink_text)
-    listOf(b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
+    b.btnScore.background = skew(R.color.ink_glow)
+    listOf(b.btnScore, b.btnLeague, b.btnReplay).forEach { it.pressFeedback() }
+    b.btnScore.setOnClickListener { show(Screen.SCORE, it) }
     b.btnLeague.setOnClickListener { show(Screen.LEAGUE, it) }
     b.btnReplay.setOnClickListener { show(Screen.REPLAY) }
     val t = realTrip
@@ -34,6 +36,7 @@ internal fun MainActivity.showResultLow() {
         b.tvTopTitle.text = "$myModel 리그 · ${t.trip.date}"
         b.tvSeasonLabel.text = "${LocalDate.now().monthValue}월 시즌 순위"
         b.tvStreakChange.text = "${streakBefore}일 → ${repository.getStreak(t.trip.date)}일"
+        if (streakBefore == 0) b.tvStreakHint.text = "다음 주행 70점이면 연속 기록 시작" // 끊긴 기록이 없으면 "다시"가 아니다
     }
     if (t != null && !t.isEligible) {
         // 3km 미만은 집계 제외: 점수·연속 기록에 영향 없음
@@ -50,6 +53,7 @@ internal fun MainActivity.showResultLow() {
         b.tvPitGain.text = ""
         b.layoutSeasonHeader.visibility = View.GONE
         b.tvStreakHint.visibility = View.GONE
+        b.btnScore.visibility = View.GONE // 집계 제외라 보여 줄 세부 점수가 없다
         playResultLow(b, intro, emptyList(), score)
         return
     }

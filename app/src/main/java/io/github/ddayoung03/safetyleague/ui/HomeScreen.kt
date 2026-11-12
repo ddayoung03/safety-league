@@ -39,7 +39,13 @@ internal fun MainActivity.showHome() {
         val last = when {
             latest == null -> "아직 주행 기록이 없어요"
             !latest.isEligible -> "지난 주행은 3km 미만"
-            else -> "지난 주행 ${latest.trip.score.roundToInt()}점"
+            else -> "지난 주행 ${latest.trip.score.roundToInt()}점 ›"
+        }
+        // 지난 결과 카드(점수 상세·리플레이)를 홈에서 다시 열 수 있다
+        if (latest != null) {
+            b.cardSeason.contentDescription = "지난 주행 결과 보기"
+            b.cardSeason.pressFeedback(.99f)
+            b.cardSeason.setOnClickListener { showResult(latest) }
         }
         b.tvSeasonMeta.text = "$last · $points · ${now.lengthOfMonth() - now.dayOfMonth}일 남음"
         val canRecord = checkSelfPermission(Car.PERMISSION_SPEED) == PackageManager.PERMISSION_GRANTED

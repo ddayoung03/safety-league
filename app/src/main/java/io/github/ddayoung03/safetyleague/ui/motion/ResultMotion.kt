@@ -120,7 +120,7 @@ internal fun MainActivity.playResultWin(
     val me = rows.indexOfFirst { it.data.name == "나" }
     val ranks = if (me < 0) emptyList() else overtakeRanks(before, after, minOf(3, rows.size - 1 - me))
     val staged = listOf(b.checkerStrip, b.tvTopTitle, b.scoreBlock, b.scoreUnderline, b.tvRankChange, b.promotionBlock,
-        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnLeague, b.btnReplay, b.rabbit, b.rabbitMat)
+        b.statsBlock, b.radioPill, b.tower, b.tvTowerNote, b.btnScore, b.btnLeague, b.btnReplay, b.rabbit, b.rabbitMat)
     val message = b.tvRadioMessage.text.toString()
     val springs = mutableListOf<SpringAnimation>()
     val waves = mutableListOf<ValueAnimator>()
@@ -261,7 +261,7 @@ internal fun MainActivity.playResultWin(
 
     // 7. 버튼 등장
     val buttonFromX = dp(30).toFloat()
-    seq.at(t) { pop(b.btnLeague, fromX = buttonFromX) }
+    seq.at(t) { pop(b.btnScore, fromX = buttonFromX); pop(b.btnLeague, fromX = buttonFromX) }
     seq.at(t + MotionTokens.STAGGER * 2) { pop(b.btnReplay, fromX = buttonFromX) }
     val end = t + MotionTokens.STAGGER * 2 + MotionTokens.SLOW
     if (voice != null) seq.at(end) { voice.done(); sound.stopAll() }

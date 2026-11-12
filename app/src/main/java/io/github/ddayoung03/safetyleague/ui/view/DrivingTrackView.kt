@@ -10,7 +10,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import io.github.ddayoung03.safetyleague.R
 
-/** Static kilometre steps only. No animator or per-frame callbacks. */
+/** Cells fill per kilometre, the car steps per 0.1 km. No animator or per-frame callbacks. */
 class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var state = DrivingTrackState.from(0.0, null)
         set(value) { if (field != value) { field = value; invalidate() } }
@@ -50,7 +50,7 @@ class DrivingTrackView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         }
         }
-        val end = if (state.filled == 0) skew else skew + state.filled * step - gap
+        val end = if (state.carAt == 0f) skew else skew + state.carAt * step - gap * minOf(state.carAt, 1f)
         val left = (end - 40 * d).coerceIn(0f, (width - 64 * d).coerceAtLeast(0f)).toInt()
         car.setBounds(left, (4 * d).toInt(), left + (64 * d).toInt(), (34 * d).toInt())
         car.draw(canvas)

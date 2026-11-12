@@ -36,7 +36,7 @@ internal fun MainActivity.updateDrivingProgress() {
     val real = demoResultWin == null && (s?.isTracking == true || !demoMode)
     val doneKm = if (real) s?.currentTripKm ?: 0.0 else 11.2
     val destKm: Double? = if (real) null else DemoData.winDayKm // 내비 목적지가 없으면 null
-    drivingKmShown = doneKm.toInt()
+    drivingKmShown = (doneKm * 10).toInt() // 0.1km 단위로 다시 그린다
     b.tvProgress.text = if (destKm != null) "${LeagueCalculator.round1(doneKm)} / ${destKm}km · 해운대까지" else "${LeagueCalculator.round1(doneKm)}km 기록됨"
     b.tvGoal.text = "안전하게, 다음 한 칸까지"
 
