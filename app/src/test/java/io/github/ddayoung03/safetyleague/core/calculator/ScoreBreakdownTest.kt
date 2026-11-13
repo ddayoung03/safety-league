@@ -23,13 +23,13 @@ class ScoreBreakdownTest {
         assertEquals(d.total, rows.sumOf { it.got }, 0.001)
     }
 
-    @Test fun explainsWhyOneHardBrakeOnAShortTripCostsSoMuch() {
-        // 실제 사례: 3.8km, 급제동 1회, 벨트 미착용, 전비 신호 없음, 첫 주행 → 63점
+    @Test fun shortTripNoteSaysItCountsAs10km() {
+        // 실제 사례: 3.8km, 급제동 1회, 벨트 미착용, 전비 신호 없음, 첫 주행 → 69점 (짧은 주행 보정 전에는 63점)
         val s = stats(brakes = 1, belts = false)
         val d = ScoreCalculator.calculate(s)
-        assertEquals(63.0, ScoreCalculator.tripScore(d), 0.0)
+        assertEquals(69.0, ScoreCalculator.tripScore(d), 0.0)
         val notes = ScoreBreakdown.rows(d, emptyList(), s.km, s).map { it.note }
-        assertEquals("급제동 1회 · 3.8km 주행이라 10km당 2.6회꼴로 환산", notes[0])
+        assertEquals("급제동 1회 · 10km 미만 주행은 10km로 보고 계산", notes[0])
         assertEquals("깜빡이 없는 차선 변경 없음", notes[1])
         assertEquals("전비·연비 신호가 없어 평균(10점)으로 계산", notes[2])
         assertEquals("출발할 때 벨트 미착용", notes[3])
@@ -43,6 +43,12 @@ class ScoreBreakdownTest {
         assertEquals("차선 변경 5회 중 2회가 깜빡이 없이", notes[1])
         assertEquals("같은 차종 평균의 110%", notes[2])
         assertEquals("출발할 때 벨트 미착용 · 경고등 95초 방치 · 주행 중 문 열림 1회", notes[3])
+    }
+
+    @Test fun fewLaneChangesNoteSaysItCountsAsFour() {
+        val s = stats(km = 20.0, lanes = 2, unindicated = 1)
+        val notes = ScoreBreakdown.rows(ScoreCalculator.calculate(s), emptyList(), s.km, s).map { it.note }
+        assertEquals("차선 변경 2회 중 1회가 깜빡이 없이 · 4회 미만은 4회로 보고 계산", notes[1])
     }
 
     @Test fun perfectTripSaysSo() {

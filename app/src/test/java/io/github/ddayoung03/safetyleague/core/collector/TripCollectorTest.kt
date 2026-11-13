@@ -286,14 +286,15 @@ class TripCollectorTest {
     // ---- 점검 보고서(2026-11-05) 재현 값 ----
 
     @Test fun h1ScoreJustBelow70IsStoredAsTheWholeNumberThatIsShown() {
-        // 10km, 차선 변경 3회 중 깜빡이 없음 2회, 연속 5일, 전비 없음 → 30 / 8.3 / 10 / 15 / 6.5 = 69.8
+        // 10km, 차선 변경 6회 중 깜빡이 없음 4회, 연속 5일, 전비 없음 → 30 / 8.3 / 10 / 15 / 6.5 = 69.8
         val c = collector(streakDays = 5)
         c.depart(1_000, speed = 20f)
-        c.onTurnSignalChanged(TurnSignalState(left = true), 2_000)
-        c.steer(2_100L to 0f, 2_500L to 6f, 3_500L to 6f, 4_500L to 1f)
-        c.onTurnSignalChanged(TurnSignalState(), 4_600)
-        c.steer(20_000L to 0f, 20_500L to 6f, 21_500L to 6f, 22_500L to 1f)
-        c.steer(40_000L to 0f, 40_500L to -6f, 41_500L to -6f, 42_500L to -1f)
+        for (t in listOf(2_000L, 12_000L)) {
+            c.onTurnSignalChanged(TurnSignalState(left = true), t)
+            c.steer(t + 100 to 0f, t + 500 to 6f, t + 1_500 to 6f, t + 2_500 to 1f)
+            c.onTurnSignalChanged(TurnSignalState(), t + 2_600)
+        }
+        for (t in listOf(25_000L, 35_000L, 45_000L, 55_000L)) c.steer(t to 0f, t + 500 to 6f, t + 1_500 to 6f, t + 2_500 to 1f)
         c.park(60_000, 110.0)
         val trip = trips.single().trip
         assertEquals(69.8, trip.detailScore!!.total, 0.001)

@@ -47,8 +47,24 @@ class ScoreCalculatorTest {
     }
 
     @Test
+    fun shortTripsCountAs10kmForSmoothness() {
+        // 3.8km에 급제동 1회: 10km로 보고 30 - 4 = 26 (보정 전에는 30 - 4/0.38 = 19.5)
+        assertEquals(26.0, ScoreCalculator.calculate(stats(km = 3.8, hardBrakes = 1)).smoothness, 0.001)
+        // 10km부터는 그대로 10km당 환산
+        assertEquals(26.0, ScoreCalculator.calculate(stats(km = 10.0, hardBrakes = 1)).smoothness, 0.001)
+    }
+
+    @Test
+    fun fewLaneChangesCountAsFourForManner() {
+        // 차선 변경 1회 중 1회 누락: 4회로 보고 25 × (1 - 1/4) = 18.75 → 18.8 (보정 전에는 0)
+        assertEquals(18.8, ScoreCalculator.calculate(stats(laneChanges = 1, unindicatedLaneChanges = 1)).manner, 0.001)
+        assertEquals(12.5, ScoreCalculator.calculate(stats(laneChanges = 2, unindicatedLaneChanges = 2)).manner, 0.001)
+        assertEquals(0.0, ScoreCalculator.calculate(stats(laneChanges = 4, unindicatedLaneChanges = 4)).manner, 0.001)
+    }
+
+    @Test
     fun mannerIsTheShareOfIndicatedLaneChanges() {
-        assertEquals(12.5, ScoreCalculator.calculate(stats(laneChanges = 4, unindicatedLaneChanges = 2)).manner, 0.001)
+        assertEquals(12.5, ScoreCalculator.calculate(stats(laneChanges = 8, unindicatedLaneChanges = 4)).manner, 0.001)
         assertEquals(25.0, ScoreCalculator.calculate(stats(laneChanges = 0)).manner, 0.001)
     }
 
