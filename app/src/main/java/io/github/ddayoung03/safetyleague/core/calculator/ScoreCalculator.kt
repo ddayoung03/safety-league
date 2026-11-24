@@ -13,6 +13,11 @@ object ScoreCalculator {
     const val ACCEL_PENALTY_PER_10KM = 3.0
     const val BRAKE_PENALTY_PER_10KM = 4.0
 
+    // 짧은 주행 보정: 10km 미만은 10km로, 차선 변경 4회 미만은 4회로 보고 계산한다.
+    // 안 그러면 3.8km의 급제동 1회가 -10.5점, 차선 변경 1회 중 1회 누락이 -25점이 된다.
+    const val SMOOTH_MIN_KM = 10.0
+    const val MANNER_MIN_LANE_CHANGES = 4
+
     // 에코: 리그 평균 대비 80% 이하 0점, 120% 이상 만점, 평균이면 절반
     private const val ECO_FLOOR_RATIO = 0.8
     private const val ECO_FULL_RATIO = 1.2
@@ -30,12 +35,12 @@ object ScoreCalculator {
 
     fun calculate(s: TripStats): DetailScore {
         if (!LeagueCalculator.isEligibleTrip(s.km)) return DetailScore(0.0, 0.0, 0.0, 0.0, 0.0)
-        val per10km = s.km / 10.0
+        val per10km = maxOf(s.km, SMOOTH_MIN_KM) / 10.0
 
         val smoothness = 30.0 - (s.hardAccels * ACCEL_PENALTY_PER_10KM + s.hardBrakes * BRAKE_PENALTY_PER_10KM) / per10km
 
         val manner = if (s.laneChanges == 0) 25.0
-        else 25.0 * (1.0 - s.unindicatedLaneChanges.toDouble() / s.laneChanges)
+        else 25.0 * (1.0 - s.unindicatedLaneChanges.toDouble() / maxOf(s.laneChanges, MANNER_MIN_LANE_CHANGES))
 
         val ratio = s.efficiency?.takeIf { it.isFinite() && it > 0 && s.leagueAvgEfficiency > 0 }
             ?.let { it / s.leagueAvgEfficiency } ?: 1.0

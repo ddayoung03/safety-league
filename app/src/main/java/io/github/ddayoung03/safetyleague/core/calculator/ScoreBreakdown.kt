@@ -20,11 +20,13 @@ object ScoreBreakdown {
 
         val smooth = if (accels + brakes == 0) "급가속·급제동 없음" else
             listOfNotNull("급가속 ${accels}회".takeIf { accels > 0 }, "급제동 ${brakes}회".takeIf { brakes > 0 }).joinToString(" · ") +
-                " · ${km}km 주행이라 10km당 ${LeagueCalculator.round1((accels + brakes) * 10 / km)}회꼴로 환산"
+                if (km < ScoreCalculator.SMOOTH_MIN_KM) " · 10km 미만 주행은 10km로 보고 계산"
+                else " · ${km}km 주행이라 10km당 ${LeagueCalculator.round1((accels + brakes) * 10 / km)}회꼴로 환산"
 
         val manner = when {
             unindicated == 0 -> "깜빡이 없는 차선 변경 없음"
-            s != null -> "차선 변경 ${s.laneChanges}회 중 ${unindicated}회가 깜빡이 없이"
+            s != null -> "차선 변경 ${s.laneChanges}회 중 ${unindicated}회가 깜빡이 없이" +
+                if (s.laneChanges < ScoreCalculator.MANNER_MIN_LANE_CHANGES) " · 4회 미만은 4회로 보고 계산" else ""
             else -> "깜빡이 없이 차선 변경 ${unindicated}회"
         }
 
